@@ -1,4 +1,4 @@
-# Build-a-Complete-Medical-Chatbot-with-LLMs-LangChain-Pinecone-Flask-AWS
+#AskMedi-Medical-Chatbot
 
 # How to run?
 ### STEPS:
@@ -6,7 +6,7 @@
 Clone the repository
 
 ```bash
-git clone https://github.com/Abhishek764/Build-a-Complete-Medical-Chatbot.git
+git clone https://github.com/Abhishek764/AskMedi-Medical-Chatbot.git
 ```
 ### STEP 01- Create a conda environment after opening the repository
 
