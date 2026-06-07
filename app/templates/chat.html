@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Chat — AskMedi{% endblock %}
+{% block content %}
+<div class="chat-shell">
+    <aside class="sidebar">
+        <button id="new-chat" class="btn btn-block">+ New chat</button>
+        <ul id="convo-list" class="convo-list">
+            {% for c in conversations %}
+            <li class="convo-item" data-id="{{ c.id }}">
+                <span class="convo-title">{{ c.title }}</span>
+                <button class="convo-del" data-id="{{ c.id }}" title="Delete">×</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <section class="chat-main">
+        <div class="medical-banner">
+            ⚠️ General information only — not medical advice. Emergencies: call your local emergency number.
+        </div>
+        <div id="messages" class="messages"></div>
+        <form id="chat-form" class="chat-input">
+            <textarea id="msg" rows="1" placeholder="Ask a medical question…"
+                      maxlength="2000" autocomplete="off" required></textarea>
+            <button id="send" type="submit" class="btn">Send</button>
+            <button id="stop" type="button" class="btn btn-ghost" hidden>Stop</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.ASKMEDI = {
+    currentConversationId: null,
+    csrfToken: document.querySelector('meta[name="csrf-token"]')?.content || '',
+};
+</script>
+<script src="{{ url_for('static', filename='chat.js') }}"></script>
+{% endblock %}

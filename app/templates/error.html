@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} — AskMedi{% endblock %}
+{% block content %}
+<section class="prose center">
+    <h2>{{ code }}</h2>
+    <p>{{ message }}</p>
+    <a class="btn" href="{{ url_for('main.landing') }}">Go home</a>
+</section>
+{% endblock %}
