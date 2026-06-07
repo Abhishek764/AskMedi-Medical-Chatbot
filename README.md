@@ -1,10 +1,10 @@
 # AskMedi — Medical Chatbot
 
-![AskMedi Screenshot](Screenshot%202026-06-07%20221253.png)
 
 A Flask RAG web app that answers medical questions from a curated medical
 reference (PDF), with user accounts, saved conversations, streaming answers,
 source citations, and safety guardrails.
+![AskMedi Screenshot](Screenshot%202026-06-07%20221253.png)
 
 ## Features
 
