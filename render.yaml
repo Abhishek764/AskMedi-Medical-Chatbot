@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: askmedi
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: flask --app wsgi init-db
+    startCommand: gunicorn wsgi:app --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.14"
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: askmedi-db
+          property: connectionString
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PINECONE_INDEX
+        value: medical-chatbot
+      - key: OPENAI_MODEL
+        value: gpt-4o
+
+databases:
+  - name: askmedi-db
+    plan: basic-256mb
