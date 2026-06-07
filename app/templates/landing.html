@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}AskMedi — Medical Q&A Assistant{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>AskMedi</h1>
+    <p class="lead">
+        An AI medical information assistant grounded in a curated medical
+        reference. Ask questions, get concise, source-cited answers.
+    </p>
+    <div class="cta">
+        {% if current_user.is_authenticated %}
+            <a class="btn" href="{{ url_for('chat.index') }}">Open chat</a>
+        {% else %}
+            <a class="btn" href="{{ url_for('auth.register') }}">Get started</a>
+            <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Log in</a>
+        {% endif %}
+    </div>
+    <div class="features">
+        <div class="feature"><h3>Grounded answers</h3><p>Responses use retrieved medical context, with sources shown.</p></div>
+        <div class="feature"><h3>Remembers context</h3><p>Follow-up questions understand the conversation so far.</p></div>
+        <div class="feature"><h3>Private history</h3><p>Your conversations are saved to your account only.</p></div>
+    </div>
+    <p class="disclaimer-banner">
+        ⚠️ Not for emergencies. For urgent symptoms call your local emergency number.
+    </p>
+</section>
+{% endblock %}
