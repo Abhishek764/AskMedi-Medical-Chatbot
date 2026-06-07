@@ -1,130 +1,89 @@
-#AskMedi-Medical-Chatbot
+# AskMedi — Medical Chatbot
 
-# How to run?
-### STEPS:
+A Flask RAG web app that answers medical questions from a curated medical
+reference (PDF), with user accounts, saved conversations, streaming answers,
+source citations, and safety guardrails.
 
-Clone the repository
+## Features
 
-```bash
-git clone https://github.com/Abhishek764/AskMedi-Medical-Chatbot.git
+- **Auth** — register / login / logout (Flask-Login, bcrypt, CSRF protection).
+- **RAG** — LangChain + OpenAI `gpt-4o`, Pinecone vector store, HuggingFace embeddings.
+- **Conversational memory** — history-aware retriever resolves follow-up questions.
+- **Streaming UX** — token-by-token answers over SSE, markdown rendering, stop button, source citations.
+- **Persistence** — conversations and messages stored per user (Postgres in prod, SQLite locally).
+- **Safety** — medical disclaimer, guardrail prompt, rate limiting, input validation.
+- **Deploy** — production-ready for Render (gunicorn, `$PORT`, health check, managed Postgres).
+
+## Architecture
+
 ```
-### STEP 01- Create a conda environment after opening the repository
-
-```bash
-conda create -n medibot python=3.10 -y
+Browser ──HTTPS──► Flask (gunicorn)
+                     ├── Auth (Flask-Login + bcrypt)
+                     ├── RAG chain (LangChain, gpt-4o, streaming)
+                     ├──► Postgres  (users, conversations, messages)
+                     └──► Pinecone  (medical-chatbot vectors)
 ```
 
-```bash
-conda activate medibot
-```
+Key paths:
+- `app/` — application package (factory, config, models, blueprints).
+  - `app/auth/` — registration & login.
+  - `app/chat/` — chat pages, streaming API (`app/chat/routes.py`), RAG chain (`app/chat/rag.py`).
+  - `app/main/` — landing, disclaimer, `/healthz`.
+  - `app/templates/`, `app/static/` — UI.
+- `src/helper.py` — PDF load/split/embeddings. `src/prompt.py` — system + contextualize prompts.
+- `store_index.py` — one-time Pinecone index builder.
+- `wsgi.py` — gunicorn entrypoint. `render.yaml` / `Procfile` — deploy config.
 
+## Local setup
 
-### STEP 02- install the requirements
 ```bash
+conda create -n medibot python=3.10 -y && conda activate medibot
 pip install -r requirements.txt
+cp .env.example .env   # then fill in PINECONE_API_KEY and OPENAI_API_KEY
 ```
 
-
-### Create a `.env` file in the root directory and add your Pinecone & openai credentials as follows:
-
-```ini
-PINECONE_API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-```
-
+Build the vector index once (uploads PDF embeddings to Pinecone):
 
 ```bash
-# run the following command to store embeddings to pinecone
 python store_index.py
 ```
 
+Create local DB tables, then run:
+
 ```bash
-# Finally run the following command
-python app.py
+flask --app wsgi init-db      # creates SQLite tables
+python wsgi.py                # dev server on http://localhost:8080
 ```
 
-Now,
+## Deploy to Render
+
+1. Push this repo to GitHub.
+2. In Render: **New → Blueprint**, point at the repo. `render.yaml` provisions a
+   web service + Postgres automatically.
+3. Set the two secret env vars (marked `sync: false`): `PINECONE_API_KEY`,
+   `OPENAI_API_KEY`. `SECRET_KEY` and `DATABASE_URL` are generated/injected.
+4. The pre-deploy step runs `flask --app wsgi init-db` to create tables.
+5. Build the Pinecone index once (run `store_index.py` locally — not at deploy).
+
+Notes:
+- `DATABASE_URL` from Render uses the `postgres://` scheme; `app/config.py`
+  rewrites it to `postgresql://` for SQLAlchemy 2.x.
+- First request loads the HuggingFace embedding model (cold-start delay).
+- The HF model is ~90 MB; expect a slow first boot on small instances.
+
+## Schema migrations
+
+First deploy uses `init-db` (idempotent `create_all`). For later schema
+changes, switch to Flask-Migrate:
+
 ```bash
-open up localhost:
+flask --app wsgi db init        # once
+flask --app wsgi db migrate -m "describe change"
+flask --app wsgi db upgrade
 ```
 
+Then change the deploy command back to `flask --app wsgi db upgrade`.
 
-### Techstack Used:
+## Tech stack
 
-- Python
-- LangChain
-- Flask
-- GPT
-- Pinecone
-
-
-
-# AWS-CICD-Deployment-with-Github-Actions
-
-## 1. Login to AWS console.
-
-## 2. Create IAM user for deployment
-
-	#with specific access
-
-	1. EC2 access : It is virtual machine
-
-	2. ECR: Elastic Container registry to save your docker image in aws
-
-
-	#Description: About the deployment
-
-	1. Build docker image of the source code
-
-	2. Push your docker image to ECR
-
-	3. Launch Your EC2 
-
-	4. Pull Your image from ECR in EC2
-
-	5. Lauch your docker image in EC2
-
-	#Policy:
-
-	1. AmazonEC2ContainerRegistryFullAccess
-
-	2. AmazonEC2FullAccess
-
-	
-## 3. Create ECR repo to store/save docker image
-    - Save the URI: <your_aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/medicalbot
-
-	
-## 4. Create EC2 machine (Ubuntu) 
-
-## 5. Open EC2 and Install docker in EC2 Machine:
-	
-	
-	#optinal
-
-	sudo apt-get update -y
-
-	sudo apt-get upgrade
-	
-	#required
-
-	curl -fsSL https://get.docker.com -o get-docker.sh
-
-	sudo sh get-docker.sh
-
-	sudo usermod -aG docker ubuntu
-
-	newgrp docker
-	
-# 6. Configure EC2 as self-hosted runner:
-    setting>actions>runner>new self hosted runner> choose os> then run command one by one
-
-
-# 7. Setup github secrets:
-
-   - AWS_ACCESS_KEY_ID
-   - AWS_SECRET_ACCESS_KEY
-   - AWS_DEFAULT_REGION
-   - ECR_REPO
-   - PINECONE_API_KEY
-   - OPENAI_API_KEY
+Python · Flask · LangChain · OpenAI · Pinecone · SQLAlchemy · gunicorn · Render
