@@ -15,7 +15,7 @@ async def test_healthz(client):
 async def test_readyz_checks_dependencies(client):
     r = await client.get("/readyz")
     assert r.status_code == 200
-    assert r.json()["checks"] == {"database": True, "kv": True}
+    assert r.json()["checks"] == {"database": True, "kv": True, "vector_store": True}
 
 
 def test_prod_rejects_dev_secret():
