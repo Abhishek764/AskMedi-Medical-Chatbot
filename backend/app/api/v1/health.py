@@ -23,6 +23,7 @@ async def readyz(request: Request) -> JSONResponse:
     checks = {
         "database": await db_ping(container.engine),
         "kv": await container.kv.ping(),
+        "vector_store": await container.store.ping(),
     }
     ok = all(checks.values())
     return JSONResponse(
