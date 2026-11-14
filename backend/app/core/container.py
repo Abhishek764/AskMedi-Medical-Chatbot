@@ -1,0 +1,24 @@
+"""Process-wide dependencies, built once at startup and torn down at shutdown."""
+
+from __future__ import annotations
+
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+
+from app.core.config import Settings
+from app.core.kv import KV, build_kv
+from app.db.session import build_engine, build_sessionmaker
+
+
+class Container:
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
+        self.engine: AsyncEngine = build_engine(settings.database_url)
+        self.sessionmaker: async_sessionmaker[AsyncSession] = build_sessionmaker(self.engine)
+        self.kv: KV = build_kv(settings.redis_url)
+
+    async def startup(self) -> None:
+        return None
+
+    async def shutdown(self) -> None:
+        await self.kv.close()
+        await self.engine.dispose()
