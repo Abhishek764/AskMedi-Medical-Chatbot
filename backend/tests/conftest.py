@@ -13,7 +13,11 @@ from app.main import create_app
 @pytest.fixture
 def settings(tmp_path) -> Settings:
     return Settings(
+        _env_file=None,
         env="test",
+        embeddings_provider="hash",
+        rerank_provider="none",
+        llm_provider="extractive",
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'test.db'}",
         qdrant_path=str(tmp_path / "qdrant"),
         redis_url=None,
