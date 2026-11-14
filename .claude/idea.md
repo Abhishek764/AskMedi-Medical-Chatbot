@@ -1,7 +1,7 @@
 # Idea — Scale AskMedi RAG to ~1,000 Documents + Research Papers
 
 **Goal:** grow the corpus from 1 PDF to about **1,000 trusted documents**, a mix of consumer health content, drug labels, and peer-reviewed research papers. Every answer must stay **cite-or-refuse**.
-Related: [v2-plan.md](v2-plan.md) (M3 retrieval, M4 guardrails), [v1-README.md](v1-README.md).
+Related: [v2-plan.md](v2-plan.md) (rev 2: M4 corpus, M5 retrieval, M6 guardrails), [security-analysis.md](security-analysis.md), [v1-README.md](v1-README.md).
 
 > Licence facts below come from the official pages, read 2026-11-11. They are **not legal advice**. Rows marked ⚠️ could not be verified (page blocked) and must be checked by hand in a browser before use.
 
@@ -55,8 +55,8 @@ Why mostly reviews: reviews summarise the evidence, while single studies can con
 
 ### Size and cost (rough; check current prices)
 - Papers ~450 × ~8k tokens ≈ 3.6M · consumer/labels/CDC ~500 × ~2k ≈ 1M · anatomy ≈ 0.5M → **about 5M tokens**.
-- At 800-token chunks with 120 overlap → **about 7–9k chunks**.
-- Hosted embedding (e.g. `text-embedding-3-small`) for 5M tokens → around a few dollars or less (look up current pricing). Pinecone serverless at about 9k vectors is small.
+- Parent sections → **about 7–9k parents**; child chunks (~300 tokens) → **about 30–80k vectors**.
+- Hosted embedding (e.g. `text-embedding-3-small`) for 5M tokens → around a few dollars or less (look up current pricing). Qdrant at about 9k (parent) or 30–80k (child) vectors is small.
 - Takeaway: one-time cost is negligible. The real costs are **LLM calls per answer** and **reranking**.
 
 ---
@@ -78,9 +78,9 @@ parse:  PMC → JATS XML (sections, drop references/acknowledgements; tables →
    │
 dedupe: exact (sha256) + near-dup (MinHash) across sources
    │
-chunk:  section-aware, 800/120, keep section title + doc title in chunk header
+chunk:  section-aware parent–child (child ~250–400 tok, parent ≤1.5k), contextual header (see v2-plan §4.2)
    │
-embed (hosted) ──► upsert Pinecone namespace `corpus-vN`, id = hash(doc_id, section, offset)
+embed (hosted) + BM25 sparse ──► upsert Qdrant collection `corpus-vN`, id = hash(doc_id, section_path, child_index)
    │                metadata: doc_type, year, licence, source, section, page/para, title
 record in Postgres `documents` + `chunks` tables (status, version, hash) → resumable, idempotent
    │
@@ -88,7 +88,7 @@ ingest report: counts by source/licence/doc_type, rejects, dupes, failures
 ```
 
 - **Resumable and idempotent:** re-running changes nothing unless a source hash changed.
-- **Corpus versions:** `corpus-v1`, `corpus-v2`, … Evals run against a new namespace before the env var flips (see v2-plan §8).
+- **Corpus versions:** `corpus-v1`, `corpus-v2`, … Evals run against a new collection before the env var flips (see v2-plan §8).
 - **Refresh:** a monthly Render cron job re-fetches MedlinePlus/openFDA, adds new PMC reviews, and **removes withdrawn or retracted papers** (check the PMC retraction notices; research how).
 - Runs offline/CLI and as a worker, **never inside the web request path**.
 
@@ -123,18 +123,18 @@ New golden slices (add to the v2-plan §5 set):
 
 ## 7. Where this fits in v2
 
-- Becomes **M3a "Corpus v1 (1k docs)"** after M1 (eval baseline) and alongside M3 retrieval work. Rough estimate +5–7 days.
+- Becomes **M4 "Corpus 1k + ingestion"** in v2-plan rev 2, after the backend core (M3) and alongside retrieval v2 (M5). Rough estimate 6–8 days.
 - Skills flow:
   - `research` → verify the ⚠️ rows, retraction handling, PDF/JATS parsers, current embedding and reranker pricing.
-  - `/grill-with-docs` → corpus scope, commercial vs non-commercial, consumer vs research tiers. ADRs: *0009 corpus sources & licence allowlist*, *0010 corpus versioning via namespaces*, *0011 reviews over single studies*.
+  - `/grill-with-docs` → corpus scope, commercial vs non-commercial, consumer vs research tiers. ADRs: *0009 corpus sources & licence allowlist*, corpus versioning via Qdrant collections (part of *0010*), reviews over single studies.
   - `prototype` → logic prototype comparing retrieval on 50 papers: section-aware vs naive chunking, with and without rerank.
   - `/to-spec` → `/to-tickets` → `/implement` (tdd seam: `ingest(sources) -> IngestReport` with a fake fetcher and a fake vector store).
-  - `wizard` → AWS CLI for the PMC S3 bucket, Semantic Scholar key, Pinecone namespace, Render cron.
+  - `wizard` → AWS CLI for the PMC S3 bucket, Semantic Scholar key, Qdrant collection, Render cron.
 
 ## 8. Open questions
 1. Is AskMedi **commercial**? If not, WHO and StatPearls-type sources open up (NC).
 2. Languages: English only, or Hindi and others? MedlinePlus has Spanish; translation affects licences (adaptation).
 3. Which specialties first? (Pick 10–20 top conditions so 1k docs give depth, not thin coverage.)
-4. Can users upload their own documents? (That brings privacy issues and a separate per-user namespace. Recommend **not** in v2.)
+4. Can users upload their own documents? (That brings privacy issues and a separate per-user collection. Recommend **not** in v2.)
 5. Who reviews corpus quality: a clinician spot-check of 50 random chunks before launch?
 6. Keep or drop `Medical_book.pdf` after the licence check?

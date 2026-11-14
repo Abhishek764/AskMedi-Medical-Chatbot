@@ -1,224 +1,311 @@
-# AskMedi v2 — Production Plan
+# AskMedi v2 — Production Plan (rev 2)
 
-**Goal:** a production-ready medical RAG assistant with guardrails, anti-hallucination, evals, and an Android app.
-**Decided (2026-11-11):** Flutter (Android first, iOS later) · FastAPI backend · **strict "grounded or refuse"** safety posture.
-**Baseline:** [v1-README.md](v1-README.md). **Workflow:** [real-engineer.md](real-engineer.md).
+**Goal:** a production Gen AI product for medical information only: a FastAPI backend, a Next.js web app, and a Flutter Android app. It runs on a licensed corpus of about 1,000 documents, uses hybrid BM25 + dense retrieval, has layered guardrails and eval gates, and is sized for **50,000 daily active users**.
 
-> Status: **draft plan**. Feed it into `/grill-with-docs`, which should challenge it and turn decisions into ADRs, then run `/to-spec` and `/to-tickets`.
+**Build order:** security analysis → backend → web app → Android app.
+**Posture:** strict **cite-or-refuse**. AskMedi is a medical information assistant. It does not diagnose, it does not prescribe, and it is not a medical device.
+
+| Doc | What it holds |
+|---|---|
+| [v1-README.md](v1-README.md) | v1 study (baseline) |
+| [security-analysis.md](security-analysis.md) | Threat model, lessons from real AI-harm cases, crisis protocol. **Read before building.** |
+| [idea.md](idea.md) | ~1k-doc corpus sources, licence allowlist, ingestion |
+| [resources.md](resources.md) | Accounts, keys, people, docs, datasets, learning material |
+| [diagrams/v2-stack.html](diagrams/v2-stack.html) | Stack diagram (PNG: [light](diagrams/v2-stack.png), [dark](diagrams/v2-stack-dark.png)) |
+| [real-engineer.md](real-engineer.md) | Skills workflow |
+| [resume-metrics.md](resume-metrics.md) | v1 baseline numbers |
+
+> Rev 2 (2026-11-14) changes from rev 1: web app added and built **before** Android; security analysis is now its own first milestone; Pinecone → **Qdrant** (native BM25 + server-side hybrid fusion); query and chunking pipeline specified; capacity plan for 50k DAU; medical-only scope enforced; provider (clinician/pharmacist) role proposed; crisis protocol based on reported real cases.
 
 ---
 
 ## 1. Principles
 
-1. **Eval first.** Build the eval harness and score v1 *before* changing the RAG. Every later change must beat the baseline.
-2. **Cite or refuse.** No claim reaches the user without a source chunk behind it. If unsure, abstain.
-3. **Safety beats helpfulness.** Emergency detection must have 100% recall. Diagnosis, dosing, and prescriptions are always refused.
-4. **One API, many clients.** FastAPI serves both the Flutter app and the web client through the same versioned `/v1` API.
-5. **Keep the deep module.** `answer_stream(question, history) -> events` stays the single boundary between the web layer and the AI.
+1. **Safety beats helpfulness.** Crisis and emergency detection is a hard gate (recall = 1.00 on the eval set). No diagnosis, no personal prescriptions, no individual dosing for the public.
+2. **Cite or refuse.** Every claim is backed by a retrieved chunk. If retrieval is weak, abstain before calling the LLM.
+3. **Eval first.** Every change to retrieval, prompts, models, or guards must beat the recorded baseline in CI before it ships.
+4. **Medical only.** One job: medical information and medicine information. No general chat, no code, no homework, no role-play, no agentic tools. A small surface is easier to secure.
+5. **One API, many clients.** FastAPI `/v1` serves web and Android. OpenAPI is the contract, and both clients are generated from it.
+6. **Deep module.** `answer_stream(question, history, user_ctx) -> events` is the single boundary between the web layer and the AI. Everything in §4 lives behind it and can be tested with fakes.
+7. **Boring infrastructure.** Managed Postgres, Redis, and vector DB. No Kubernetes at this scale.
 
 ---
 
-## 2. Target architecture
+## 2. Architecture
+
+![AskMedi v2 stack](diagrams/v2-stack.png)
 
 ```
-┌──────────────┐   ┌──────────────┐
-│ Flutter app  │   │ Web client   │   (port chat.js to /v1 API, or Flutter web later)
-│ (Android)    │   │              │
-└──────┬───────┘   └──────┬───────┘
-       │ HTTPS  JWT (access 15m + refresh 30d)  SSE stream
-       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ FastAPI  /v1                                                 │
-│  auth · conversations · chat(SSE) · feedback · health        │
-│  middleware: request-id, rate limit (Redis), CORS, logging   │
-│                                                              │
-│  ┌──────────────── answer pipeline (deep module) ─────────┐  │
-│  │ 1 Input guard   → emergency? out-of-scope? injection?  │  │
-│  │                   PII redaction                        │  │
-│  │ 2 Rewrite       → standalone question (history-aware)  │  │
-│  │ 3 Retrieve      → hybrid (dense + BM25) → rerank       │  │
-│  │ 4 Gate          → top score < τ  ⇒ REFUSE (no LLM call)│  │
-│  │ 5 Generate      → JSON: sentences[] each w/ chunk ids  │  │
-│  │ 6 Verify        → citation check + groundedness judge  │  │
-│  │ 7 Output guard  → dosing/diagnosis filter, disclaimer  │  │
-│  └────────────────────────────────────────────────────────┘  │
-└───────┬───────────┬──────────────┬─────────────┬────────────┘
-        ▼           ▼              ▼             ▼
-   Postgres     Redis (KV)     Pinecone     OpenAI (LLM +
-   (Alembic)    rate limit,    namespaced,  hosted embeddings)
-                cache          stable IDs
-        │
-        └─► Traces/metrics: Langfuse (or OpenTelemetry) — latency, tokens, cost, refusals, feedback
-
-Offline:  ingest CLI (idempotent, page metadata)  ·  eval CLI (golden set → scorecard)  ·  CI gates
+Clients        Next.js web (Vercel or Render) · Flutter Android
+                     │ HTTPS · SSE · JWT
+Edge           Cloudflare: DNS, CDN, WAF, DDoS, bot + IP rate limits
+                     │
+Backend        FastAPI /v1 on Render (autoscaled, ≥2 instances)
+(Render)         ├─ auth · users · conversations · chat (SSE) · feedback · admin
+                 ├─ Postgres (Render) — users, chats, citations, audit, corpus registry
+                 ├─ Redis (Render Key Value) — rate limits, semantic cache, job queue, session risk state
+                 └─ Worker (arq) — ingestion, re-index, eval runs, deletion jobs, cron
+                     │
+Answer         Input guard → query pipeline → Qdrant hybrid (dense + BM25, RRF)
+pipeline         → Cohere Rerank → abstain gate → LLM (OpenAI, Claude fallback)
+                 → verifier (citations + groundedness + output filter) → stream
+                     │
+Offline        Sources (PMC OA, MedlinePlus, openFDA, CDC) → R2 raw store → Docling/JATS parse
+                 → chunk → embed → Qdrant collection `corpus-vN`
+Ops            Langfuse (LLM traces, eval scores) · Sentry · GitHub Actions (CI + eval gate)
 ```
 
-### Data model additions
-- `messages`: + `status` (`complete` | `aborted` | `error` | `refused`), `refusal_reason`, `latency_ms`, `model`, `tokens_in/out`.
-- `citations(message_id, chunk_id, source, page, score)`
-- `feedback(message_id, user_id, rating ±1, reason, created_at)`
-- `refresh_tokens(user_id, token_hash, expires_at, revoked_at)`
-- `users`: + `email_verified_at`, `deleted_at` (account deletion is required by Play Store policy).
+### Stack decisions (each becomes an ADR)
 
----
-
-## 3. Guardrails (layered)
-
-| Layer | Check | Action | How |
+| Layer | Choice | Why | Alternative kept in mind |
 |---|---|---|---|
-| Input | **Emergency** (chest pain, suicidal ideation, stroke signs, overdose…) | Stop generation. Show the emergency card with local numbers. | Keyword/regex list **plus** an LLM classifier; either one triggers (favour recall). Mobile shows a native emergency screen. |
-| Input | **Out of scope** (non-medical, code, homework) | Polite refusal | Small classifier prompt or embedding similarity to the corpus centroid |
-| Input | **Prompt injection / jailbreak** | Refuse and log | Pattern list + classifier. User text is never put in the system role. |
-| Input | **PII** (names, phone, Aadhaar/SSN, email) | Redact before LLM and logs | Regex + a library such as Presidio (to research) |
-| Input | Length / rate | 400 / 429 | Pydantic + Redis limiter per user **and** per IP |
-| Retrieval | **Relevance gate** | Score < τ ⇒ "I don't have reliable information on that in my sources." | τ tuned on the eval set |
-| Generation | **Grounded prompt** | Only the context; every sentence must cite `[c1]`…; no dosing or diagnosis | temperature 0, structured JSON output |
-| Output | **Citation validator** | Drop or flag sentences whose cited ids weren't retrieved | Deterministic code |
-| Output | **Groundedness judge** | Unsupported claim ⇒ regenerate once, else refuse | LLM-as-judge or NLI model; async sampling if latency is too high (see trade-off below) |
-| Output | **Dosing/diagnosis filter** | Replace with "consult a clinician" | Regex for mg/ml/"take X times" + classifier |
-| Output | **Disclaimer** | Always appended (structured field, not LLM text) | API field `disclaimer` the client renders |
-
-**Streaming trade-off (decide in grilling, ADR):** full verification needs the whole answer before showing it.
-Options: (a) generate → verify → then stream verified text (adds about 1–2 s, safest; recommended for strict mode); (b) stream live and retract if verification fails (better UX, but the user may see an unsafe sentence briefly).
-
----
-
-## 4. Anti-hallucination (retrieval quality)
-
-1. **Fix ingestion:** stable chunk IDs (`hash(source,page,offset)`), keep the `page` metadata, idempotent upsert, a namespace per corpus version, clear the polluted "youtube" vector.
-2. **Better chunks:** tune size/overlap on the eval set (start 800/120); heading-aware splitting.
-3. **Hosted embeddings:** OpenAI `text-embedding-3-small` (or Pinecone inference). Removes torch from the server; needs a re-index under a new namespace. Use `research` to confirm dims and cost.
-4. **Hybrid search + rerank:** dense + BM25 (Pinecone sparse-dense or a local BM25), then a cross-encoder or Cohere/Jina rerank, top 5.
-5. **Abstain gate** before the LLM (see guardrails).
-6. **Structured citations:** model returns `{sentences:[{text, chunk_ids[]}]}`; UI shows "Medical_book.pdf p. 213" chips; tap opens the chunk text.
-7. **Corpus governance:** a `corpus/manifest.yaml` with source, edition, licence, and review date. Scale to ~1,000 docs + research papers: see **[idea.md](idea.md)** for verified sources, licence allowlist, ingestion pipeline, and the M3a milestone.
+| API | **FastAPI** (Python 3.12, uv, async SQLAlchemy 2, Alembic, Pydantic v2) | Same language as the RAG code; async SSE; OpenAPI built in | — |
+| Web | **Next.js** (App Router, TypeScript, Tailwind, shadcn/ui, TanStack Query) | Standard, SEO-friendly landing pages, server components for static content | Flutter web (one codebase, weaker web UX) |
+| Mobile | **Flutter** (Riverpod, dio, go_router, flutter_secure_storage) | Decided in rev 1 | — |
+| Vector + BM25 | **Qdrant Cloud**: dense vectors + sparse BM25 vectors (IDF modifier) in one collection, fused server-side with RRF in a single Query API call | Real BM25 without a second system; open source, so it can be self-hosted later | Pinecone sparse-dense (v1 vendor); Postgres + pgvector + ParadeDB `pg_search` (one database) |
+| Embeddings | `text-embedding-3-small` to start; **evaluate** `-3-large` and a biomedical model (MedCPT) on the golden set | Hosted, so no torch in the API (v1 cold start was 149 s) | Pinecone/Qdrant inference |
+| Rerank | **Cohere Rerank** (hosted cross-encoder), top-30 → top-5 | Big precision gain for little code | Jina reranker; self-hosted `bge-reranker` |
+| LLM | OpenAI as primary (model picked by evals and cost); **Claude** as fallback through one thin provider interface | Avoids single-vendor outage; 50k DAU needs headroom on rate limits | LiteLLM router |
+| Guards | OpenAI Moderation API (free) + Presidio (PII) + custom crisis/scope classifiers + rules | Layered; each layer is cheap | Llama Guard (self-host) |
+| Parsing | **Docling** for PDFs; JATS XML parser for PMC; JSON for openFDA; XML for MedlinePlus | Layout and table aware; this is also the doc-AI skill Outmarket.ai cares about | Unstructured, GROBID |
+| Queue | **arq** (Redis) | Async, light, same Redis | Celery |
+| Edge | **Cloudflare** (proxy, WAF, rate limiting) + **R2** for raw documents | DDoS protection at 50k DAU; R2 has no egress fees | — |
+| Observability | **Langfuse** (traces, cost, eval scores), **Sentry**, structured JSON logs, uptime checks | LLM-aware tracing plus classic error tracking | OpenTelemetry + Grafana |
+| Email | Resend or Postmark | Verification, password reset | — |
+| Hosting | **Render** (staging + prod projects) | Decided in rev 1; autoscaling, managed Postgres and Redis | Fly.io, AWS ECS |
 
 ---
 
-## 5. Evals
+## 3. Users, roles, scope
 
-### Golden dataset (`evals/golden/*.jsonl`, versioned in git)
-| Slice | Size (start) | Expected |
+| Role | Who | Can do |
 |---|---|---|
-| In-corpus factual | 120 | correct answer + correct page cited |
-| Follow-up / multi-turn | 30 | standalone rewrite correct |
-| Out-of-corpus medical | 40 | **refuse** |
-| Off-topic | 20 | refuse |
-| Emergency | 40 | **emergency path, 100%** |
-| Dosing/diagnosis requests | 30 | refuse + clinician advice |
-| Adversarial / jailbreak / injection | 40 | refuse, no leak of system prompt |
-| PII in question | 15 | redacted in logs and LLM input |
+| `public` | Signed-up adult (**18+ at launch**, age attested at sign-up) | Health and medicine information with citations. No individual dosing, diagnosis, or prescriptions. |
+| `provider` | Verified clinician or pharmacist (manual review of registration number) | Everything above plus **label-cited dosing tables and drug interaction facts** from openFDA labels, with a "verify against current label" banner. Still no patient-specific prescribing. *(Open question Q1)* |
+| `reviewer` | Clinician reviewer | Review flagged answers, golden-set rows, crisis copy |
+| `admin` | You | Corpus versions, feature flags, user moderation |
 
-Build it: the agent drafts questions from corpus pages, **you review every row** (the source of truth must be independent of the code, which is the `tdd` rule).
+**Scope enforcement (medical only).**
+- An input classifier labels each turn: `medical_info`, `medicine_info`, `emergency`, `crisis_self_harm`, `out_of_scope`, `injection_attempt`.
+- Anything `out_of_scope` gets a fixed refusal. No LLM generation is spent on it.
+- There are no tools, no browsing, no code execution, and no file upload in v2.
+- Role-play, personas ("act as my therapist / doctor"), and fiction framing are refused for medical-risk topics. See [security-analysis.md §3](security-analysis.md).
 
-### Metrics and release gates
+---
+
+## 4. Answer pipeline (inside `answer_stream`)
+
+```
+ 0 Load context      user role, conversation risk state (Redis), last N turns
+ 1 Input guard       length/rate → crisis & emergency (rules + classifier, either fires)
+                     → moderation → scope classifier → injection detector → PII redaction
+ 2 Query pipeline    standalone rewrite → intent + tier routing → term normalisation
+                     → expansion (BM25 side) → 1–3 query variants
+ 3 Retrieve          Qdrant hybrid per variant (dense + BM25, RRF) with metadata filters → top-30
+ 4 Rerank            Cohere → top-5; recency boost for papers
+ 5 Abstain gate      rerank score < τ or coverage too low ⇒ refuse (no LLM call)
+ 6 Generate          grounded prompt, temperature 0, JSON: sentences[] each with chunk_ids[]
+ 7 Verify            citation validator (code) → groundedness check → output filter
+                     (dosing/diagnosis for public, harmful-substance advice) → disclaimer field
+ 8 Stream            verified sentences over SSE; citations; status events
+ 9 Record            message, citations, guard decisions, latencies, tokens, cost → Postgres + Langfuse
+```
+
+### 4.1 Query pipeline ("high-value querying")
+
+Each step is an experiment that must improve the golden-set scores. Keep it only if it does.
+
+| Step | What | Notes |
+|---|---|---|
+| Standalone rewrite | History-aware rewrite to one self-contained question | Small, fast model. Eval slice: multi-turn. |
+| Intent + tier routing | `definition / symptoms / causes / treatment-overview / drug-info / interactions / evidence / prevention` → filter or boost `doc_type` (consumer, label, research) | "Does X work?" → research tier. "What is X?" → consumer tier. |
+| Term normalisation | Abbreviations (MI, HTN, T2DM), brand → generic names via **RxNorm (RxNav API)**, spelling fixes for drug names | Big win for BM25 on drug and condition names |
+| Expansion | **MeSH** synonyms added to the BM25 query only (dense already handles meaning) | Measure. Expansion can hurt precision. |
+| Multi-query | 2–3 paraphrases, retrieve each, fuse with RRF | Costs one small LLM call. Keep only if recall gains. |
+| HyDE | Hypothetical answer embedded for dense search | Experiment only. Risky in medicine because the "hypothetical" can be wrong. |
+| Metadata filters | language, licence allowlist (always), `doc_type`, year, retracted = false | The licence filter is enforced in code and tested |
+
+### 4.2 Chunking
+
+| Technique | Detail |
+|---|---|
+| Structure-aware splitting | JATS sections (Abstract, Methods, Results, Discussion; drop References and Acknowledgements), FDA label sections (Indications, Warnings, Adverse Reactions, Dosage), MedlinePlus summary blocks, Docling headings for PDFs |
+| **Parent–child** | Child chunks of ~250–400 tokens are indexed for retrieval. The parent section (≤1,500 tokens) is sent to the LLM. Better recall and better context together. |
+| Contextual header | Each chunk is stored as `Title › Section › Subsection · Source · Year` + text, so BM25 and dense both see the context |
+| Contextual retrieval (experiment) | An LLM writes 1–2 sentences placing the chunk in its document, prepended before embedding and BM25 (Anthropic's technique). One-time ingest cost. Keep if recall improves. |
+| Tables | Docling tables → Markdown, as their own chunks with a caption. Dosing tables are tagged `dosing=true` so the output guard can gate them by role. |
+| Stable IDs | `id = hash(doc_id, section_path, child_index)`. Idempotent upserts. Collection per corpus version (`corpus-vN`). |
+| Dedup | sha256 exact + MinHash near-duplicate across sources |
+| Tuning | Child size, overlap, and parent size are tuned on the golden set. Report recall@k per `doc_type`. |
+
+### 4.3 Retrieval details (Qdrant)
+- One collection per corpus version, with named vectors `dense` (1536-d) and `bm25` (sparse, `modifier: idf`). BM25 sparse vectors are produced with FastEmbed `Qdrant/bm25` at ingest and query time.
+- Query API: `prefetch` dense top-50 + BM25 top-50 → `fusion: rrf` → top-30 → Cohere rerank → top-5.
+- Payload indexes on `doc_type`, `licence`, `lang`, `year`, `retracted`, `dosing`.
+- Index switch = change `QDRANT_COLLECTION` after evals pass. Rollback = switch back.
+
+---
+
+## 5. Guardrails (layered)
+
+Full threat model: [security-analysis.md](security-analysis.md).
+
+| Layer | Check | Action |
+|---|---|---|
+| Input | **Crisis / self-harm** (rules + classifier; either fires; conversation-level score is sticky) | Stop generation. Show the crisis card (local helplines, tap-to-call). Supportive, non-judgmental fixed copy. **No method information, ever.** Conversation stays in elevated-risk mode. |
+| Input | **Medical emergency** (chest pain, stroke signs, anaphylaxis, overdose, poisoning) | Emergency card with local emergency number. No LLM text first. |
+| Input | Moderation (OpenAI Moderation) | Block categories → fixed refusal |
+| Input | **Scope** (non-medical) | Fixed polite refusal |
+| Input | **Prompt injection / jailbreak** (patterns + classifier; fiction/role-play framing on risk topics) | Refuse and log. User text never goes in the system role. |
+| Input | **PII** (Presidio + regex: phone, email, Aadhaar, PAN, addresses, names) | Redact before LLM, logs, and traces |
+| Input | Size and rate | Pydantic limits; Redis limits per user, IP, and device; daily question quota per tier |
+| Retrieval | Licence + retraction filter | Always on, tested |
+| Retrieval | **Abstain gate** | Score < τ ⇒ "I don't have reliable information on that in my sources." |
+| Generation | Grounded JSON prompt | Only the provided context; every sentence cites chunk ids; temperature 0; refuse personal diagnosis and treatment |
+| Output | Citation validator | Code: drop or flag sentences citing ids that weren't retrieved |
+| Output | Groundedness | NLI or small-model judge on every answer; regenerate once, then refuse |
+| Output | Role filter | Public: dosing and diagnosis language → "talk to a clinician or pharmacist". Provider: dosing allowed only if cited to a label chunk. |
+| Output | Harmful-substance filter | Ingesting non-food chemicals, substitutions (the bromide case), stopping prescribed medication → refuse + clinician advice |
+| Output | Disclaimer | Structured API field rendered by the client, not LLM text |
+| Session | Long-conversation drift | Guards run on **every** turn. Risk state persists across turns. Hard cap on conversation length → start a new chat. |
+
+**Streaming (ADR):** verify-then-stream. Generate the full JSON, verify, then stream verified sentences. Time to first token goes up by about 1–2 s, but no unsafe sentence is ever shown. The `status` SSE events (`retrieving`, `checking sources`) cover the wait.
+
+---
+
+## 6. Evals
+
+Harness and v1 baseline already exist in `evals/` (Recall@3 0.878, MRR 0.795). Answer and safety evals are pending an OpenAI key.
+
+### Golden set (target v1 of the set: ~600 rows, every row reviewed by you; safety rows reviewed by a clinician)
+
+| Slice | Size | Expected |
+|---|---|---|
+| In-corpus consumer factual (MedQuAD-seeded) | 120 | correct + correct source cited |
+| Drug / label questions | 60 | correct label section cited; dosing refused for public, allowed for provider |
+| Paper-grounded evidence | 60 | correct PMC article; "evidence is mixed" when it is |
+| Multi-turn follow-ups | 40 | correct standalone rewrite |
+| Out-of-corpus medical | 40 | refuse |
+| Off-topic / scope | 30 | refuse |
+| **Crisis / self-harm** (direct, indirect, slang, Hinglish, fiction-framed, late in long chats) | 60 | crisis path, **100%** |
+| **Medical emergency** | 40 | emergency path, **100%** |
+| Dosing / diagnosis requests (public) | 30 | refuse + clinician advice |
+| Harmful substitution / ingestion | 20 | refuse |
+| Adversarial: jailbreak, injection, system-prompt extraction | 60 | refuse, no leak |
+| PII in question | 20 | redacted in LLM input, logs, traces |
+| Long-conversation drift (scripted 30–50 turn chats) | 10 | guards still fire at turn N |
+
+### Release gates (CI blocks merge or deploy)
+
 | Metric | Gate |
 |---|---|
-| Retrieval recall@5 (gold page in top 5) | ≥ 0.85 |
+| Retrieval recall@5 (hybrid + rerank) | ≥ 0.90 and ≥ v1 baseline + 0.05 |
 | Faithfulness / groundedness | ≥ 0.95 |
-| Citation precision (cited chunk supports sentence) | ≥ 0.95 |
-| Correct refusal rate (out-of-corpus + unsafe) | ≥ 0.95 |
+| Citation precision | ≥ 0.95 |
+| Correct refusal rate | ≥ 0.95 |
 | False refusal rate (in-corpus) | ≤ 0.10 |
-| **Emergency recall** | **= 1.00 (hard gate)** |
-| Jailbreak success | 0 |
-| p95 time-to-first-token / full answer | ≤ 2.5 s / ≤ 8 s |
+| **Crisis + emergency recall** | **= 1.00 (hard)** |
+| Jailbreak / injection success | 0 |
+| p95 time-to-first-token / full answer | ≤ 3 s / ≤ 9 s |
 | Cost per answer | tracked; alert on +30% |
 
-Gates are starting targets. Set real ones after the v1 baseline run.
-
 ### Where evals run
-- **PR CI (fast, no secrets):** unit tests for guards, validator, and pipeline with fakes.
-- **PR CI with label `rag` / nightly (secrets):** full golden run → scorecard markdown posted to the PR; fails if below the gate.
-- **Production:** sample 5% of traces through the groundedness judge, review 👎 feedback weekly, and add each failure to the golden set (the data flywheel).
-- Tooling: custom pytest-based harness + LLM judge; compare with `ragas` and pick via `research`.
+- **PR CI (no secrets):** unit tests for guards, validator, chunker, query normaliser, licence filter; pipeline tests with fakes.
+- **PR label `rag` + nightly (secrets):** full golden run → scorecard posted on the PR → fail below gate. Red-team suite (promptfoo) nightly.
+- **Production:** sample 5% of traces through an LLM judge in Langfuse; every 👎 and every crisis trigger goes into a review queue; reviewed failures are added to the golden set weekly (data flywheel).
 
 ---
 
-## 6. Backend (FastAPI) production checklist
+## 7. Capacity plan — 50k DAU
 
-- Layout: `backend/app/{api,core,db,rag,guards,evals}`; `pyproject.toml` (uv), ruff, mypy, pytest.
-- SQLAlchemy 2 async + **Alembic** migrations, carrying over v1 tables (data migration script from v1 Postgres).
-- Auth: email+password (argon2/bcrypt), JWT access + rotating refresh tokens, email verification, password reset, **account + data deletion endpoint**.
-- API contract: OpenAPI is the source of truth; generate the Dart client (`openapi-generator`) for Flutter.
-- SSE events v2: `meta`, `status` (retrieving/verifying), `token` (or `sentence`), `citations`, `refusal{reason}`, `emergency{numbers}`, `done{message_id}`, `error`.
-- Hardening: fail fast on missing secrets, CORS allowlist, security headers/CSP for web, request-id logging, structured JSON logs, no PII in logs, Sentry for errors.
-- Resilience: OpenAI/Pinecone timeouts + retry with backoff + circuit breaker; graceful "service busy" message.
-- Health: `/healthz` (liveness), `/readyz` (DB + Redis + Pinecone ping).
-- Delete: root `templates/`, `static/`, `template.sh`, `Dockerfile` (rewrite), `cicd.yaml` (rewrite).
+Assumptions (re-check with real traffic): 50k DAU × 4 questions = **200k answers/day**, average 2.3/s. Busiest hour ≈ 10% of daily traffic ≈ 5.6/s, bursts ×3 ≈ **17 answers/s**. Design for **20/s sustained, 50/s burst** (queue + 429 above that).
 
----
+| Resource | Sizing |
+|---|---|
+| FastAPI | Async, verify-then-stream ≈ 6–9 s per answer → ~150 concurrent streams at 20/s. 2–6 instances (2 vCPU / 4 GB each), autoscale on CPU and concurrency, min 2 for HA. |
+| Postgres | ~3 writes per answer → ~60 writes/s peak. Render Postgres with a connection pool (PgBouncer or SQLAlchemy pool sized per instance). Read replica later if analytics grows. |
+| Redis | Rate limits, risk state, semantic cache, queue. Small instance; enable persistence for the queue. |
+| Qdrant | ~1k docs → roughly 30–80k child chunks. Tiny for Qdrant; 1 node + replica for HA; ~40 QPS hybrid at peak. |
+| LLM tokens | Per answer ≈ 4–7k input (system + 5 parents + history + judge) and ~0.5k output → **~1–1.4B input tokens/day**. Peak ≈ 5–8M tokens/min: you need a high OpenAI usage tier **and** the Claude fallback. |
+| Cost levers | Semantic cache for repeated questions (aim for 20–30% hits on common FAQs; cache only non-personal, fully verified answers); provider prompt caching for the fixed system prefix; small models for rewrite, classifiers, and judge; abstain before the LLM; daily quotas per free user. |
+| Cost model | `daily cost ≈ answers × (in_tokens × in_price + out_tokens × out_price) × (1 − cache_hit)` + rerank + embed. Work it out with current prices during M7 and set a budget alert. **This is the biggest operating cost and the biggest business risk.** |
 
-## 7. Android app (Flutter)
-
-- Layout: `mobile/` with Riverpod (state), `dio` (+ SSE stream parsing), `go_router`, `flutter_secure_storage` (tokens), `flutter_markdown`, generated API client.
-- Screens: onboarding + **medical disclaimer consent** (must accept), sign up/in/verify/reset, conversation list, chat (streaming, stop, citation chips → source sheet, 👍/👎), emergency screen (tap-to-call), settings (delete account, privacy policy, export data).
-- Quality: widget tests for chat states (streaming/refused/emergency/error), integration test against a staging API, Crashlytics, offline/retry handling, dark mode, accessibility (TalkBack, text scaling).
-- Release: Play Console → internal testing → closed testing → production. App signing, `versionCode` from CI, privacy policy URL, **Data Safety form** (health data + email), health app declaration. Use `research` on Play's current *Health apps* and *medical misinformation* policies before submitting.
-- CI: GitHub Actions `flutter analyze` + `flutter test` on PR; build an AAB and upload to the internal track on tag (fastlane or `r0adkll/upload-google-play`).
+Load test (M7): k6 or Locust with SSE, ramped to 50 answers/s against staging, with fake LLM and real LLM runs.
 
 ---
 
-## 8. Deployment and ops
+## 8. Backend (FastAPI) checklist
+
+- Layout: `backend/app/{api,core,db,auth,rag,guards,ingest,evals}`; `pyproject.toml` (uv), ruff, mypy (strict for `guards/` and `rag/`), pytest + coverage gate.
+- Data model: `users` (role, age_attested_at, email_verified_at, deleted_at), `provider_verifications`, `refresh_tokens`, `conversations`, `messages` (status `complete|aborted|error|refused|crisis|emergency`, refusal_reason, model, tokens, cost, latency), `citations`, `feedback`, `guard_events` (no raw text), `documents`, `chunks`, `corpus_versions`, `audit_log`.
+- Auth: argon2id; JWT access (15 min) + rotating refresh (30 d) with reuse detection; web uses httpOnly Secure SameSite cookies with CSRF protection; mobile uses bearer tokens in secure storage; email verification; reset; optional Google sign-in; **account and data deletion** (Play policy + DPDP).
+- Authorization: every conversation and message query is scoped by `user_id` (BOLA tests for each route).
+- SSE events: `meta`, `status`, `sentence`, `citations`, `refusal{reason}`, `crisis{resources}`, `emergency{number}`, `done{message_id}`, `error`.
+- Resilience: timeouts, retries with jitter, circuit breaker per provider, fallback LLM, graceful "busy" message, idempotency keys on POST.
+- Health: `/healthz`, `/readyz` (Postgres, Redis, Qdrant).
+- Security headers, CORS allowlist, request-id, structured logs without PII, secrets from env only (fail fast), dependency scanning (pip-audit, Dependabot), SAST (Semgrep or CodeQL), container scan (Trivy).
+- Remove v1 leftovers: root `templates/`, `static/`, `template.sh`, broken `Dockerfile`, stale AWS CI.
+
+## 9. Web app (Next.js)
+
+- Pages: landing (what AskMedi is and isn't), sign up / in / verify / reset, **disclaimer + age consent**, chat (streaming, stop, citation chips → source drawer with chunk text, 👍/👎), conversation list, crisis and emergency cards, settings (delete account, export data), provider verification request, legal pages (privacy, terms, medical disclaimer).
+- Client: TypeScript client generated from OpenAPI (`openapi-typescript` + `openapi-fetch`); SSE via `fetch` streaming (EventSource can't send auth headers).
+- Quality: Playwright e2e (chat, refusal, crisis card, auth); accessibility (WCAG 2.2 AA, keyboard, screen reader); CSP; no third-party trackers on chat pages.
+- Deploy: Vercel (or a Render web service) behind Cloudflare; preview deploys per PR.
+
+## 10. Android app (Flutter)
+
+- Same screens as web, plus a native crisis/emergency screen with tap-to-call, `flutter_secure_storage` for tokens, Dart client generated from OpenAPI, Crashlytics, offline and retry handling, TalkBack and text scaling.
+- Release: internal → closed testing → production. Data Safety form (health info, email), health app declaration, privacy policy URL, account deletion URL. Research Play's current Health apps and medical misinformation policies before submitting.
+- CI: `flutter analyze` + `flutter test` on PR; AAB to the internal track on tag.
+
+## 11. Deployment and ops
 
 | Env | Where | Notes |
 |---|---|---|
-| dev | local docker-compose (api + postgres + redis) | `.env` from `.env.example` |
-| staging | Render (web service + Postgres + Key Value) | own Pinecone namespace, nightly evals run here |
-| prod | Render (separate project) | autodeploy on tag after eval gate passes |
+| dev | docker-compose: api + worker + postgres + redis + qdrant | `.env.example` |
+| staging | Render project + Qdrant collection `staging-*` | nightly evals and load tests |
+| prod | Render project, Cloudflare in front | deploy on tag after eval gate; blue/green by Render deploys |
 
-- Dockerfile (multi-stage, slim, non-root, uvicorn/gunicorn workers), `render.yaml` with `preDeployCommand: alembic upgrade head`.
-- Index switching: ingest → new namespace → evals → flip `PINECONE_NAMESPACE` env var. Rollback = flip back.
-- Alerts: error rate, p95 latency, refusal-rate spike, emergency-path count, OpenAI spend.
-- Backups: Render Postgres daily backups; test a restore once.
-- Legal/compliance (to research; not legal advice): privacy policy, terms, "not a medical device" positioning, data retention, applicable privacy law for your users' region (e.g. India DPDP Act / GDPR). Get a clinician to review the guardrail list and the emergency copy.
+- Alerts: error rate, p95 latency, refusal-rate spike, **crisis-trigger count spike**, LLM spend per hour, provider error rate, queue depth.
+- Backups: daily Postgres backups, a restore drill once per quarter; Qdrant snapshots per corpus version; R2 holds raw sources.
+- Incident runbooks: LLM provider down, cost runaway, harmful answer reported, data breach (DPDP breach notice duties).
 
 ---
 
-## 9. Milestones (each = one `/to-spec`; tickets via `/to-tickets`)
+## 12. Milestones
+
+Each milestone = `/grill-with-docs` → `/to-spec` → `/to-tickets` → implement (tdd) → PR → `/retro`.
 
 | M | Name | Outcome | Est. |
 |---|---|---|---|
-| **M0** | Foundations | `/setup-matt-pocock-skills`, CLAUDE.md, monorepo layout (`backend/` `mobile/` `evals/`), CI runs pytest, dead files removed | 2–3 d |
-| **M1** | Eval harness + v1 baseline | golden set v0 (reviewed), eval CLI, scorecard on **v1 chain** | 4–5 d |
-| **M2** | FastAPI backend parity | auth (JWT), conversations, SSE chat with the *current* chain, Alembic, v1 data migration, Docker, staging on Render | 5–7 d |
-| **M3** | Ingestion + retrieval v2 | idempotent ingest, page metadata, hosted embeddings, hybrid + rerank, abstain gate → **beats baseline** | 4–6 d |
-| **M4** | Guardrails + verification | input guards, structured citations, validator, groundedness judge, output filter, emergency path → **all gates green** | 5–7 d |
-| **M5** | Flutter app | screens, streaming, citations, emergency screen, account deletion, tests, internal track build | 8–12 d |
-| **M6** | Production hardening | observability, alerts, Sentry, rate limits, security review, load test, privacy docs, prod deploy | 4–5 d |
-| **M7** | Launch + flywheel | Play closed testing → production, feedback triage loop, weekly eval refresh | ongoing |
+| **M0** | Foundations | CLAUDE.md, monorepo (`backend/ web/ mobile/ evals/ ingest/`), CI with pytest + ruff + mypy, v1 dead files removed, docker-compose | 2–3 d |
+| **M1** | Evals complete | Answer + safety evals running on v1 (needs OpenAI key); golden set grown toward §6 sizes; red-team suite skeleton | 4–5 d |
+| **M2** | **Security analysis + safety spec** | [security-analysis.md](security-analysis.md) reviewed; crisis protocol and copy reviewed by a clinician; abuse cases written as failing tests; ADRs 0001–0012 | 3–4 d |
+| **M3** | Backend core | FastAPI auth (roles), conversations, SSE with the v1 chain behind `answer_stream`, Postgres + Alembic, Redis limits, Docker, staging on Render | 6–8 d |
+| **M4** | Corpus 1k + ingestion | Worker ingestion: fetch → R2 → parse (Docling/JATS) → licence gate → dedupe → parent–child chunks → embed → Qdrant `corpus-v1`; ingest report | 6–8 d |
+| **M5** | Retrieval v2 | Hybrid BM25 + dense, query pipeline (§4.1), rerank, abstain gate → **beats baseline** | 5–7 d |
+| **M6** | Guardrails + verification | All §5 layers; crisis/emergency path; provider role; **all gates green** | 6–8 d |
+| **M7** | Scale + hardening | Load test to 50 answers/s, semantic cache, autoscale, Langfuse + Sentry + alerts, cost model, security review + pentest checklist, privacy docs, prod deploy | 5–7 d |
+| **M8** | Web app | Next.js app (§9), Playwright e2e, **public beta on web** | 7–10 d |
+| **M9** | Android app | Flutter app (§10), Play internal → closed testing → production | 8–12 d |
+| **M10** | Launch + flywheel | Feedback triage, weekly golden-set refresh, monthly corpus refresh, cost reviews | ongoing |
 
-Critical path: M0 → M1 → (M2 ∥ M3) → M4 → M5 → M6. **M5 can start on mocked API after M2's OpenAPI spec exists.**
-Estimates assume one developer + agent. Re-estimate after `/to-tickets`.
+Critical path: M0 → M1 → M2 → M3 → (M4 ∥ start M5 on a sample) → M6 → M7 → M8 → M9.
+Web and mobile can start on a mocked API once M3's OpenAPI spec is stable.
+Estimates assume one developer + agent; re-estimate after `/to-tickets`.
+
+### ADRs to write
+0001 FastAPI replaces Flask · 0002 Next.js web + Flutter Android · 0003 strict cite-or-refuse · 0004 hosted embeddings · 0005 verify-then-stream · 0006 Render hosting, staging + prod · 0007 JWT access/refresh, cookies on web · 0008 eval gates block release · 0009 corpus sources + licence allowlist · 0010 **Qdrant for hybrid BM25 + dense** (replaces Pinecone) · 0011 parent–child chunking · 0012 crisis protocol + sticky risk state · 0013 provider role and dosing policy · 0014 18+ at launch · 0015 LLM fallback provider
 
 ---
 
-## 10. How to run this with the skills
+## 13. Open questions (for grilling)
 
-```text
-/setup-matt-pocock-skills
-research (background, docs/research/):
-  - hosted embeddings vs MiniLM (dims, cost)        - ragas vs custom judge
-  - Pinecone hybrid search + rerank options          - PII redaction libs (Presidio)
-  - Google Play health app + data safety policy      - FastAPI SSE + JWT refresh best practice
-  - Flutter SSE streaming client patterns
-/wayfinder AskMedi v2 production + Android     ← v2 is bigger than one session
-  (map = this file's milestones; resolve one decision ticket per session)
-Per milestone:
-  /grill-with-docs M<n> → ADRs + GLOSSARY.md
-  /to-spec → /to-tickets → /implement #ticket (tdd) or /implement-spec
-  pr skill → merge → /retro
-Every few days: /improve-codebase-architecture
-Deploy steps you must do by hand: wizard (Render, Pinecone, Play Console, GitHub secrets)
-```
-
-### ADRs to expect
-0001 FastAPI replaces Flask · 0002 Flutter for mobile · 0003 strict grounded-or-refuse · 0004 hosted embeddings + re-index · 0005 verify-then-stream · 0006 Render only, staging + prod · 0007 JWT access/refresh · 0008 eval gates block release · 0009 corpus sources + licensing
-
-## 11. Open questions for grilling
-1. Verify-then-stream (safer, slower) or stream-then-retract?
-2. Which new corpus sources, and do their licences allow commercial use?
-3. Target countries → emergency numbers, privacy law, Play listing regions?
-4. Free app or paid tier? (sets rate limits and OpenAI cost budget)
-5. Keep a web client in v2, or mobile only at launch?
-6. Is there a clinician available to review the golden set and guardrails?
-7. LLM choice: keep `gpt-4o`, or a cheaper model plus a stronger judge?
+1. **"Medicine provider"**: verified clinicians and pharmacists as a user role (as proposed in §3), or a business customer (a pharmacy or clinic using AskMedi for its patients)? This changes auth, pricing, and the dosing policy.
+2. Target countries at launch: India only? This decides helplines, emergency numbers, privacy law (DPDP), and languages (Hindi/Hinglish?).
+3. Free vs paid tiers: this sets daily quotas, which set LLM cost at 50k DAU.
+4. Is a clinician available for reviewing safety rows, crisis copy, and provider verification?
+5. Commercial or non-commercial? This decides corpus licences (see [idea.md](idea.md) §1).
+6. Is 50k DAU a launch target or a design ceiling? Launch can start with smaller instances; the design stays the same.
+7. LLM choice and budget: what monthly LLM spend is acceptable?
