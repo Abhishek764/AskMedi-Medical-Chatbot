@@ -74,11 +74,15 @@ def check_input(text: str, *, role: str = "public", elevated_risk: bool = False)
     plain = forms[0]
     if any_match(rules.GREETING, [plain]):
         return decide(Action.refuse, "greeting")
-    medical = any_match(rules.MEDICAL_TERMS, forms)
-    if not medical or (any_match(rules.OFF_TOPIC, forms) and not _strongly_medical(forms)):
+    # Refuse only when the message is clearly off-topic. Unknown medical vocabulary (rare
+    # diseases, follow-ups like "what causes it?") goes on to retrieval, whose abstain gate
+    # refuses anything the corpus can't support.
+    if any_match(rules.OFF_TOPIC, forms) and not _strongly_medical(forms):
         return decide(Action.refuse, "out_of_scope")
 
-    # 6. Personal diagnosis and dosing.
+    # 6. Prescriptions, personal diagnosis and dosing.
+    if any_match(rules.PRESCRIPTION, forms):
+        return decide(Action.refuse, "prescription")
     if any_match(rules.DIAGNOSIS, forms):
         return decide(Action.refuse, "diagnosis")
     if any_match(rules.DOSING, forms):

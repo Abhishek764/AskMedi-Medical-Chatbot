@@ -90,6 +90,10 @@ REFUSALS: dict[str, str] = {
         "age, weight, other conditions and medicines. A pharmacist or doctor can tell you "
         "safely. I can explain what a medicine is used for and its common side effects."
     ),
+    "prescription": (
+        "I can't prescribe medicines. Only a licensed doctor who has assessed you can do that "
+        "safely. I can explain what a medicine is used for or what a condition is."
+    ),
     "diagnosis": (
         "I can't tell whether you have a condition; only a clinician who examines you can. "
         'I can explain a condition in general, for example: "What are the symptoms of '
