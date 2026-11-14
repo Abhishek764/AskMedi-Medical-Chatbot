@@ -17,7 +17,12 @@ class Container:
         self.kv: KV = build_kv(settings.redis_url)
 
     async def startup(self) -> None:
-        return None
+        if self.settings.db_auto_create:
+            # dev/test convenience; staging/prod run `alembic upgrade head` before deploy
+            from app.db.models import Base
+
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
 
     async def shutdown(self) -> None:
         await self.kv.close()

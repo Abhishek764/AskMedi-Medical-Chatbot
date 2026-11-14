@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     # Storage
     database_url: str = "sqlite+aiosqlite:///./askmedi.db"
     redis_url: str | None = None  # None -> in-process KV (dev/test only)
+    db_auto_create: bool = True  # create tables at startup (dev/test); False in prod
 
     # Auth
     jwt_secret: str = _DEV_SECRET
@@ -83,6 +84,8 @@ class Settings(BaseSettings):
                 raise ValueError("DATABASE_URL must be Postgres outside dev/test")
             if self.redis_url is None:
                 raise ValueError("REDIS_URL is required outside dev/test")
+            if self.db_auto_create:
+                raise ValueError("DB_AUTO_CREATE must be false outside dev/test (use Alembic)")
         if self.llm_provider == "openai" and not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY required when LLM_PROVIDER=openai")
         if self.llm_provider == "anthropic" and not self.anthropic_api_key:
