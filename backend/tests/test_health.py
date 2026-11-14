@@ -20,12 +20,12 @@ async def test_readyz_checks_dependencies(client):
 
 def test_prod_rejects_dev_secret():
     with pytest.raises(ValueError, match="JWT_SECRET"):
-        Settings(env="prod", redis_url="redis://x", database_url="postgresql+asyncpg://x/y")
+        Settings(_env_file=None, env="prod", redis_url="redis://x", database_url="postgresql+asyncpg://x/y")
 
 
 def test_paid_provider_requires_key():
     with pytest.raises(ValueError, match="OPENAI_API_KEY"):
-        Settings(env="test", llm_provider="openai")
+        Settings(_env_file=None, env="test", llm_provider="openai")
 
 
 async def test_inmemory_kv_ttl_and_incr():
