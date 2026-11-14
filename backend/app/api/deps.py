@@ -37,11 +37,13 @@ ContainerDep = Annotated[Container, Depends(get_container)]
 SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 
 
-def client_ip(request: Request) -> str:
+def client_ip(request: Request, settings: Settings) -> str:
     # Behind Cloudflare the real client IP is in CF-Connecting-IP; trust it only there.
-    return request.headers.get("CF-Connecting-IP") or (
-        request.client.host if request.client else "unknown"
-    )
+    if settings.trust_cloudflare_ip_header:
+        cf = request.headers.get("CF-Connecting-IP")
+        if cf:
+            return cf
+    return request.client.host if request.client else "unknown"
 
 
 async def current_user(request: Request, session: SessionDep, settings: SettingsDep) -> User:
@@ -79,6 +81,6 @@ def require_role(*roles: Role) -> Callable[[User], Coroutine[Any, Any, User]]:
 def ip_rate_limit(bucket: str, per_minute_attr: str) -> Callable[..., Coroutine[Any, Any, None]]:
     async def _limit(request: Request, container: ContainerDep, settings: SettingsDep) -> None:
         limit = int(getattr(settings, per_minute_attr))
-        await enforce_limit(container.kv, f"{bucket}:ip:{client_ip(request)}", limit, 60)
+        await enforce_limit(container.kv, f"{bucket}:ip:{client_ip(request, settings)}", limit, 60)
 
     return _limit

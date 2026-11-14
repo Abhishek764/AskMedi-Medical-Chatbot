@@ -1,0 +1,10 @@
+.venv
+.env
+*.db
+qdrant_data
+data
+.pytest_cache
+.ruff_cache
+.mypy_cache
+tests
+*.log
