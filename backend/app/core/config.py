@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     app_name: str = "AskMedi"
     api_prefix: str = "/v1"
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    # Only true when every request reaches us through Cloudflare (otherwise spoofable).
+    trust_cloudflare_ip_header: bool = False
 
     # Storage
     database_url: str = "sqlite+aiosqlite:///./askmedi.db"

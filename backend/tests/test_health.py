@@ -20,7 +20,12 @@ async def test_readyz_checks_dependencies(client):
 
 def test_prod_rejects_dev_secret():
     with pytest.raises(ValueError, match="JWT_SECRET"):
-        Settings(_env_file=None, env="prod", redis_url="redis://x", database_url="postgresql+asyncpg://x/y")
+        Settings(
+            _env_file=None,
+            env="prod",
+            redis_url="redis://x",
+            database_url="postgresql+asyncpg://x/y",
+        )
 
 
 def test_paid_provider_requires_key():

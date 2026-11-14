@@ -1,0 +1,36 @@
+name: backend
+
+on:
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check app tests && uv run ruff format --check app tests
+      - name: Tests (guards, auth, retrieval, pipeline; no secrets needed)
+        run: uv run pytest --cov=app --cov-report=term-missing:skip-covered
+      - name: Migrations apply cleanly
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///./ci.db
+        run: uv run alembic upgrade head && uv run alembic check
+      - name: Dependency audit
+        run: uvx pip-audit --strict --progress-spinner off -r <(uv export --frozen --no-dev --no-hashes)
+        continue-on-error: true
