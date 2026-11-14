@@ -66,8 +66,15 @@ EMERGENCY = compile_all(
         rf"{_I}.{{0,40}}\b(chest (pain|pressure|tightness)|crushing pain)\b",
         r"\b(chest (pain|pressure|tightness)|crushing pain)\b.{0,40}\b(now|right now|spreading|arm|jaw|sweating)\b",
         r"\b(can'?t|cannot|unable to|struggling to|hard to) breathe?\b",
-        r"\b(face (is )?(drooping|droops)|slurred speech|sudden (numbness|weakness)|one side of (my|his|her) (face|body))\b",
+        r"\b(slurred speech|sudden (numbness|weakness)|one side of (my|his|her) (face|body))\b",
+        r"\bface\b.{0,30}\bdroop",
+        r"\bspeech\b.{0,20}\bslurr|\bslurring\b",
         r"\b(overdosed|took too many|swallowed (a|the|some)?.{0,25}(pills|tablets|bleach|poison|battery|chemical))\b",
+        r"\b(took|taken|swallowed|ate) (\d+|a lot of|a bunch of|a whole (bottle|pack|strip) of|all (my|the|of my)) .{0,25}\b(pills|tablets|capsules|medicines?)\b",
+        r"\b(swallowed|drank|ingested)\b.{0,30}\b(drain cleaner|bleach|acid|pesticide|insecticide|rat poison|kerosene|phenyl|detergent|button battery)\b",
+        r"\bworst headache\b|\bthunderclap headache\b|\bsudden (severe|terrible) headache\b",
+        r"\b(lips|face|fingers) (are |is )?(turning )?blue\b",
+        r"\bcollapsed\b",
         r"\b(unconscious|not breathing|unresponsive|passed out and)\b",
         r"\b(bleeding (heavily|a lot|won'?t stop|wont stop)|severe bleeding|lots of blood)\b",
         r"\b(throat|tongue|lips?) (is |are )?(swelling|closing|swollen)\b",
@@ -96,6 +103,9 @@ INJECTION = compile_all(
         r"\byou are (now )?(no longer|not) (bound|restricted|askmedi)\b",
         r"<\s*/?\s*(system|assistant|instructions?)\s*>",
         r"\b(new|updated) (system )?instructions?:",
+        r"\bsystem override\b|\badmin mode\b|\bdisclaimers? (are |is )?(disabled|off)\b",
+        r"\b(translate|summari[sz]e|encode) (your|the) (hidden |system )?(instructions|prompt)\b",
+        r"\brepeat (the|all) (text|words) above\b",
     ]
 )
 
@@ -114,8 +124,9 @@ HARMFUL_SUBSTANCE = compile_all(
         r"\b(replace|substitute|swap|instead of)\b.{0,40}\b(salt|sugar|food|water)\b.{0,40}\b(bromide|chloride of|borax|bleach|chemical)\b",
         r"\b(bromide|borax|bleach|chlorine dioxide|mms|miracle mineral|hydrogen peroxide|turpentine|kerosene|methanol|antifreeze)\b.{0,40}\b(drink|eat|take|swallow|ingest|consume|instead|substitute|replace|cure|dose)\b",
         r"\b(drink|eat|take|swallow|ingest|consume|cure)\b.{0,40}\b(bromide|borax|bleach|chlorine dioxide|mms|miracle mineral|turpentine|kerosene|methanol|antifreeze)\b",
-        r"\b(stop|quit|come off) (taking )?(my )?(insulin|blood thinners?|warfarin|antidepressants?|seizure med(ication)?s?|chemo(therapy)?|medications?|medicines?|tablets)\b",
+        r"\b(stop|quit|come off) (taking )?(my )?(insulin|blood thinners?|warfarin|antidepressants?|anticonvulsants?|antiepileptics?|antipsychotics?|steroids?|seizure med(ication)?s?|chemo(therapy)?|medications?|medicines?|meds|tablets|pills|bp (medicine|tablets|pills))\b",
         r"\b(how to|can i) (make|cook|extract)\b.{0,30}\b(drugs?|opioids?|meth|lsd)\b",
+        r"\b(produce|make|synthesi[sz]e|extract|culture|grow|weaponi[sz]e|purify)\b.{0,50}\b(toxin|botulinum|ricin|sarin|anthrax|nerve agent|abrin|tetrodotoxin)\b",
     ]
 )
 
@@ -129,6 +140,15 @@ DOSING = compile_all(
         r"\b\d+(\.\d+)? ?(mg|mcg|ml|g|iu|units?)\b.{0,30}\b(ok|okay|safe|enough|too much)\b",
         r"\bmaximum (dose|daily dose|amount)\b",
         r"\bcan i (take|give)\b.{0,40}\b(with|and|together)\b",  # interaction for self
+    ]
+)
+
+# Asking to be prescribed something.
+PRESCRIPTION = compile_all(
+    [
+        r"\b(prescribe|prescription)\b.{0,15}\b(me|for me|my)\b",
+        r"\b(can|could|will) you (prescribe|give me a prescription|write (me )?a prescription)\b",
+        r"\bwrite (me )?a prescription\b",
     ]
 )
 
@@ -151,6 +171,8 @@ MEDICAL_TERMS = compile_all(
         r"\b(disease|disorder|syndrome|condition|cancer|tumou?r|diabet\w*|asthma|hypertension|blood pressure|cholesterol|thyroid|arthritis|covid|hiv|aids|malaria|dengue|typhoid|tuberculosis|tb|hepatitis|anemia|anaemia|obesity|stroke|heart|kidney|liver|lung|stomach|skin|brain|bone|blood|eye|ear|teeth|tooth|gum|pregnan\w*|period|menstrua\w*|fertility|vaccin\w*|immun\w*|virus|bacteria\w*|fung\w*|parasit\w*|ulcer|gastritis|acid\w*|reflux|epilep\w*|seizure|dementia|alzheimer\w*|parkinson\w*|autism|adhd|eczema|psoriasis|acne)\b",
         r"\b(medicine|medication|medic\w*|drug|drugs|tablet|tablets|pill|pills|capsule|syrup|injection|vaccine|antibiotic\w*|antiviral|painkiller|insulin|steroid\w*|dose|dosage|prescription|side effects?|pharmac\w*|doctor|clinic|hospital|nurse|surgery|treatment|therapy|diagnos\w*|health|healthy|diet|nutrition|vitamin\w*|supplement\w*|exercise|calorie\w*|bmi|weight)\b",
         r"\b\w+(mab|pril|olol|sartan|statin|cillin|mycin|cycline|floxacin|azole|prazole|tidine|pine|done|pam|lam|vir|parin|gliptin|formin|profen)\b",
+        r"\b\w{3,}(itis|osis|iasis|emia|aemia|ectomy|otomy|ostomy|oma|pathy|algia|plasty|scopy|graphy|plegia|trophy|rrhea|rrhoea|uria|penia|lysis|phobia)\b",
+        r"\b(prognosis|senescence|aging|ageing|biopsy|anesthe\w*|anaesthe\w*|infect\w*|transmi\w*|contagious|screening|sickness|illness|toxin|poison\w*|injury|fracture|sprain|surgical|operation|transplant|dialysis|chemotherapy|radiation|x-ray|mri|ultrasound|urine|stool|hormone\w*|gland\w*|enzyme\w*|gene|genes|genetic\w*|chromosom\w*|tissue|muscle\w*|nerve\w*|joint\w*|spine|artery|arteries|vein\w*|throat|dental|newborn|vaccination|mpox|monkeypox|glp-1|agonists?|inhibitors?|receptors?|bite|sting|anticonvulsant\w*|antidepressant\w*)\b",
         r"\b(paracetamol|acetaminophen|ibuprofen|aspirin|metformin|amoxicillin|cetirizine|omeprazole|dolo|crocin|azithromycin|atorvastatin|amlodipine|losartan|levothyroxine|salbutamol|albuterol|prednisolone|ors)\b",
     ]
 )
@@ -158,8 +180,8 @@ MEDICAL_TERMS = compile_all(
 # Clearly not medical: code, homework, trivia, creative writing.
 OFF_TOPIC = compile_all(
     [
-        r"\b(python|javascript|java|c\+\+|sql|html|css|code|coding|program|function|algorithm|debug|compile)\b",
-        r"\b(essay|homework|poem|lyrics|story|joke|recipe|movie|song|cricket|football|stock|crypto|bitcoin|weather|capital of|president|election|translate)\b",
+        r"\b(python|javascript|java|c\+\+|sql|html|css|code|coding|algorithm|debug|compile)\b",
+        r"\b(essay|homework|poem|lyrics|story|joke|recipe|movie|song|cricket|football|fifa|world cup|stock|crypto|bitcoin|weather|capital of|president|prime minister|election|translate|car|engine|laptop|smartphone|software|math|equation|geography|business plan|marketing|resume|cover letter)\b",
     ]
 )
 
