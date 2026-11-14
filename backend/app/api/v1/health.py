@@ -25,5 +25,6 @@ async def readyz(request: Request) -> JSONResponse:
         "kv": await container.kv.ping(),
     }
     ok = all(checks.values())
-    return JSONResponse({"status": "ok" if ok else "degraded", "checks": checks},
-                        status_code=200 if ok else 503)
+    return JSONResponse(
+        {"status": "ok" if ok else "degraded", "checks": checks}, status_code=200 if ok else 503
+    )
