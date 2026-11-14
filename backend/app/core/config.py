@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     rerank_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
     retrieve_k: int = 30
     context_k: int = 5
-    abstain_threshold: float = 0.15
+    abstain_threshold: float | None = None  # None -> the reranker's own default
 
     # Generation
     llm_provider: Literal["extractive", "ollama", "openai", "anthropic"] = "extractive"
