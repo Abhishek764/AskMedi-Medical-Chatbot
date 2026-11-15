@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     # Crisis resources (verify numbers with a clinician before launch)
     crisis_country: str = "IN"
 
+    # Observability (optional)
+    sentry_dsn: str | None = None
+    sentry_traces_sample_rate: float = 0.05
+
     @model_validator(mode="after")
     def _check_prod_secrets(self) -> Settings:
         if self.env in ("staging", "prod"):

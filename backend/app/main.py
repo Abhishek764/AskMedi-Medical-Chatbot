@@ -13,10 +13,12 @@ from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging, request_id_var
+from app.core.observability import init_sentry
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
+    init_sentry(settings)
     if settings.env != "test":
         configure_logging()
 
