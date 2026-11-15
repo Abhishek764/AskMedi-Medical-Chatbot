@@ -217,6 +217,9 @@ def _report(rows: list[dict[str, object]]) -> str:
 
 
 async def _main(args: argparse.Namespace) -> None:
+    import sys
+
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]  # Windows consoles
     container = Container(get_settings())
     await container.startup()
     try:

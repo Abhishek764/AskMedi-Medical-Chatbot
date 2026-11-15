@@ -82,6 +82,21 @@ Templates. Replace X/Y with harness output.
 
 Interview story (STAR): *"v1 worked in demos but I had no idea how often it was wrong. So I built evals first, measured the baseline, and only then changed the RAG. Every change had to beat the baseline in CI."*
 
+## 2b. Measured v2 numbers (2026-11-15, free local stack, no API keys)
+
+Source: `evals/results/v2/REPORT.md` (fastembed bge-small + BM25 hybrid, MiniLM cross-encoder, extractive generator).
+
+| Metric | v2 |
+|---|---|
+| Corpus | 253 licence-checked docs (MedlinePlus, openFDA, PMC OA reviews), 4,906 vectors; 90 PDFs + JATS downloaded |
+| Held-out safety rows (v0: emergency, dosing, jailbreak, off-topic) | 32/32 pass; **crisis + emergency recall 1.00** |
+| Corpus questions citing the expected document | 356/382 (**93%**); consumer 95%, drug labels 89% |
+| False refusals on corpus questions | 13/382 (3.4%) |
+| Latency p50 / p95 (CPU laptop, local models) | ~2.6 s / ~5 s |
+| Backend tests | 157 passing |
+
+Caveat: the 382 corpus questions are templated from section headings and not yet human-reviewed, so treat 93% as a retrieval smoke test. Several "misses" answered correctly from a PMC review instead of the templated MedlinePlus page.
+
 ## 3. Caveats (be honest if asked)
 - Golden set v0 was AI-drafted from book pages and is not yet human-reviewed. Questions reuse book wording, so recall is optimistic. v2 adds paraphrased questions; compare v1 vs v2 on the **same** set.
 - Retrieval measured on a local numpy replica of v1 (same loader, splitter 500/20, MiniLM-L6, cosine, k=3), not on the Pinecone index. Ranking should match; latency doesn't include the network.
