@@ -12,6 +12,14 @@ One harness, run on every version, so before/after numbers are comparable.
 
 ## Run (Windows, Git Bash or PowerShell)
 
+The v1 Flask code was removed from `main`'s working tree when v2 replaced it. To reproduce the
+v1 baseline, check out the tag in a separate worktree and run the harness there:
+
+```bash
+git worktree add ../askmedi-v1 v1-final
+cp -r evals ../askmedi-v1/ && cd ../askmedi-v1
+```
+
 ```bash
 python -m venv .venv
 .venv/Scripts/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch

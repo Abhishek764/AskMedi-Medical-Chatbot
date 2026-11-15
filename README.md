@@ -1,91 +1,64 @@
-# AskMedi — Medical Chatbot
+# AskMedi v2 — Medical Information Assistant
 
+AskMedi answers health and medicine questions **only from trusted, licensed sources, with a
+citation on every sentence, or it refuses**. It is a medical information tool: it does not
+diagnose, prescribe, or recommend doses to the public, and it is not a medical device.
 
-A Flask RAG web app that answers medical questions from a curated medical
-reference (PDF), with user accounts, saved conversations, streaming answers,
-source citations, and safety guardrails.
-![AskMedi Screenshot](Screenshot%202026-06-07%20221253.png)
+v2 replaces the v1 Flask app (kept at tag `v1-final`) with a FastAPI backend built for web
+and Android clients. Plan and design docs live in [`.claude/`](.claude/v2-plan.md).
 
-## Features
+![AskMedi v2 stack](.claude/diagrams/v2-stack.png)
 
-- **Auth** — register / login / logout (Flask-Login, bcrypt, CSRF protection).
-- **RAG** — LangChain + OpenAI `gpt-4o`, Pinecone vector store, HuggingFace embeddings.
-- **Conversational memory** — history-aware retriever resolves follow-up questions.
-- **Streaming UX** — token-by-token answers over SSE, markdown rendering, stop button, source citations.
-- **Persistence** — conversations and messages stored per user (Postgres in prod, SQLite locally).
-- **Safety** — medical disclaimer, guardrail prompt, rate limiting, input validation.
-- **Deploy** — production-ready for Render (gunicorn, `$PORT`, health check, managed Postgres).
+## What's in the backend
 
-## Architecture
+| Area | What it does |
+|---|---|
+| **Safety guards** | Crisis and self-harm detection (first-person, means/lethality, fiction framing, Hinglish, leetspeak) and acute emergency detection run before anything else, with fixed helpline copy (India: Tele-MANAS 14416, emergency 112). Conversation risk is sticky. Also blocks prompt injection, therapist/companion personas, harmful-substance advice, prescriptions, personal diagnosis, and dosing for non-verified users. PII is redacted before logs and models. |
+| **Hybrid retrieval** | Qdrant with dense vectors **and BM25** sparse vectors (IDF applied server-side), fused with RRF, reranked by a cross-encoder, expanded from child chunks to parent sections. Query planner rewrites follow-ups, normalises abbreviations and brand names, and routes by intent. |
+| **Cite-or-refuse** | Abstain gate before generation; verifier drops sentences with missing citations, weak support, or numbers not found in the source. Free extractive mode answers with verbatim source sentences; Ollama, OpenAI or Claude plug in behind the same interface. |
+| **Corpus** | Ingestion from MedlinePlus (public domain), openFDA labels (CC0, overdosage excluded, dosing sections provider-only) and PMC open-access reviews (licence and retraction checked per article; PDF + JATS XML). Licence allowlist enforced in code. |
+| **API** | JWT auth with rotating refresh tokens, email verification, password reset, account deletion and export, provider (clinician/pharmacist) verification, conversations, SSE chat, feedback, rate limits and daily quotas. |
+| **Ops** | Postgres + Alembic, Redis, arq worker (token cleanup, monthly corpus refresh), Docker, docker-compose, Render blueprint, GitHub Actions CI. |
 
-```
-Browser ──HTTPS──► Flask (gunicorn)
-                     ├── Auth (Flask-Login + bcrypt)
-                     ├── RAG chain (LangChain, gpt-4o, streaming)
-                     ├──► Postgres  (users, conversations, messages)
-                     └──► Pinecone  (medical-chatbot vectors)
-```
-
-Key paths:
-- `app/` — application package (factory, config, models, blueprints).
-  - `app/auth/` — registration & login.
-  - `app/chat/` — chat pages, streaming API (`app/chat/routes.py`), RAG chain (`app/chat/rag.py`).
-  - `app/main/` — landing, disclaimer, `/healthz`.
-  - `app/templates/`, `app/static/` — UI.
-- `src/helper.py` — PDF load/split/embeddings. `src/prompt.py` — system + contextualize prompts.
-- `store_index.py` — one-time Pinecone index builder.
-- `wsgi.py` — gunicorn entrypoint. `render.yaml` / `Procfile` — deploy config.
-
-## Local setup
+## Quick start (no API keys, no paid services)
 
 ```bash
-conda create -n medibot python=3.10 -y && conda activate medibot
-pip install -r requirements.txt
-cp .env.example .env   # then fill in PINECONE_API_KEY and OPENAI_API_KEY
+cd backend
+uv sync --extra local                       # free local ONNX models (no torch)
+cp .env.example .env                         # then set JWT_SECRET
+uv run python -m app.ingest run --papers-per-topic 3   # downloads ~250 documents
+uv run python scripts/ask.py "What are the symptoms of dengue?"
+uv run uvicorn app.main:create_app --factory --reload  # API docs at http://localhost:8000/docs
+uv run pytest
 ```
 
-Build the vector index once (uploads PDF embeddings to Pinecone):
+Full stack with Postgres, Redis and Qdrant: `docker compose up --build` in `backend/`.
+
+## Moving from v1
 
 ```bash
-python store_index.py
+cd backend
+uv run alembic upgrade head
+uv run python -m app.migrate_v1 --source "postgresql+asyncpg://USER:PASS@HOST/V1DB" --dry-run
+uv run python -m app.migrate_v1 --source "postgresql+asyncpg://USER:PASS@HOST/V1DB"
 ```
 
-Create local DB tables, then run:
+Users, conversations and messages are copied. v1 passwords keep working and are upgraded to
+argon2id at next login; migrated users confirm age and the disclaimer once before chatting.
 
-```bash
-flask --app wsgi init-db      # creates SQLite tables
-python wsgi.py                # dev server on http://localhost:8080
+## Repository layout
+
+```
+backend/   FastAPI API, answer pipeline, guards, ingestion, worker, tests
+evals/     eval harness, golden set, v1 baseline results
+data/      v1 source PDF (licence unverified; not in the v2 index)
+.claude/   v2 plan, security analysis, corpus plan, resources, stack diagram
 ```
 
-## Deploy to Render
+Web (Next.js) and Android (Flutter) clients come next; see the milestones in
+[`.claude/v2-plan.md`](.claude/v2-plan.md).
 
-1. Push this repo to GitHub.
-2. In Render: **New → Blueprint**, point at the repo. `render.yaml` provisions a
-   web service + Postgres automatically.
-3. Set the two secret env vars (marked `sync: false`): `PINECONE_API_KEY`,
-   `OPENAI_API_KEY`. `SECRET_KEY` and `DATABASE_URL` are generated/injected.
-4. The pre-deploy step runs `flask --app wsgi init-db` to create tables.
-5. Build the Pinecone index once (run `store_index.py` locally — not at deploy).
+## Disclaimer
 
-Notes:
-- `DATABASE_URL` from Render uses the `postgres://` scheme; `app/config.py`
-  rewrites it to `postgresql://` for SQLAlchemy 2.x.
-- First request loads the HuggingFace embedding model (cold-start delay).
-- The HF model is ~90 MB; expect a slow first boot on small instances.
-
-## Schema migrations
-
-First deploy uses `init-db` (idempotent `create_all`). For later schema
-changes, switch to Flask-Migrate:
-
-```bash
-flask --app wsgi db init        # once
-flask --app wsgi db migrate -m "describe change"
-flask --app wsgi db upgrade
-```
-
-Then change the deploy command back to `flask --app wsgi db upgrade`.
-
-## Tech stack
-
-Python · Flask · LangChain · OpenAI · Pinecone · SQLAlchemy · gunicorn · Render
+AskMedi provides general health information from cited sources. It is not medical advice, a
+diagnosis, or a prescription. In an emergency, call your local emergency number.
