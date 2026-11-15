@@ -72,8 +72,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column(_enum(Role), default=Role.public)
-    age_attested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    disclaimer_accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # NULL for accounts migrated from v1 until they confirm age and accept the disclaimer.
+    age_attested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disclaimer_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 

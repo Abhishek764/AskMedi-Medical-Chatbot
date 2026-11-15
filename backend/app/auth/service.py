@@ -13,6 +13,7 @@ from app.auth.email import EmailSender, OutgoingEmail
 from app.auth.security import (
     create_access_token,
     hash_password,
+    needs_rehash,
     new_opaque_token,
     token_digest,
     verify_password,
@@ -89,9 +90,18 @@ class AuthService:
         user = await self.s.scalar(select(User).where(User.email == email.strip().lower()))
         if not verify_password(password, user.password_hash if user else None) or user is None:
             raise Unauthorized("Email or password is incorrect.", code="invalid_credentials")
+        if needs_rehash(user.password_hash):
+            user.password_hash = hash_password(password)  # bcrypt (v1) -> argon2id
         pair = await self._issue(user)
         await self.s.commit()
         return user, pair
+
+    async def record_consent(self, user: User) -> None:
+        now = _now()
+        user.age_attested_at = now
+        user.disclaimer_accepted_at = now
+        self.s.add(AuditLog(actor_id=user.id, action="user.consent"))
+        await self.s.commit()
 
     async def refresh(self, refresh_token: str) -> TokenPair:
         row = await self.s.scalar(

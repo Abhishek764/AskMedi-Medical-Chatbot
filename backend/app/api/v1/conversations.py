@@ -123,6 +123,12 @@ async def ask(
             code="question_too_long",
         )
     await enforce_limit(container.kv, f"chat:user:{user.id}", settings.rate_limit_per_minute, 60)
+    if user.age_attested_at is None or user.disclaimer_accepted_at is None:
+        raise AppError(
+            "Please confirm you are 18 or older and accept the medical disclaimer first.",
+            code="consent_required",
+            status_code=403,
+        )
     conv = await _owned(session, user, conversation_id, load=True)
     turns = sum(1 for m in conv.messages if m.role == "user")
     if turns >= settings.max_turns_per_conversation:

@@ -53,6 +53,11 @@ class ResetPasswordIn(Strict):
     new_password: str = Field(min_length=1, max_length=256)
 
 
+class ConsentIn(Strict):
+    age_confirmed: Literal[True]
+    accept_disclaimer: Literal[True]
+
+
 class DeleteAccountIn(Strict):
     password: str = Field(min_length=1, max_length=256)
 
@@ -64,6 +69,7 @@ class UserOut(BaseModel):
     email: str
     role: str
     email_verified: bool
+    consent_required: bool = False
     created_at: datetime
 
 
