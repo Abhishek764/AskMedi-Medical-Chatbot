@@ -38,6 +38,7 @@ def user_out(user: User) -> UserOut:
         email=user.email,
         role=user.role.value,
         email_verified=user.email_verified_at is not None,
+        consent_required=user.age_attested_at is None or user.disclaimer_accepted_at is None,
         created_at=user.created_at,
     )
 

@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import ContainerDep, CurrentUser, SessionDep, SettingsDep, require_role
 from app.api.v1.auth import REFRESH_COOKIE, user_out
 from app.api.v1.schemas import (
+    ConsentIn,
     DeleteAccountIn,
     ProviderVerificationIn,
     ProviderVerificationOut,
@@ -36,6 +37,19 @@ router = APIRouter(tags=["users"])
 
 @router.get("/users/me", response_model=UserOut)
 async def me(user: CurrentUser) -> UserOut:
+    return user_out(user)
+
+
+@router.post("/users/me/consent", response_model=UserOut)
+async def consent(
+    body: ConsentIn,
+    user: CurrentUser,
+    session: SessionDep,
+    settings: SettingsDep,
+    container: ContainerDep,
+) -> UserOut:
+    """Age (18+) and disclaimer confirmation; required once for accounts migrated from v1."""
+    await AuthService(session, settings, container.mailer).record_consent(user)
     return user_out(user)
 
 

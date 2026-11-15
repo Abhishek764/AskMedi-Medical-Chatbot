@@ -20,11 +20,27 @@ def hash_password(password: str) -> str:
     return _hasher.hash(password)
 
 
+def _is_bcrypt(password_hash: str) -> bool:
+    return password_hash.startswith(("$2a$", "$2b$", "$2y$"))
+
+
 def verify_password(password: str, password_hash: str | None) -> bool:
+    if password_hash and _is_bcrypt(password_hash):
+        # Accounts migrated from v1 (Flask) still hold bcrypt hashes until their next login.
+        import bcrypt
+
+        try:
+            return bcrypt.checkpw(password.encode()[:72], password_hash.encode())
+        except (ValueError, TypeError):
+            return False
     try:
         return _hasher.verify(password_hash or _DUMMY_HASH, password) and password_hash is not None
     except (VerifyMismatchError, InvalidHashError):
         return False
+
+
+def needs_rehash(password_hash: str) -> bool:
+    return _is_bcrypt(password_hash) or _hasher.check_needs_rehash(password_hash)
 
 
 def create_access_token(
