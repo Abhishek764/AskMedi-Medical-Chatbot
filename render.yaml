@@ -1,32 +1,103 @@
+# Render Blueprint for AskMedi v2 (backend). Replaces the v1 Flask service.
+# Secrets marked `sync: false` are set in the Render dashboard. All paid providers are
+# optional: without keys the API runs with free local models and extractive answers.
 services:
   - type: web
-    name: askmedi
-    runtime: python
-    plan: starter
-    buildCommand: pip install -r requirements.txt
-    preDeployCommand: flask --app wsgi init-db
-    startCommand: gunicorn wsgi:app --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
-    healthCheckPath: /healthz
+    name: askmedi-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: standard            # 2 GB RAM: local ONNX models need ~1 GB
+    healthCheckPath: /readyz
+    preDeployCommand: alembic upgrade head
+    autoDeploy: false         # deploy after the eval gate passes (see .github/workflows)
+    scaling:
+      minInstances: 2
+      maxInstances: 6
+      targetCPUPercent: 70
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.10.14"
-      - key: FLASK_ENV
-        value: production
-      - key: SECRET_KEY
+      - key: ENV
+        value: prod
+      - key: DB_AUTO_CREATE
+        value: "false"
+      - key: JWT_SECRET
         generateValue: true
       - key: DATABASE_URL
         fromDatabase:
           name: askmedi-db
           property: connectionString
-      - key: PINECONE_API_KEY
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: askmedi-kv
+          property: connectionString
+      - key: QDRANT_URL
         sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION
+        value: corpus-v1
+      - key: EMBEDDINGS_PROVIDER
+        value: fastembed
+      - key: RERANK_PROVIDER
+        value: fastembed
+      - key: LLM_PROVIDER
+        value: extractive
       - key: OPENAI_API_KEY
         sync: false
-      - key: PINECONE_INDEX
-        value: medical-chatbot
-      - key: OPENAI_MODEL
-        value: gpt-4o
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["https://askmedi.example"]'
+      - key: TRUST_CLOUDFLARE_IP_HEADER
+        value: "false"
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"            # Render's proxy terminates TLS; the container is not reachable directly
+
+  - type: worker
+    name: askmedi-worker
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerCommand: arq app.worker.WorkerSettings
+    plan: starter
+    envVars:
+      - fromGroup: askmedi-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: askmedi-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: askmedi-kv
+          property: connectionString
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  - type: keyvalue
+    name: askmedi-kv
+    plan: starter
+    ipAllowList: []           # internal network only
+    maxmemoryPolicy: noeviction
 
 databases:
   - name: askmedi-db
-    plan: basic-256mb
+    plan: basic-1gb
+    postgresMajorVersion: "17"
+
+envVarGroups:
+  - name: askmedi-shared
+    envVars:
+      - key: ENV
+        value: prod
+      - key: DB_AUTO_CREATE
+        value: "false"
+      - key: QDRANT_COLLECTION
+        value: corpus-v1
+      - key: EMBEDDINGS_PROVIDER
+        value: fastembed
