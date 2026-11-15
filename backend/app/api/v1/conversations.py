@@ -6,6 +6,7 @@ Every query is scoped by the current user's id (no BOLA): other users' ids retur
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from collections.abc import AsyncIterator
 
@@ -23,6 +24,7 @@ from app.api.v1.schemas import (
     FeedbackIn,
 )
 from app.core.errors import AppError, NotFound
+from app.core.logging import log_event
 from app.core.ratelimit import enforce_daily_quota, enforce_limit
 from app.db.models import (
     Citation,
@@ -39,6 +41,7 @@ from app.guards.resources import REFUSALS
 from app.rag.pipeline import AnswerRecord, UserContext
 
 router = APIRouter(tags=["conversations"])
+logger = logging.getLogger("askmedi.chat")
 
 
 async def _owned(session, user: User, conversation_id: uuid.UUID, *, load: bool = False):
@@ -217,6 +220,18 @@ async def _persist(sessionmaker, conv_id: uuid.UUID, user_id: uuid.UUID, rec: An
                 conv.risk_level = RiskLevel.elevated
             conv.updated_at = func.now()
         await s.commit()
+        log_event(
+            logger,
+            "answer",
+            status=rec.status,
+            reason=rec.refusal_reason,
+            latency_ms=rec.latency_ms,
+            model=rec.model,
+            tokens_in=rec.tokens_in,
+            tokens_out=rec.tokens_out,
+            citations=len(rec.citations),
+            cached=rec.cached,
+        )
         return msg.id
 
 
