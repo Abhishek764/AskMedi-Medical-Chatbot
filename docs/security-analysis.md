@@ -94,7 +94,7 @@ Also map the API to the **OWASP API Security Top 10 (2023)**: BOLA, broken auth,
 - Medical device boundary: position as general health information, with no diagnosis or treatment recommendation. Check India CDSCO software-as-a-medical-device guidance before adding anything diagnostic.
 - Google Play: Health apps declaration, Data Safety form, account deletion, medical misinformation policy.
 - Retention: chats kept until the user deletes them (or N months idle); traces 30 days; guard events aggregated.
-- Corpus licences: see [idea.md](idea.md) §1; attribution shown in citations.
+- Corpus licences: see [corpus-plan.md](corpus-plan.md) §1; attribution shown in citations.
 
 ---
 

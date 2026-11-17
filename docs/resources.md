@@ -29,7 +29,7 @@ What you need to add or obtain to build v2 ([v2-plan.md](v2-plan.md)). Check cur
 - **Legal / privacy review** before public launch: privacy policy, terms, medical disclaimer, DPDP consent flow.
 - **5–10 beta testers**, including at least one clinician and one non-technical user.
 
-## 3. Data sources (see [idea.md](idea.md))
+## 3. Data sources (see [corpus-plan.md](corpus-plan.md))
 
 | Source | Use |
 |---|---|

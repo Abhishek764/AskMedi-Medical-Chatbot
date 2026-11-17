@@ -5,11 +5,11 @@ citation on every sentence, or it refuses**. It is a medical information tool: i
 diagnose, prescribe, or recommend doses to the public, and it is not a medical device.
 
 v2 replaces the v1 Flask app (kept at tag `v1-final`) with a FastAPI backend built for web
-and Android clients. Plan and design docs live in [`.claude/`](.claude/v2-plan.md).
+and Android clients. Plan and design docs live in [`docs/`](docs/v2-plan.md).
 
-![AskMedi v2 stack](.claude/diagrams/v2-stack.png)
+![AskMedi v2 stack](docs/diagrams/v2-architecture.png)
 
-Interactive, source-linked architecture: [`.claude/diagrams/v2-architecture.html`](.claude/diagrams/v2-architecture.html) (open in a browser). Corpus details: [`data/README.md`](data/README.md).
+Interactive, source-linked architecture: [`docs/diagrams/v2-architecture.html`](docs/diagrams/v2-architecture.html) (open in a browser). Corpus details: [`data/README.md`](data/README.md).
 
 ## What's in the backend
 
@@ -54,11 +54,11 @@ argon2id at next login; migrated users confirm age and the disclaimer once befor
 backend/   FastAPI API, answer pipeline, guards, ingestion, worker, tests
 evals/     eval harness, golden set, v1 baseline results
 data/      corpus snapshot (253 docs, JSONL + manifest), raw downloads (gitignored), v1 book
-.claude/   v2 plan, security analysis, corpus plan, resources, stack diagram
+docs/     v2 plan, security analysis, corpus plan, metrics, architecture diagram
 ```
 
 Web (Next.js) and Android (Flutter) clients come next; see the milestones in
-[`.claude/v2-plan.md`](.claude/v2-plan.md).
+[`docs/v2-plan.md`](docs/v2-plan.md).
 
 ## Disclaimer
 

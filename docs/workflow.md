@@ -1,7 +1,7 @@
 # Real Engineer Playbook — Matt Pocock Skills × AskMedi v2
 
 How to use [mattpocock/skills](https://github.com/mattpocock/skills) ("Skills For Real Engineers")
-on this repo, from research to deployment. Baseline of the current code: [v1-README.md](v1-README.md).
+on this repo, from research to deployment. Baseline of the current code: [v1-study.md](v1-study.md).
 
 > Status: plugin **`mattpocock-skills` v1.3.1 is already installed** (`claude-plugins-official`).
 > Update: auto. Reinstall: `claude plugin install mattpocock-skills@claude-plugins-official`.
@@ -95,7 +95,7 @@ Research questions v2 needs answered:
 
 ### 2a. `/grill-with-docs` — the core design session
 
-Start: `/grill-with-docs I want to plan AskMedi v2. Read .claude/v1-README.md first.`
+Start: `/grill-with-docs I want to plan AskMedi v2. Read docs/v1-study.md first.`
 
 It asks questions in **rounds**, each with a recommended answer (`❓ Q1 … ➡ recommended`). Reply "yes" to accept. Facts come from code and research; **you make the decisions**. Along the way it:
 
@@ -242,7 +242,7 @@ The skills don't deploy for you. They make the human steps safe and repeatable.
 ```text
 1. /setup-matt-pocock-skills
 2. research: <each row of the Phase 1 table>          (background; results in docs/research/)
-3. /grill-with-docs Plan AskMedi v2. Read .claude/v1-README.md and docs/research/.
+3. /grill-with-docs Plan AskMedi v2. Read docs/v1-study.md and docs/research/.
 4. /to-spec
 5. /to-tickets #<spec issue>
 6. /clear

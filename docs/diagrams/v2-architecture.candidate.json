@@ -4,7 +4,7 @@
   "meta": {
     "title": "AskMedi v2 architecture",
     "locale": "en",
-    "output": ".claude/diagrams/v2-architecture.html",
+    "output": "docs/diagrams/v2-architecture.html",
     "quality_profile": "showcase",
     "repository": {
       "url": "https://github.com/Abhishek764/AskMedi-Medical-Chatbot.git",
@@ -15,13 +15,13 @@
   },
   "components": [
     { "id": "people", "type": "external", "label": "People", "sublabel": "patients · clinicians", "pos": [40, 200], "size": [140, 64],
-      "sources": [{ "path": ".claude/v2-plan.md", "line": 81, "end_line": 86 }] },
+      "sources": [{ "path": "docs/v2-plan.md", "line": 81, "end_line": 86 }] },
     { "id": "web", "type": "frontend", "label": "Web app", "sublabel": "Next.js", "tag": "planned", "pos": [250, 200], "size": [140, 64],
-      "sources": [{ "path": ".claude/v2-plan.md", "line": 251, "end_line": 257 }] },
+      "sources": [{ "path": "docs/v2-plan.md", "line": 251, "end_line": 257 }] },
     { "id": "android", "type": "frontend", "label": "Android app", "sublabel": "Flutter", "tag": "planned", "pos": [250, 340], "size": [140, 64],
-      "sources": [{ "path": ".claude/v2-plan.md", "line": 258, "end_line": 263 }] },
+      "sources": [{ "path": "docs/v2-plan.md", "line": 258, "end_line": 263 }] },
     { "id": "edge", "type": "cloud", "label": "Cloudflare", "sublabel": "CDN · WAF · rate limits", "pos": [480, 200], "size": [140, 64],
-      "sources": [{ "path": ".claude/v2-plan.md", "line": 43, "end_line": 43 }, { "path": "backend/app/api/deps.py", "line": 40, "end_line": 46 }] },
+      "sources": [{ "path": "docs/v2-plan.md", "line": 43, "end_line": 43 }, { "path": "backend/app/api/deps.py", "line": 40, "end_line": 46 }] },
     { "id": "api", "type": "backend", "label": "FastAPI /v1", "sublabel": "auth · chats · SSE", "pos": [710, 200], "size": [140, 64],
       "sources": [{ "path": "backend/app/main.py", "line": 19, "end_line": 73 }, { "path": "backend/app/api/v1/router.py", "line": 9, "end_line": 16 }, { "path": "backend/app/api/v1/conversations.py", "line": 115, "end_line": 176 }] },
     { "id": "postgres", "type": "database", "label": "PostgreSQL", "sublabel": "users · chats · registry", "pos": [710, 40], "size": [140, 64],

@@ -1,7 +1,7 @@
 # Idea — Scale AskMedi RAG to ~1,000 Documents + Research Papers
 
 **Goal:** grow the corpus from 1 PDF to about **1,000 trusted documents**, a mix of consumer health content, drug labels, and peer-reviewed research papers. Every answer must stay **cite-or-refuse**.
-Related: [v2-plan.md](v2-plan.md) (rev 2: M4 corpus, M5 retrieval, M6 guardrails), [security-analysis.md](security-analysis.md), [v1-README.md](v1-README.md).
+Related: [v2-plan.md](v2-plan.md) (rev 2: M4 corpus, M5 retrieval, M6 guardrails), [security-analysis.md](security-analysis.md), [v1-study.md](v1-study.md).
 
 > Licence facts below come from the official pages, read 2026-11-11. They are **not legal advice**. Rows marked ⚠️ could not be verified (page blocked) and must be checked by hand in a browser before use.
 

@@ -213,6 +213,6 @@ evals/.cache/
 data/raw/
 
 # Archify delivery receipts (contain local absolute paths)
-.claude/diagrams/*.finalize*.json
-.claude/diagrams/*.browser-check.json
-.claude/diagrams/*.delivery.json
+docs/diagrams/*.finalize*.json
+docs/diagrams/*.browser-check.json
+docs/diagrams/*.delivery.json

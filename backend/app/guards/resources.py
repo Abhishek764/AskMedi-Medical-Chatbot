@@ -1,7 +1,7 @@
 """Fixed, reviewed copy for refusals and crisis/emergency cards.
 
 The LLM never writes this text. Helpline numbers must be re-verified by a clinician before
-launch and every quarter (see .claude/security-analysis.md, crisis protocol).
+launch and every quarter (see docs/security-analysis.md, crisis protocol).
 """
 
 from __future__ import annotations

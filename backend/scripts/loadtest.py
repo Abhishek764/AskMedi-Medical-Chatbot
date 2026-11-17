@@ -5,7 +5,7 @@
 Registers throwaway users, then sends questions at a target rate and reports throughput,
 p50/p95/p99 latency, time to first SSE event, and error/429 rates.
 
-Sizing reference (.claude/v2-plan.md §7): 50k DAU x 4 questions ≈ 200k answers/day; design for
+Sizing reference (docs/v2-plan.md §7): 50k DAU x 4 questions ≈ 200k answers/day; design for
 20 answers/s sustained and 50/s bursts. Raise per-user limits on staging for the test
 (RATE_LIMIT_PER_MINUTE, DAILY_QUESTION_QUOTA) so you measure the system, not the limiter.
 """

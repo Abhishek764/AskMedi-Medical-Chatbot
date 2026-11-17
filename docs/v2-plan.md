@@ -7,12 +7,12 @@
 
 | Doc | What it holds |
 |---|---|
-| [v1-README.md](v1-README.md) | v1 study (baseline) |
+| [v1-study.md](v1-study.md) | v1 study (baseline) |
 | [security-analysis.md](security-analysis.md) | Threat model, lessons from real AI-harm cases, crisis protocol. **Read before building.** |
-| [idea.md](idea.md) | ~1k-doc corpus sources, licence allowlist, ingestion |
+| [corpus-plan.md](corpus-plan.md) | ~1k-doc corpus sources, licence allowlist, ingestion |
 | [resources.md](resources.md) | Accounts, keys, people, docs, datasets, learning material |
-| [diagrams/v2-stack.html](diagrams/v2-stack.html) | Stack diagram (PNG: [light](diagrams/v2-stack.png), [dark](diagrams/v2-stack-dark.png)) |
-| [real-engineer.md](real-engineer.md) | Skills workflow |
+| [diagrams/v2-architecture.html](diagrams/v2-architecture.html) | Stack diagram (PNG: [light](diagrams/v2-architecture.png), [dark](diagrams/v2-architecture.html)) |
+| [workflow.md](workflow.md) | Skills workflow |
 | [resume-metrics.md](resume-metrics.md) | v1 baseline numbers |
 
 > **Status (2026-11-15):** backend built on branch `v2/backend` and v1 Flask removed (tag `v1-final`). Done: M3 backend core, M4 corpus ingestion (253 docs / 4,906 vectors downloaded), M5 hybrid BM25 + dense retrieval with free local models, M6 rule-based guards + verifier (all 85 held-out v0 safety rows pass), v1 → v2 data migration, Docker/compose/Render/CI. Runs with **no API keys** (extractive answers); LLM providers plug in by env var. Open: LLM-based guard classifier, Langfuse/Sentry, load test, reviewed v2 golden set, web and Android apps.
@@ -35,7 +35,7 @@
 
 ## 2. Architecture
 
-![AskMedi v2 stack](diagrams/v2-stack.png)
+![AskMedi v2 stack](diagrams/v2-architecture.png)
 
 ```
 Clients        Next.js web (Vercel or Render) · Flutter Android
@@ -308,6 +308,6 @@ Estimates assume one developer + agent; re-estimate after `/to-tickets`.
 2. Target countries at launch: India only? This decides helplines, emergency numbers, privacy law (DPDP), and languages (Hindi/Hinglish?).
 3. Free vs paid tiers: this sets daily quotas, which set LLM cost at 50k DAU.
 4. Is a clinician available for reviewing safety rows, crisis copy, and provider verification?
-5. Commercial or non-commercial? This decides corpus licences (see [idea.md](idea.md) §1).
+5. Commercial or non-commercial? This decides corpus licences (see [corpus-plan.md](corpus-plan.md) §1).
 6. Is 50k DAU a launch target or a design ceiling? Launch can start with smaller instances; the design stays the same.
 7. LLM choice and budget: what monthly LLM spend is acceptable?

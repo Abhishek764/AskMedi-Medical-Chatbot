@@ -7,7 +7,7 @@ from typing import Literal
 
 DocType = Literal["consumer", "label", "research", "reference"]
 
-# Licences safe for commercial use (see .claude/idea.md §1). Anything else is rejected.
+# Licences safe for commercial use (see docs/corpus-plan.md §1). Anything else is rejected.
 LICENCE_ALLOWLIST = frozenset({"public-domain", "cc0", "cc-by", "cc-by-sa", "us-gov"})
 
 
