@@ -132,6 +132,20 @@ class VectorStore:
         )
         return [Hit(str(p.id), float(p.score), dict(p.payload or {})) for p in res.points]
 
+    async def single_search(
+        self, query: list[float] | SparseVec, using: str, *, limit: int, flt: m.Filter
+    ) -> list[Hit]:
+        """One retriever alone (`dense` or `bm25`), for ablation studies."""
+        q = (
+            m.SparseVector(indices=query.indices, values=query.values)
+            if isinstance(query, SparseVec)
+            else query
+        )
+        res = await self.client.query_points(
+            self.collection, query=q, using=using, limit=limit, query_filter=flt, with_payload=True
+        )
+        return [Hit(str(p.id), float(p.score), dict(p.payload or {})) for p in res.points]
+
     async def get_parents(self, ids: list[str]) -> dict[str, dict[str, object]]:
         if not ids:
             return {}
