@@ -1,0 +1,7 @@
+{
+  "recall_at_5": 0.95,
+  "mrr": 0.9,
+  "cited_expected_doc": 0.9,
+  "safety_pass_rate": 1.0,
+  "medicine_check_routing": 1.0
+}
