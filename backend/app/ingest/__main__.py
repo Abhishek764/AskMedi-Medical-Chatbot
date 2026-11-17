@@ -1,12 +1,14 @@
-"""Corpus CLI.
+"""Corpus CLI. Run from backend/.
 
-    uv run python -m app.ingest run                      # all sources, seed lists
+    uv run python -m app.ingest run                      # download (cached) + index, seed lists
     uv run python -m app.ingest run --sources medlineplus --limit 10
     uv run python -m app.ingest run --sources pmc --papers-per-topic 5 --no-pdf
+    uv run python -m app.ingest export                   # parsed corpus -> ../data/corpus/
+    uv run python -m app.ingest load                     # rebuild the index from ../data/corpus/ offline
     uv run python -m app.ingest pdf ../data/Medical_book.pdf --title "..." --licence cc-by
     uv run python -m app.ingest stats
 
-Raw downloads (XML, JSON, PDFs) are cached in RAW_DATA_DIR (default ./data/raw).
+Raw downloads (XML, JSON, PDFs) are cached in RAW_DATA_DIR (default ../data/raw).
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import argparse
 import asyncio
 import json
 import logging
+from collections.abc import AsyncIterator
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -23,6 +26,7 @@ from app.core.config import get_settings
 from app.core.container import Container
 from app.db.models import Document
 from app.ingest import seeds
+from app.ingest.corpus_file import read_corpus, write_corpus
 from app.ingest.pipeline import Ingestor, IngestReport
 from app.ingest.sources import (
     Fetcher,
@@ -32,8 +36,59 @@ from app.ingest.sources import (
     local_pdf_doc,
     search_pmc,
 )
+from app.rag.types import SourceDoc
 
 log = logging.getLogger("askmedi.ingest")
+
+
+async def collect_docs(
+    fetcher: Fetcher, args: argparse.Namespace
+) -> AsyncIterator[tuple[str, SourceDoc | None, str]]:
+    """Yield (label, doc or None, status) for every seed item of the selected sources."""
+    sources = set(args.sources.split(","))
+    if "medlineplus" in sources:
+        for topic in seeds.parse(seeds.CONDITIONS)[: args.limit]:
+            try:
+                doc = await fetch_medlineplus(fetcher, topic)
+                yield f"medlineplus  {topic}", doc, "ok" if doc else "not_found"
+            except Exception as exc:  # keep going; report it
+                log.warning("medlineplus %s failed: %s", topic, type(exc).__name__)
+                yield f"medlineplus  {topic}", None, "fetch_error"
+    if "openfda" in sources:
+        for generic in seeds.parse(seeds.MEDICINES)[: args.limit]:
+            try:
+                doc = await fetch_openfda(fetcher, generic)
+                yield f"openfda      {generic}", doc, "ok" if doc else "not_found"
+            except Exception as exc:
+                log.warning("openfda %s failed: %s", generic, type(exc).__name__)
+                yield f"openfda      {generic}", None, "fetch_error"
+    if "pmc" in sources:
+        for topic in seeds.parse(seeds.PAPER_TOPICS)[: args.limit]:
+            try:
+                ids = await search_pmc(
+                    fetcher, topic, limit=args.papers_per_topic, since_year=args.since
+                )
+            except Exception as exc:
+                log.warning("pmc search %s failed: %s", topic, type(exc).__name__)
+                yield f"pmc          {topic}", None, "fetch_error"
+                continue
+            for pmcid in ids:
+                try:
+                    doc, status = await fetch_pmc(fetcher, pmcid, download_pdf=not args.no_pdf)
+                    yield f"pmc          {topic} {pmcid}", doc, status.split(":")[0]
+                except Exception as exc:
+                    log.warning("pmc %s failed: %s", pmcid, type(exc).__name__)
+                    yield f"pmc          {topic} {pmcid}", None, "fetch_error"
+
+
+def _ingestor(container: Container) -> Ingestor:
+    return Ingestor(
+        container.store,
+        container.embedder,
+        container.bm25,
+        container.sessionmaker,
+        corpus_version=container.settings.qdrant_collection,
+    )
 
 
 async def _run(args: argparse.Namespace) -> IngestReport:
@@ -41,84 +96,59 @@ async def _run(args: argparse.Namespace) -> IngestReport:
     container = Container(settings)
     await container.startup()
     fetcher = Fetcher(Path(settings.raw_data_dir))
-    ingestor = Ingestor(
-        container.store,
-        container.embedder,
-        container.bm25,
-        container.sessionmaker,
-        corpus_version=settings.qdrant_collection,
-    )
+    ingestor = _ingestor(container)
     report = IngestReport()
-    sources = set(args.sources.split(","))
     try:
-        if "medlineplus" in sources:
-            for topic in seeds.parse(seeds.CONDITIONS)[: args.limit]:
-                try:
-                    doc = await fetch_medlineplus(fetcher, topic)
-                except Exception as exc:  # keep going; report it
-                    log.warning("medlineplus %s failed: %s", topic, type(exc).__name__)
-                    report.rejected["fetch_error"] += 1
-                    continue
-                if doc:
-                    await ingestor.ingest([doc], report)
-                else:
-                    report.rejected["not_found"] += 1
-                print(f"medlineplus  {topic:<35} {_short(report)}")
-        if "openfda" in sources:
-            for generic in seeds.parse(seeds.MEDICINES)[: args.limit]:
-                try:
-                    doc = await fetch_openfda(fetcher, generic)
-                except Exception as exc:
-                    log.warning("openfda %s failed: %s", generic, type(exc).__name__)
-                    report.rejected["fetch_error"] += 1
-                    continue
-                if doc:
-                    await ingestor.ingest([doc], report)
-                else:
-                    report.rejected["not_found"] += 1
-                print(f"openfda      {generic:<35} {_short(report)}")
-        if "pmc" in sources:
-            for topic in seeds.parse(seeds.PAPER_TOPICS)[: args.limit]:
-                try:
-                    ids = await search_pmc(
-                        fetcher, topic, limit=args.papers_per_topic, since_year=args.since
-                    )
-                except Exception as exc:
-                    log.warning("pmc search %s failed: %s", topic, type(exc).__name__)
-                    report.rejected["fetch_error"] += 1
-                    continue
-                for pmcid in ids:
-                    try:
-                        doc, status = await fetch_pmc(fetcher, pmcid, download_pdf=not args.no_pdf)
-                    except Exception as exc:
-                        log.warning("pmc %s failed: %s", pmcid, type(exc).__name__)
-                        report.rejected["fetch_error"] += 1
-                        continue
-                    if doc:
-                        await ingestor.ingest([doc], report)
-                    else:
-                        report.rejected[status.split(":")[0]] += 1
-                print(f"pmc          {topic:<35} {_short(report)}")
+        async for label, doc, status in collect_docs(fetcher, args):
+            if doc:
+                await ingestor.ingest([doc], report)
+            else:
+                report.rejected[status] += 1
+            print(f"{label:<48} {_short(report)}")
     finally:
         await fetcher.aclose()
         await container.shutdown()
     return report
 
 
-async def _pdf(args: argparse.Namespace) -> IngestReport:
+async def _export(args: argparse.Namespace) -> dict[str, object]:
+    """Parse cached raw files (downloading only what is missing) into the corpus snapshot."""
     settings = get_settings()
-    container = Container(settings)
+    fetcher = Fetcher(Path(settings.raw_data_dir))
+    docs: dict[str, SourceDoc] = {}
+    skipped: dict[str, int] = {}
+    try:
+        async for _label, doc, status in collect_docs(fetcher, args):
+            if doc:
+                docs.setdefault(doc.doc_id, doc)
+            else:
+                skipped[status] = skipped.get(status, 0) + 1
+    finally:
+        await fetcher.aclose()
+    out = Path(args.out)
+    n = write_corpus(docs.values(), out / "corpus-v1.jsonl", out / "manifest.csv")
+    return {"written": n, "skipped": skipped, "dir": args.out}
+
+
+async def _load(args: argparse.Namespace) -> IngestReport:
+    container = Container(get_settings())
     await container.startup()
     try:
-        ingestor = Ingestor(
-            container.store,
-            container.embedder,
-            container.bm25,
-            container.sessionmaker,
-            corpus_version=settings.qdrant_collection,
-        )
+        report = IngestReport()
+        ingestor = _ingestor(container)
+        for doc in read_corpus(Path(args.path)):
+            await ingestor.ingest([doc], report)
+        return report
+    finally:
+        await container.shutdown()
+
+
+async def _pdf(args: argparse.Namespace) -> IngestReport:
+    container = Container(get_settings())
+    await container.startup()
+    try:
         doc = local_pdf_doc(Path(args.path), title=args.title, licence=args.licence)
-        return await ingestor.ingest([doc])
+        return await _ingestor(container).ingest([doc])
     finally:
         await container.shutdown()
 
@@ -155,16 +185,24 @@ def _short(r: IngestReport) -> str:
     return f"added={r.added} updated={r.updated} unchanged={r.unchanged} chunks={r.chunks} rejected={sum(r.rejected.values())}"
 
 
+def _source_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--sources", default="medlineplus,openfda,pmc")
+    p.add_argument("--limit", type=int, default=1000, help="max seed items per source")
+    p.add_argument("--papers-per-topic", type=int, default=3)
+    p.add_argument("--since", type=int, default=2016)
+    p.add_argument("--no-pdf", action="store_true", help="skip PDF downloads for PMC papers")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.WARNING)
     ap = argparse.ArgumentParser(prog="python -m app.ingest")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    run = sub.add_parser("run", help="fetch and ingest from public sources")
-    run.add_argument("--sources", default="medlineplus,openfda,pmc")
-    run.add_argument("--limit", type=int, default=1000, help="max seed items per source")
-    run.add_argument("--papers-per-topic", type=int, default=10)
-    run.add_argument("--since", type=int, default=2016)
-    run.add_argument("--no-pdf", action="store_true", help="skip PDF downloads for PMC papers")
+    _source_args(sub.add_parser("run", help="fetch (cached) and index public sources"))
+    export = sub.add_parser("export", help="write the parsed corpus snapshot (JSONL + manifest)")
+    _source_args(export)
+    export.add_argument("--out", default="../data/corpus")
+    load = sub.add_parser("load", help="index a corpus snapshot without network access")
+    load.add_argument("path", nargs="?", default="../data/corpus/corpus-v1.jsonl")
     pdf = sub.add_parser("pdf", help="ingest a local PDF (licence must be declared)")
     pdf.add_argument("path")
     pdf.add_argument("--title", required=True)
@@ -172,12 +210,9 @@ def main() -> None:
     sub.add_parser("stats", help="corpus counts")
     args = ap.parse_args()
 
-    if args.cmd == "run":
-        print(json.dumps(asyncio.run(_run(args)).as_dict(), indent=2))
-    elif args.cmd == "pdf":
-        print(json.dumps(asyncio.run(_pdf(args)).as_dict(), indent=2))
-    else:
-        print(json.dumps(asyncio.run(_stats()), indent=2))
+    runners = {"run": _run, "export": _export, "load": _load, "pdf": _pdf}
+    result = asyncio.run(runners[args.cmd](args)) if args.cmd in runners else asyncio.run(_stats())
+    print(json.dumps(result.as_dict() if isinstance(result, IngestReport) else result, indent=2))
 
 
 if __name__ == "__main__":
