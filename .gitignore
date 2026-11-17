@@ -208,3 +208,11 @@ __marimo__/
 
 # eval harness cache (embeddings)
 evals/.cache/
+
+# AskMedi corpus raw downloads (rebuild: cd backend && uv run python -m app.ingest run)
+data/raw/
+
+# Archify delivery receipts (contain local absolute paths)
+docs/diagrams/*.finalize*.json
+docs/diagrams/*.browser-check.json
+docs/diagrams/*.delivery.json

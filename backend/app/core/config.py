@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     qdrant_path: str = "./qdrant_data"
     qdrant_api_key: str | None = None
     qdrant_collection: str = "corpus-v1"
-    raw_data_dir: str = "./data/raw"
+    raw_data_dir: str = "../data/raw"  # repo-root data/raw, relative to backend/
     embeddings_provider: Literal["hash", "fastembed", "openai"] = "hash"
     embeddings_model: str = "BAAI/bge-small-en-v1.5"
     embeddings_dim: int = 384
