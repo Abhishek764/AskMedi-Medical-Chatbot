@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AskMedi v2 architecture",
+    "locale": "en",
+    "output": ".claude/diagrams/v2-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Abhishek764/AskMedi-Medical-Chatbot.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "503a0d3b23e4b47055854fa65ad364f3b4264b7f"
+    }
+  },
+  "components": [
+    { "id": "people", "type": "external", "label": "People", "sublabel": "patients · clinicians", "pos": [40, 200], "size": [140, 64],
+      "sources": [{ "path": ".claude/v2-plan.md", "line": 81, "end_line": 86 }] },
+    { "id": "web", "type": "frontend", "label": "Web app", "sublabel": "Next.js", "tag": "planned", "pos": [250, 200], "size": [140, 64],
+      "sources": [{ "path": ".claude/v2-plan.md", "line": 251, "end_line": 257 }] },
+    { "id": "android", "type": "frontend", "label": "Android app", "sublabel": "Flutter", "tag": "planned", "pos": [250, 340], "size": [140, 64],
+      "sources": [{ "path": ".claude/v2-plan.md", "line": 258, "end_line": 263 }] },
+    { "id": "edge", "type": "cloud", "label": "Cloudflare", "sublabel": "CDN · WAF · rate limits", "pos": [480, 200], "size": [140, 64],
+      "sources": [{ "path": ".claude/v2-plan.md", "line": 43, "end_line": 43 }, { "path": "backend/app/api/deps.py", "line": 40, "end_line": 46 }] },
+    { "id": "api", "type": "backend", "label": "FastAPI /v1", "sublabel": "auth · chats · SSE", "pos": [710, 200], "size": [140, 64],
+      "sources": [{ "path": "backend/app/main.py", "line": 19, "end_line": 73 }, { "path": "backend/app/api/v1/router.py", "line": 9, "end_line": 16 }, { "path": "backend/app/api/v1/conversations.py", "line": 115, "end_line": 176 }] },
+    { "id": "postgres", "type": "database", "label": "PostgreSQL", "sublabel": "users · chats · registry", "pos": [710, 40], "size": [140, 64],
+      "sources": [{ "path": "backend/app/db/session.py", "line": 14, "end_line": 20 }, { "path": "backend/app/api/v1/conversations.py", "line": 179, "end_line": 235 }] },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "limits · quotas · cache", "pos": [480, 40], "size": [140, 64],
+      "sources": [{ "path": "backend/app/core/kv.py", "line": 66, "end_line": 99 }, { "path": "backend/app/core/ratelimit.py", "line": 11, "end_line": 25 }] },
+    { "id": "evals", "type": "backend", "label": "Eval runner", "sublabel": "golden sets → scorecard", "pos": [965, 40], "size": [140, 64],
+      "sources": [{ "path": "backend/app/eval_run.py", "line": 148, "end_line": 169 }] },
+    { "id": "guard", "type": "security", "label": "Input guard", "sublabel": "crisis · scope · PII", "pos": [965, 200], "size": [140, 64],
+      "sources": [{ "path": "backend/app/guards/input_guard.py", "line": 37, "end_line": 95 }] },
+    { "id": "retriever", "type": "backend", "label": "Hybrid retriever", "sublabel": "plan · RRF · rerank", "pos": [1220, 200], "size": [140, 64],
+      "sources": [{ "path": "backend/app/rag/retriever.py", "line": 43, "end_line": 81 }, { "path": "backend/app/rag/query.py", "line": 162, "end_line": 174 }, { "path": "backend/app/rag/rerank.py", "line": 55, "end_line": 68 }] },
+    { "id": "qdrant", "type": "database", "label": "Qdrant", "sublabel": "dense + BM25 (IDF)", "pos": [1455, 200], "size": [140, 64],
+      "sources": [{ "path": "backend/app/rag/store.py", "line": 41, "end_line": 59 }, { "path": "backend/app/rag/store.py", "line": 115, "end_line": 133 }, { "path": "backend/app/rag/bm25.py", "line": 56, "end_line": 73 }] },
+    { "id": "generator", "type": "backend", "label": "Generator", "sublabel": "extractive · Ollama · API", "pos": [1220, 340], "size": [140, 64],
+      "sources": [{ "path": "backend/app/rag/generate.py", "line": 47, "end_line": 69 }, { "path": "backend/app/rag/generate.py", "line": 106, "end_line": 120 }, { "path": "backend/app/rag/llm.py", "line": 145, "end_line": 157 }] },
+    { "id": "verifier", "type": "security", "label": "Verifier", "sublabel": "cites · numbers · role", "pos": [965, 340], "size": [140, 64],
+      "sources": [{ "path": "backend/app/rag/verify.py", "line": 64, "end_line": 107 }, { "path": "backend/app/rag/pipeline.py", "line": 90, "end_line": 232 }] },
+    { "id": "sources", "type": "external", "label": "Medical sources", "sublabel": "MedlinePlus · FDA · PMC", "pos": [710, 500], "size": [140, 64],
+      "sources": [{ "path": "backend/app/ingest/sources.py", "line": 133, "end_line": 140 }, { "path": "backend/app/ingest/sources.py", "line": 188, "end_line": 199 }, { "path": "backend/app/ingest/sources.py", "line": 253, "end_line": 297 }] },
+    { "id": "fetcher", "type": "backend", "label": "Fetcher", "sublabel": "rate-limited · cached", "pos": [965, 500], "size": [140, 64],
+      "sources": [{ "path": "backend/app/ingest/sources.py", "line": 42, "end_line": 94 }] },
+    { "id": "raw", "type": "database", "label": "data/raw", "sublabel": "XML · JSON · PDF", "pos": [965, 640], "size": [140, 64],
+      "sources": [{ "path": "backend/app/ingest/sources.py", "line": 42, "end_line": 94 }] },
+    { "id": "ingestor", "type": "backend", "label": "Ingestor", "sublabel": "licence · chunk · embed", "pos": [1220, 500], "size": [140, 64],
+      "sources": [{ "path": "backend/app/ingest/pipeline.py", "line": 51, "end_line": 128 }, { "path": "backend/app/rag/chunking.py", "line": 60, "end_line": 110 }, { "path": "backend/app/ingest/parsers.py", "line": 114, "end_line": 156 }] },
+    { "id": "worker", "type": "backend", "label": "arq worker", "sublabel": "cron: refresh · purge", "pos": [1220, 640], "size": [140, 64],
+      "sources": [{ "path": "backend/app/worker.py", "line": 46, "end_line": 67 }] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "answer_stream() pipeline", "wraps": ["guard", "retriever", "generator", "verifier"] },
+    { "kind": "region", "label": "Offline ingestion", "wraps": ["fetcher", "ingestor", "raw", "worker"] }
+  ],
+  "connections": [
+    { "id": "people-web", "from": "people", "to": "web", "label": "browser", "variant": "emphasis" },
+    { "id": "people-android", "from": "people", "to": "android", "label": "app" },
+    { "id": "web-edge", "from": "web", "to": "edge", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "android-edge", "from": "android", "to": "edge", "label": "HTTPS" },
+    { "id": "edge-api", "from": "edge", "to": "api", "label": "JWT · SSE", "variant": "emphasis" },
+    { "id": "api-postgres", "from": "api", "to": "postgres", "label": "SQL" },
+    { "id": "api-redis", "from": "api", "to": "redis", "label": "limits" },
+    { "id": "api-guard", "from": "api", "to": "guard", "label": "answer_stream", "variant": "emphasis" },
+    { "id": "evals-guard", "from": "evals", "to": "guard", "label": "golden sets", "variant": "dashed" },
+    { "id": "guard-retriever", "from": "guard", "to": "retriever", "label": "allowed", "variant": "emphasis" },
+    { "id": "retriever-qdrant", "from": "retriever", "to": "qdrant", "label": "hybrid RRF" },
+    { "id": "retriever-generator", "from": "retriever", "to": "generator", "label": "top-5 parents", "variant": "emphasis" },
+    { "id": "generator-verifier", "from": "generator", "to": "verifier", "label": "draft + cites", "variant": "emphasis" },
+    { "id": "verifier-api", "from": "verifier", "to": "api", "label": "verified", "variant": "emphasis" },
+    { "id": "sources-fetcher", "from": "sources", "to": "fetcher", "label": "HTTPS GET" },
+    { "id": "fetcher-raw", "from": "fetcher", "to": "raw", "label": "cache" },
+    { "id": "fetcher-ingestor", "from": "fetcher", "to": "ingestor", "label": "SourceDoc" },
+    { "id": "ingestor-qdrant", "from": "ingestor", "to": "qdrant", "label": "upsert" },
+    { "id": "worker-ingestor", "from": "worker", "to": "ingestor", "label": "monthly", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "Safety", "items": [
+      "Input guard runs before retrieval: crisis or emergency stops the answer and returns fixed helpline copy",
+      "A crisis turn marks the conversation elevated (sticky) in PostgreSQL",
+      "Abstain gate refuses when rerank score is below threshold; verifier drops uncited, unsupported or invented-number sentences"
+    ] },
+    { "dot": "emerald", "title": "Free by default", "items": [
+      "Embeddings and rerank: fastembed local ONNX; BM25 is computed in-process",
+      "Generator: extractive (verbatim source sentences); Ollama, OpenAI or Claude by env var",
+      "Qdrant runs embedded locally or as Qdrant Cloud"
+    ] },
+    { "dot": "cyan", "title": "Data", "items": [
+      "Licence allowlist enforced by the ingestor; openFDA overdosage sections excluded",
+      "Ingestor also records each document in the PostgreSQL registry",
+      "Worker jobs are queued in Redis (arq)"
+    ] },
+    { "dot": "slate", "title": "Ops", "items": [
+      "GitHub Actions: ruff, pytest, Alembic upgrade and drift check",
+      "Sentry is optional (SENTRY_DSN) and strips bodies and auth headers",
+      "Render blueprint: API, worker, PostgreSQL, Key Value"
+    ] }
+  ]
+}
