@@ -1,0 +1,42 @@
+# Local production-like stack: API + worker + Postgres + Redis + Qdrant.
+#   docker compose up --build
+#   docker compose run --rm api alembic upgrade head
+#   docker compose run --rm api python -m app.ingest run --papers-per-topic 3
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    environment: &env
+      ENV: staging
+      DATABASE_URL: postgresql+asyncpg://askmedi:askmedi@postgres:5432/askmedi
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      DB_AUTO_CREATE: "false"
+    depends_on: [postgres, redis, qdrant]
+  worker:
+    build: .
+    command: arq app.worker.WorkerSettings
+    env_file: .env
+    environment: *env
+    depends_on: [postgres, redis, qdrant]
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: askmedi
+      POSTGRES_PASSWORD: askmedi
+      POSTGRES_DB: askmedi
+    volumes: [pg:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes: [redis:/data]
+  qdrant:
+    image: qdrant/qdrant:v1.15.4
+    volumes: [qdrant:/qdrant/storage]
+    ports: ["6333:6333"]
+volumes:
+  pg: {}
+  redis: {}
+  qdrant: {}

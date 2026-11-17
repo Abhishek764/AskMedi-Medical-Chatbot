@@ -1,0 +1,254 @@
+doc_id,source,doc_type,licence,year,title,url,sections,words
+medlineplus:acne,medlineplus,consumer,public-domain,1999,Acne,https://medlineplus.gov/acne.html,1,169
+medlineplus:acute-bronchitis,medlineplus,consumer,public-domain,2011,Acute Bronchitis,https://medlineplus.gov/acutebronchitis.html,1,208
+medlineplus:alcohol-use-disorder-aud,medlineplus,consumer,public-domain,1998,Alcohol Use Disorder (AUD),https://medlineplus.gov/alcoholusedisorderaud.html,5,522
+medlineplus:allergy,medlineplus,consumer,public-domain,1998,Allergy,https://medlineplus.gov/allergy.html,1,143
+medlineplus:alzheimer-s-disease,medlineplus,consumer,public-domain,1998,Alzheimer's Disease,https://medlineplus.gov/alzheimersdisease.html,6,575
+medlineplus:anaphylaxis,medlineplus,consumer,public-domain,2015,Anaphylaxis,https://medlineplus.gov/anaphylaxis.html,1,144
+medlineplus:anemia,medlineplus,consumer,public-domain,1999,Anemia,https://medlineplus.gov/anemia.html,1,194
+medlineplus:animal-bites,medlineplus,consumer,public-domain,1999,Animal Bites,https://medlineplus.gov/animalbites.html,1,144
+medlineplus:anxiety,medlineplus,consumer,public-domain,1998,Anxiety,https://medlineplus.gov/anxiety.html,8,731
+medlineplus:appendicitis,medlineplus,consumer,public-domain,2000,Appendicitis,https://medlineplus.gov/appendicitis.html,1,171
+medlineplus:asthma,medlineplus,consumer,public-domain,1998,Asthma,https://medlineplus.gov/asthma.html,6,857
+medlineplus:atrial-fibrillation,medlineplus,consumer,public-domain,2009,Atrial Fibrillation,https://medlineplus.gov/atrialfibrillation.html,8,918
+medlineplus:attention-deficit-hyperactivity-disorder,medlineplus,consumer,public-domain,1999,Attention Deficit Hyperactivity Disorder,https://medlineplus.gov/attentiondeficithyperactivitydisorder.html,6,873
+medlineplus:autism-spectrum-disorder,medlineplus,consumer,public-domain,1999,Autism Spectrum Disorder,https://medlineplus.gov/autismspectrumdisorder.html,1,239
+medlineplus:back-pain,medlineplus,consumer,public-domain,1999,Back Pain,https://medlineplus.gov/backpain.html,1,189
+medlineplus:bipolar-disorder,medlineplus,consumer,public-domain,1999,Bipolar Disorder,https://medlineplus.gov/bipolardisorder.html,7,1024
+medlineplus:breast-cancer,medlineplus,consumer,public-domain,1998,Breast Cancer,https://medlineplus.gov/breastcancer.html,8,1042
+medlineplus:cataract,medlineplus,consumer,public-domain,1998,Cataract,https://medlineplus.gov/cataract.html,7,572
+medlineplus:cervical-cancer,medlineplus,consumer,public-domain,1999,Cervical Cancer,https://medlineplus.gov/cervicalcancer.html,7,942
+medlineplus:chickenpox,medlineplus,consumer,public-domain,1999,Chickenpox,https://medlineplus.gov/chickenpox.html,1,204
+medlineplus:chikungunya,medlineplus,consumer,public-domain,2016,Chikungunya,https://medlineplus.gov/chikungunya.html,1,276
+medlineplus:cholera,medlineplus,consumer,public-domain,2010,Cholera,https://medlineplus.gov/cholera.html,1,335
+medlineplus:chronic-kidney-disease,medlineplus,consumer,public-domain,2012,Chronic Kidney Disease,https://medlineplus.gov/chronickidneydisease.html,1,276
+medlineplus:cirrhosis,medlineplus,consumer,public-domain,1999,Cirrhosis,https://medlineplus.gov/cirrhosis.html,1,178
+medlineplus:colorectal-cancer,medlineplus,consumer,public-domain,1999,Colorectal Cancer,https://medlineplus.gov/colorectalcancer.html,8,889
+medlineplus:common-cold,medlineplus,consumer,public-domain,1999,Common Cold,https://medlineplus.gov/commoncold.html,5,602
+medlineplus:constipation,medlineplus,consumer,public-domain,1999,Constipation,https://medlineplus.gov/constipation.html,1,147
+medlineplus:copd,medlineplus,consumer,public-domain,1998,COPD,https://medlineplus.gov/copd.html,8,1065
+medlineplus:coronary-artery-disease,medlineplus,consumer,public-domain,2000,Coronary Artery Disease,https://medlineplus.gov/coronaryarterydisease.html,9,767
+medlineplus:covid-19-coronavirus-disease-2019,medlineplus,consumer,public-domain,2020,COVID-19 (Coronavirus Disease 2019),https://medlineplus.gov/covid19coronavirusdisease2019.html,1,76
+medlineplus:dehydration,medlineplus,consumer,public-domain,2012,Dehydration,https://medlineplus.gov/dehydration.html,7,559
+medlineplus:dementia,medlineplus,consumer,public-domain,1999,Dementia,https://medlineplus.gov/dementia.html,7,800
+medlineplus:dengue,medlineplus,consumer,public-domain,2003,Dengue,https://medlineplus.gov/dengue.html,6,475
+medlineplus:depression,medlineplus,consumer,public-domain,1998,Depression,https://medlineplus.gov/depression.html,8,1015
+medlineplus:diabetes-type-1,medlineplus,consumer,public-domain,2000,Diabetes Type 1,https://medlineplus.gov/diabetestype1.html,7,425
+medlineplus:diabetes-type-2,medlineplus,consumer,public-domain,2011,Diabetes Type 2,https://medlineplus.gov/diabetestype2.html,7,727
+medlineplus:diarrhea,medlineplus,consumer,public-domain,1999,Diarrhea,https://medlineplus.gov/diarrhea.html,8,748
+medlineplus:eczema,medlineplus,consumer,public-domain,2000,Eczema,https://medlineplus.gov/eczema.html,1,210
+medlineplus:endometriosis,medlineplus,consumer,public-domain,1999,Endometriosis,https://medlineplus.gov/endometriosis.html,6,574
+medlineplus:epilepsy,medlineplus,consumer,public-domain,1999,Epilepsy,https://medlineplus.gov/epilepsy.html,1,134
+medlineplus:flu,medlineplus,consumer,public-domain,1999,Flu,https://medlineplus.gov/flu.html,7,594
+medlineplus:food-allergy,medlineplus,consumer,public-domain,2000,Food Allergy,https://medlineplus.gov/foodallergy.html,5,663
+medlineplus:fungal-infections,medlineplus,consumer,public-domain,1999,Fungal Infections,https://medlineplus.gov/fungalinfections.html,1,137
+medlineplus:gallstones,medlineplus,consumer,public-domain,2008,Gallstones,https://medlineplus.gov/gallstones.html,1,184
+medlineplus:gerd,medlineplus,consumer,public-domain,1999,GERD,https://medlineplus.gov/gerd.html,6,549
+medlineplus:glaucoma,medlineplus,consumer,public-domain,1999,Glaucoma,https://medlineplus.gov/glaucoma.html,6,658
+medlineplus:gout,medlineplus,consumer,public-domain,1999,Gout,https://medlineplus.gov/gout.html,6,841
+medlineplus:gum-disease,medlineplus,consumer,public-domain,1999,Gum Disease,https://medlineplus.gov/gumdisease.html,1,130
+medlineplus:headache,medlineplus,consumer,public-domain,1999,Headache,https://medlineplus.gov/headache.html,1,189
+medlineplus:hearing-disorders-and-deafness,medlineplus,consumer,public-domain,1999,Hearing Disorders and Deafness,https://medlineplus.gov/hearingdisordersanddeafness.html,1,164
+medlineplus:heart-attack,medlineplus,consumer,public-domain,1998,Heart Attack,https://medlineplus.gov/heartattack.html,7,649
+medlineplus:heart-failure,medlineplus,consumer,public-domain,1999,Heart Failure,https://medlineplus.gov/heartfailure.html,8,1100
+medlineplus:heat-illness,medlineplus,consumer,public-domain,1999,Heat Illness,https://medlineplus.gov/heatillness.html,1,252
+medlineplus:hepatitis-a,medlineplus,consumer,public-domain,2002,Hepatitis A,https://medlineplus.gov/hepatitisa.html,9,506
+medlineplus:hepatitis-b,medlineplus,consumer,public-domain,2002,Hepatitis B,https://medlineplus.gov/hepatitisb.html,9,740
+medlineplus:hepatitis-c,medlineplus,consumer,public-domain,2000,Hepatitis C,https://medlineplus.gov/hepatitisc.html,8,818
+medlineplus:high-blood-pressure,medlineplus,consumer,public-domain,1998,High Blood Pressure,https://medlineplus.gov/highbloodpressure.html,5,473
+medlineplus:high-blood-pressure-in-pregnancy,medlineplus,consumer,public-domain,2001,High Blood Pressure in Pregnancy,https://medlineplus.gov/highbloodpressureinpregnancy.html,7,997
+medlineplus:high-cholesterol-in-children-and-teens,medlineplus,consumer,public-domain,2018,High Cholesterol in Children and Teens,https://medlineplus.gov/highcholesterolinchildrenandteens.html,5,629
+medlineplus:hiv,medlineplus,consumer,public-domain,1998,HIV,https://medlineplus.gov/hiv.html,8,715
+medlineplus:hyperthyroidism,medlineplus,consumer,public-domain,2013,Hyperthyroidism,https://medlineplus.gov/hyperthyroidism.html,7,887
+medlineplus:hypothyroidism,medlineplus,consumer,public-domain,2013,Hypothyroidism,https://medlineplus.gov/hypothyroidism.html,7,744
+medlineplus:infertility,medlineplus,consumer,public-domain,1999,Infertility,https://medlineplus.gov/infertility.html,7,416
+medlineplus:insomnia,medlineplus,consumer,public-domain,2012,Insomnia,https://medlineplus.gov/insomnia.html,7,545
+medlineplus:irritable-bowel-syndrome,medlineplus,consumer,public-domain,1999,Irritable Bowel Syndrome,https://medlineplus.gov/irritablebowelsyndrome.html,1,157
+medlineplus:kidney-stones,medlineplus,consumer,public-domain,2000,Kidney Stones,https://medlineplus.gov/kidneystones.html,1,190
+medlineplus:leukemia,medlineplus,consumer,public-domain,2010,Leukemia,https://medlineplus.gov/leukemia.html,7,605
+medlineplus:lung-cancer,medlineplus,consumer,public-domain,1999,Lung Cancer,https://medlineplus.gov/lungcancer.html,6,872
+medlineplus:malaria,medlineplus,consumer,public-domain,1999,Malaria,https://medlineplus.gov/malaria.html,1,168
+medlineplus:malnutrition,medlineplus,consumer,public-domain,2010,Malnutrition,https://medlineplus.gov/malnutrition.html,8,544
+medlineplus:measles,medlineplus,consumer,public-domain,1999,Measles,https://medlineplus.gov/measles.html,1,99
+medlineplus:menopause,medlineplus,consumer,public-domain,1998,Menopause,https://medlineplus.gov/menopause.html,8,1003
+medlineplus:migraine,medlineplus,consumer,public-domain,2003,Migraine,https://medlineplus.gov/migraine.html,6,836
+medlineplus:mumps,medlineplus,consumer,public-domain,1999,Mumps,https://medlineplus.gov/mumps.html,1,122
+medlineplus:mycobacterial-infections,medlineplus,consumer,public-domain,2010,Mycobacterial Infections,https://medlineplus.gov/mycobacterialinfections.html,1,124
+medlineplus:obesity,medlineplus,consumer,public-domain,1998,Obesity,https://medlineplus.gov/obesity.html,5,626
+medlineplus:oral-cancer,medlineplus,consumer,public-domain,1999,Oral Cancer,https://medlineplus.gov/oralcancer.html,6,360
+medlineplus:osteoarthritis,medlineplus,consumer,public-domain,2000,Osteoarthritis,https://medlineplus.gov/osteoarthritis.html,6,588
+medlineplus:osteoporosis,medlineplus,consumer,public-domain,1998,Osteoporosis,https://medlineplus.gov/osteoporosis.html,7,803
+medlineplus:parkinson-s-disease,medlineplus,consumer,public-domain,1998,Parkinson's Disease,https://medlineplus.gov/parkinsonsdisease.html,1,227
+medlineplus:peptic-ulcer,medlineplus,consumer,public-domain,1999,Peptic Ulcer,https://medlineplus.gov/pepticulcer.html,1,214
+medlineplus:pink-eye,medlineplus,consumer,public-domain,2009,Pink Eye,https://medlineplus.gov/pinkeye.html,1,99
+medlineplus:pneumonia,medlineplus,consumer,public-domain,1999,Pneumonia,https://medlineplus.gov/pneumonia.html,8,945
+medlineplus:polycystic-ovary-syndrome,medlineplus,consumer,public-domain,2011,Polycystic Ovary Syndrome,https://medlineplus.gov/polycysticovarysyndrome.html,6,958
+medlineplus:post-traumatic-stress-disorder,medlineplus,consumer,public-domain,1999,Post-Traumatic Stress Disorder,https://medlineplus.gov/posttraumaticstressdisorder.html,7,848
+medlineplus:pregnancy,medlineplus,consumer,public-domain,1999,Pregnancy,https://medlineplus.gov/pregnancy.html,1,289
+medlineplus:prostate-cancer,medlineplus,consumer,public-domain,1998,Prostate Cancer,https://medlineplus.gov/prostatecancer.html,7,872
+medlineplus:psoriasis,medlineplus,consumer,public-domain,1999,Psoriasis,https://medlineplus.gov/psoriasis.html,1,186
+medlineplus:rabies,medlineplus,consumer,public-domain,1999,Rabies,https://medlineplus.gov/rabies.html,1,142
+medlineplus:rheumatoid-arthritis,medlineplus,consumer,public-domain,2000,Rheumatoid Arthritis,https://medlineplus.gov/rheumatoidarthritis.html,6,768
+medlineplus:salmonella-infections,medlineplus,consumer,public-domain,2000,Salmonella Infections,https://medlineplus.gov/salmonellainfections.html,1,151
+medlineplus:scabies,medlineplus,consumer,public-domain,2000,Scabies,https://medlineplus.gov/scabies.html,1,172
+medlineplus:schizophrenia,medlineplus,consumer,public-domain,1998,Schizophrenia,https://medlineplus.gov/schizophrenia.html,1,234
+medlineplus:sexually-transmitted-infections,medlineplus,consumer,public-domain,1999,Sexually Transmitted Infections,https://medlineplus.gov/sexuallytransmittedinfections.html,7,588
+medlineplus:sickle-cell-disease,medlineplus,consumer,public-domain,1999,Sickle Cell Disease,https://medlineplus.gov/sicklecelldisease.html,6,1037
+medlineplus:sinusitis,medlineplus,consumer,public-domain,1999,Sinusitis,https://medlineplus.gov/sinusitis.html,1,194
+medlineplus:skin-cancer,medlineplus,consumer,public-domain,1999,Skin Cancer,https://medlineplus.gov/skincancer.html,1,183
+medlineplus:smoking,medlineplus,consumer,public-domain,1998,Smoking,https://medlineplus.gov/smoking.html,4,580
+medlineplus:steatotic-liver-disease,medlineplus,consumer,public-domain,2017,Steatotic Liver Disease,https://medlineplus.gov/steatoticliverdisease.html,8,888
+medlineplus:streptococcal-infections,medlineplus,consumer,public-domain,1999,Streptococcal Infections,https://medlineplus.gov/streptococcalinfections.html,7,607
+medlineplus:stroke,medlineplus,consumer,public-domain,1998,Stroke,https://medlineplus.gov/stroke.html,7,1030
+medlineplus:thalassemia,medlineplus,consumer,public-domain,2005,Thalassemia,https://medlineplus.gov/thalassemia.html,1,158
+medlineplus:thyroid-diseases,medlineplus,consumer,public-domain,1999,Thyroid Diseases,https://medlineplus.gov/thyroiddiseases.html,1,194
+medlineplus:tooth-decay,medlineplus,consumer,public-domain,2012,Tooth Decay,https://medlineplus.gov/toothdecay.html,7,893
+medlineplus:tuberculosis,medlineplus,consumer,public-domain,1998,Tuberculosis,https://medlineplus.gov/tuberculosis.html,7,1036
+medlineplus:urinary-tract-infections,medlineplus,consumer,public-domain,1999,Urinary Tract Infections,https://medlineplus.gov/urinarytractinfections.html,1,175
+medlineplus:vitamin-d-deficiency,medlineplus,consumer,public-domain,2017,Vitamin D Deficiency,https://medlineplus.gov/vitaminddeficiency.html,8,817
+openfda:002875d2-8c30-2d2e-e063-6294a90ae01e,openfda,label,cc0,2026,Famotidine — FDA drug label (Famotidine),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=002875d2-8c30-2d2e-e063-6294a90ae01e,12,2598
+openfda:003dd1ec-16f8-4f96-b6a8-c4689d35892a,openfda,label,cc0,2026,Amlodipine — FDA drug label (Amlodipine Besylate),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=003dd1ec-16f8-4f96-b6a8-c4689d35892a,11,2899
+openfda:004bb832-29d5-add0-e063-6394a90a90f4,openfda,label,cc0,2026,Naproxen — FDA drug label (Naproxen),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=004bb832-29d5-add0-e063-6394a90a90f4,13,8006
+openfda:005d0245-fe53-47e5-888b-683f58cd6d26,openfda,label,cc0,2026,Zinc — FDA drug label (Botnia Gentle Sun SPF 30),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=005d0245-fe53-47e5-888b-683f58cd6d26,4,210
+openfda:00940cc5-d2eb-4841-9138-de97d7b1c674,openfda,label,cc0,2026,Metoprolol — FDA drug label (METOPROLOL TARTRATE),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=00940cc5-d2eb-4841-9138-de97d7b1c674,12,3611
+openfda:00c121ff-141d-410b-8632-c884a3909552,openfda,label,cc0,2026,Acetaminophen — FDA drug label (Extra Strength pain relief),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=00c121ff-141d-410b-8632-c884a3909552,5,399
+openfda:00d11130-c9ae-4258-9746-9763bc5deb84,openfda,label,cc0,2026,Amitriptyline — FDA drug label (Amitriptyline Hydrochloride),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=00d11130-c9ae-4258-9746-9763bc5deb84,11,5457
+openfda:01964f8a-f05c-4f72-9530-e0cffd981ffa,openfda,label,cc0,2025,Loperamide — FDA drug label (anti diarrheal),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=01964f8a-f05c-4f72-9530-e0cffd981ffa,5,392
+openfda:01d2c8c9-db54-4002-8f79-4ec396531024,openfda,label,cc0,2026,Levothyroxine — FDA drug label (LEVOTHYROXINE SODIUM),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=01d2c8c9-db54-4002-8f79-4ec396531024,13,5549
+openfda:01f8fe3a-8810-4b38-8860-d95e05d37709,openfda,label,cc0,2026,Ibuprofen — FDA drug label (Ibuprofen),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=01f8fe3a-8810-4b38-8860-d95e05d37709,5,645
+openfda:021cd76a-b093-4704-8410-5e7d01e20a54,openfda,label,cc0,2026,Losartan — FDA drug label (Losartan Potassium),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=021cd76a-b093-4704-8410-5e7d01e20a54,13,3947
+openfda:02a481cb-ad80-41bb-82d3-c237b00ed8d7,openfda,label,cc0,2025,Hydrochlorothiazide — FDA drug label (Hydrochlorothiazide),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=02a481cb-ad80-41bb-82d3-c237b00ed8d7,10,2029
+openfda:02c23f9c-f3cf-4366-ae1e-56296f1fedf9,openfda,label,cc0,2026,Lisinopril — FDA drug label (LISINOPRIL),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=02c23f9c-f3cf-4366-ae1e-56296f1fedf9,13,5069
+openfda:02ddd5f5-76d3-4f1c-9af3-d39e05a19c29,openfda,label,cc0,2026,Ondansetron — FDA drug label (Ondansetron),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=02ddd5f5-76d3-4f1c-9af3-d39e05a19c29,12,4359
+openfda:0348fec4-d919-4307-ac90-35360819bc00,openfda,label,cc0,2026,Levetiracetam — FDA drug label (Levetiracetam),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0348fec4-d919-4307-ac90-35360819bc00,11,7496
+openfda:03774690-662b-1c30-e063-6294a90a3488,openfda,label,cc0,2026,Aspirin — FDA drug label (CARDIASPIRIN PROTECT),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=03774690-662b-1c30-e063-6294a90a3488,6,615
+openfda:0379c918-1717-40ab-81cc-268116950fd5,openfda,label,cc0,2026,Diclofenac — FDA drug label (Diclofenac Sodium),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0379c918-1717-40ab-81cc-268116950fd5,13,8005
+openfda:039d2677-b04f-436c-e063-6294a90ac519,openfda,label,cc0,2025,Amoxicillin — FDA drug label (Amoxicillin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=039d2677-b04f-436c-e063-6294a90ac519,12,3279
+openfda:039f144b-891b-4ab0-e063-6394a90aa4c8,openfda,label,cc0,2026,Loratadine — FDA drug label (Loratadine antihistamine),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=039f144b-891b-4ab0-e063-6394a90aa4c8,5,211
+openfda:03e1f274-fa9a-4461-b7c9-31ba6428c107,openfda,label,cc0,2026,Sertraline — FDA drug label (Sertraline),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=03e1f274-fa9a-4461-b7c9-31ba6428c107,13,7240
+openfda:04b08c52-5390-4cdb-a9e7-fca81fffdc73,openfda,label,cc0,2026,Cetirizine — FDA drug label (Cetirizine HCl),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=04b08c52-5390-4cdb-a9e7-fca81fffdc73,3,348
+openfda:04de98f3-33a2-48ba-85b5-9fac867524b7,openfda,label,cc0,2026,Doxycycline — FDA drug label (Doxycycline),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=04de98f3-33a2-48ba-85b5-9fac867524b7,6,2928
+openfda:05999192-ebc6-4198-bd1e-f46abbfb4f8a,openfda,label,cc0,2026,Metformin — FDA drug label (Metformin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=05999192-ebc6-4198-bd1e-f46abbfb4f8a,8,2974
+openfda:05f42300-2a06-45f1-a9b9-6e5c84ae58ec,openfda,label,cc0,2026,Acyclovir — FDA drug label (ACYCLOVIR),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=05f42300-2a06-45f1-a9b9-6e5c84ae58ec,6,2004
+openfda:062800b1-790a-41c3-a8be-94143d2c7fb6,openfda,label,cc0,2026,Omeprazole — FDA drug label (Omeprazole),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=062800b1-790a-41c3-a8be-94143d2c7fb6,12,7773
+openfda:07460764-43fa-49fd-ae77-d4571cb9f944,openfda,label,cc0,2026,Fexofenadine — FDA drug label (Fexofenadine HCL),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=07460764-43fa-49fd-ae77-d4571cb9f944,4,134
+openfda:07be390e-ef1e-4bf9-a9da-4338b5f6cfa5,openfda,label,cc0,2026,Prednisone — FDA drug label (PredniSONE),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=07be390e-ef1e-4bf9-a9da-4338b5f6cfa5,11,6731
+openfda:07ff83f9-7039-ac26-e063-6394a90a37ce,openfda,label,cc0,2025,Pantoprazole — FDA drug label (Pantoprazole),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=07ff83f9-7039-ac26-e063-6394a90a37ce,12,6249
+openfda:08880902-bd44-41b6-866b-2cbad4c3f2b1,openfda,label,cc0,2026,Gabapentin — FDA drug label (GABAPENTIN),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=08880902-bd44-41b6-866b-2cbad4c3f2b1,12,6363
+openfda:08d0a109-3307-47b5-8ff2-c0ad83e66f08,openfda,label,cc0,2026,Clonazepam — FDA drug label (Clonazepam),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=08d0a109-3307-47b5-8ff2-c0ad83e66f08,12,10501
+openfda:09944470-807d-ad37-e063-6394a90a7bfe,openfda,label,cc0,2026,Nitrofurantoin — FDA drug label (Nitrofurantoin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=09944470-807d-ad37-e063-6394a90a7bfe,11,3539
+openfda:09c6c750-ae05-459f-83e8-4a9e4fd85212,openfda,label,cc0,2026,Atorvastatin — FDA drug label (ATORVASTATIN CALCIUM),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=09c6c750-ae05-459f-83e8-4a9e4fd85212,12,5760
+openfda:09d31eee-cd22-4918-a889-3eb4d2969525,openfda,label,cc0,2026,Telmisartan — FDA drug label (telmisartan),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=09d31eee-cd22-4918-a889-3eb4d2969525,13,4378
+openfda:09fb3100-1e06-4cdc-8016-7e4f5d097490,openfda,label,cc0,2026,Fluoxetine — FDA drug label (Fluoxetine),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=09fb3100-1e06-4cdc-8016-7e4f5d097490,13,13169
+openfda:0a7181a6-e9eb-4047-a26f-4268f174db16,openfda,label,cc0,2023,Oseltamivir — FDA drug label (OSELTAMIVIR),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0a7181a6-e9eb-4047-a26f-4268f174db16,12,5549
+openfda:0ad21db3-2b1c-4ed9-a687-bdd6a74d0aae,openfda,label,cc0,2026,Insulin Glargine — FDA drug label (BASAGLAR KwikPen),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0ad21db3-2b1c-4ed9-a687-bdd6a74d0aae,12,4480
+openfda:0adb2f88-8a6f-4f33-9e2d-73f537e05313,openfda,label,cc0,2026,Fluconazole — FDA drug label (fluconazole),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0adb2f88-8a6f-4f33-9e2d-73f537e05313,10,10379
+openfda:0b3d986c-eecc-adbe-e063-6294a90a0fb2,openfda,label,cc0,2026,Furosemide — FDA drug label (Furosemide),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0b3d986c-eecc-adbe-e063-6294a90a0fb2,6,2850
+openfda:0baa10dd-6d1d-4946-8236-566451132da3,openfda,label,cc0,2026,Folic Acid — FDA drug label (Folic Acid),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0baa10dd-6d1d-4946-8236-566451132da3,8,1074
+openfda:0cf8b567-201b-44fa-8fd3-c74023aff44f,openfda,label,cc0,2026,Alprazolam — FDA drug label (Alprazolam),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0cf8b567-201b-44fa-8fd3-c74023aff44f,13,5397
+openfda:0d010775-1160-4b2e-a928-563a02edd191,openfda,label,cc0,2025,Clopidogrel — FDA drug label (Clopidogrel),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0d010775-1160-4b2e-a928-563a02edd191,13,3243
+openfda:0ef807d2-5d66-40c2-be3e-ff6176a35295,openfda,label,cc0,2026,Escitalopram — FDA drug label (Escitalopram),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0ef807d2-5d66-40c2-be3e-ff6176a35295,13,8837
+openfda:0f02c184-49f3-8fa6-e063-6394a90a5092,openfda,label,cc0,2026,Rosuvastatin — FDA drug label (Rosuvastatin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0f02c184-49f3-8fa6-e063-6394a90a5092,12,5461
+openfda:101cdc41-2131-4425-b550-6a0a60b5f4a4,openfda,label,cc0,2026,Glimepiride — FDA drug label (Glimepiride),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=101cdc41-2131-4425-b550-6a0a60b5f4a4,12,3662
+openfda:10c9795e-358c-4f6a-b7bc-cccc179617c0,openfda,label,cc0,2026,Carbamazepine — FDA drug label (Carbamazepine),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=10c9795e-358c-4f6a-b7bc-cccc179617c0,13,8962
+openfda:1277591d-ccf4-428a-b647-cb1ef3fbf561,openfda,label,cc0,2026,Metronidazole — FDA drug label (Metronidazole),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1277591d-ccf4-428a-b647-cb1ef3fbf561,12,4444
+openfda:12e39d3d-de16-4735-8897-cbf82148a3f5,openfda,label,cc0,2026,Azithromycin — FDA drug label (Azithromycin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=12e39d3d-de16-4735-8897-cbf82148a3f5,12,5500
+openfda:15c0c2df-f195-45f9-a1e4-1ed2a43c2216,openfda,label,cc0,2026,Atenolol — FDA drug label (Atenolol),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=15c0c2df-f195-45f9-a1e4-1ed2a43c2216,9,4572
+openfda:15c78a03-17d7-43af-978f-1a64bd2240fe,openfda,label,cc0,2026,Vitamin D — FDA drug label (Tri-Vite Drops with Fluoride),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=15c78a03-17d7-43af-978f-1a64bd2240fe,5,432
+openfda:16d4e064-66d3-4497-8c7d-3aa355f91e1d,openfda,label,cc0,2024,Prednisolone — FDA drug label (PREDNISOLONE),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=16d4e064-66d3-4497-8c7d-3aa355f91e1d,8,3043
+openfda:178dc379-e2b8-4b47-9f0c-3fc7fb435c36,openfda,label,cc0,2025,Ciprofloxacin — FDA drug label (ciprofloxacin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=178dc379-e2b8-4b47-9f0c-3fc7fb435c36,13,10381
+openfda:1810ff8e-d505-bf9c-e063-6394a90a6540,openfda,label,cc0,2026,Albuterol — FDA drug label (ALBUTEROL SULFATE),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1810ff8e-d505-bf9c-e063-6394a90a6540,9,2119
+openfda:1b464099-491d-473b-836e-9d86b2b1eeec,openfda,label,cc0,2026,Enalapril — FDA drug label (Enalapril Maleate),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1b464099-491d-473b-836e-9d86b2b1eeec,12,6744
+openfda:1d139a25-9c17-4b3e-8ffd-b2d562cc00ee,openfda,label,cc0,2026,Budesonide — FDA drug label (Budesonide Inhalation),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1d139a25-9c17-4b3e-8ffd-b2d562cc00ee,12,5806
+openfda:1eeb3123-9e93-4681-8096-800a7c7acf8a,openfda,label,cc0,2026,Montelukast — FDA drug label (montelukast sodium),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1eeb3123-9e93-4681-8096-800a7c7acf8a,13,5208
+openfda:2fb8b8d5-f643-4069-8e47-5eae31a8fbc8,openfda,label,cc0,2026,Warfarin — FDA drug label (Warfarin Sodium),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=2fb8b8d5-f643-4069-8e47-5eae31a8fbc8,9,5289
+openfda:34496b43-05a2-45fb-a769-52b12e099341,openfda,label,cc0,2026,Hydroxychloroquine — FDA drug label (Plaquenil),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=34496b43-05a2-45fb-a769-52b12e099341,12,4334
+openfda:3a749d62-0e20-0c15-e063-6394a90ac1a8,openfda,label,cc0,2025,Ferrous Sulfate — FDA drug label (FERRUM SULPHURICUM),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=3a749d62-0e20-0c15-e063-6394a90ac1a8,3,56
+openfda:41a133ef-e461-48ad-8221-b735bdd0ec25,openfda,label,cc0,2026,Apixaban — FDA drug label (ELIQUIS),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=41a133ef-e461-48ad-8221-b735bdd0ec25,13,9806
+openfda:58e23b30-451c-f451-e063-6394a90a35a7,openfda,label,cc0,2026,Sitagliptin — FDA drug label (Sitagliptin),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=58e23b30-451c-f451-e063-6394a90a35a7,12,4605
+openfda:6f1df975-f825-4301-87da-d7eba56a6890,openfda,label,cc0,2026,Cefixime — FDA drug label (CEFIXIME),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=6f1df975-f825-4301-87da-d7eba56a6890,12,2650
+openfda:aab81d9f-397d-49fb-8083-77a1872cc71f,openfda,label,cc0,2026,"Ranitidine — FDA drug label (Ranitidine, Ranitidine cool mint)",https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=aab81d9f-397d-49fb-8083-77a1872cc71f,5,191
+pmc:PMC10015567,pmc,research,cc-by,2023,Assessing the relationship between burnout syndrome and irritable bowel syndrome among medical health providers and medical students in Saudi Arabia,https://pmc.ncbi.nlm.nih.gov/articles/PMC10015567/,12,2967
+pmc:PMC10119226,pmc,research,cc-by,2023,Association of asthma genetic variants with asthma‐associated traits reveals molecular pathways of eosinophilic asthma,https://pmc.ncbi.nlm.nih.gov/articles/PMC10119226/,13,3888
+pmc:PMC10210837,pmc,research,cc-by,2023,Correlation Between Quantitative Hepatitis B Surface Antigen and Hepatitis B Virus Deoxyribonucleic Acid Levels in Hepatitis B e Antigen-Positive and Hepatitis B e Antigen-Negative Chronic Hepatitis B Patients,https://pmc.ncbi.nlm.nih.gov/articles/PMC10210837/,9,2219
+pmc:PMC10346142,pmc,research,cc-by,2023,Influence of Vitamin D on the Incidence of Metabolic Syndrome and Hormonal Balance in Patients with Polycystic Ovary Syndrome,https://pmc.ncbi.nlm.nih.gov/articles/PMC10346142/,12,3691
+pmc:PMC10454024,pmc,research,cc-by,2023,Genetic Mechanisms of Migraine: Insights from Monogenic Migraine Mutations,https://pmc.ncbi.nlm.nih.gov/articles/PMC10454024/,11,5499
+pmc:PMC10463610,pmc,research,cc-by,2023,Immunogenicity and safety of inactivated quadrivalent influenza vaccine compared with the trivalent vaccine for influenza infection: an overview of systematic reviews,https://pmc.ncbi.nlm.nih.gov/articles/PMC10463610/,21,6288
+pmc:PMC10478909,pmc,research,cc-by,2023,Frontotemporal dementia – a catastrophic form of dementia praecox,https://pmc.ncbi.nlm.nih.gov/articles/PMC10478909/,1,220
+pmc:PMC10498538,pmc,research,cc-by,2023,"Comparison of three measures for insomnia in ischemic stroke patients: Pittsburgh sleep quality index, insomnia severity index, and Athens insomnia scale",https://pmc.ncbi.nlm.nih.gov/articles/PMC10498538/,19,5129
+pmc:PMC10586725,pmc,research,cc-by,2023,Dengue Encephalopathy or Dengue Encephalitis? You Decide,https://pmc.ncbi.nlm.nih.gov/articles/PMC10586725/,3,1495
+pmc:PMC10695267,pmc,research,cc-by,2023,Is pulmonary arterial hypertension associated with schistosomiasis distinct from pulmonary arterial hypertension associated with portal hypertension?,https://pmc.ncbi.nlm.nih.gov/articles/PMC10695267/,10,1942
+pmc:PMC10757323,pmc,research,cc-by,2023,COVID-19 vaccination and corneal allograft rejection- a review,https://pmc.ncbi.nlm.nih.gov/articles/PMC10757323/,8,5826
+pmc:PMC10828526,pmc,research,cc-by,2023,Tuberculosis and the Effectiveness of the Revised National Tuberculosis Control Program (RNTCP) to Control Tuberculosis: A Narrative Review,https://pmc.ncbi.nlm.nih.gov/articles/PMC10828526/,5,3144
+pmc:PMC10886649,pmc,research,cc-by,2024,The Role of Immune Cells Driving Electropathology and Atrial Fibrillation,https://pmc.ncbi.nlm.nih.gov/articles/PMC10886649/,11,6113
+pmc:PMC11043112,pmc,research,cc-by,2024,Antibody-independent surface plasmon resonance assays for influenza vaccine quality control,https://pmc.ncbi.nlm.nih.gov/articles/PMC11043112/,12,4491
+pmc:PMC11063568,pmc,research,cc-by,2024,"Comparison of Adenosine Deaminase, C-reactive Protein, Uric Acid, and Rheumatoid Arthritis Levels in Patients With Rheumatoid Arthritis and Those Without Arthritis: A Review",https://pmc.ncbi.nlm.nih.gov/articles/PMC11063568/,4,3086
+pmc:PMC11166372,pmc,research,cc0,2024,"Progress Toward Tuberculosis Elimination and Tuberculosis Program Performance — National Tuberculosis Indicators Project, 2016–2022",https://pmc.ncbi.nlm.nih.gov/articles/PMC11166372/,21,8899
+pmc:PMC11235602,pmc,research,cc-by,2024,Molecular nociceptive mechanisms in migraine: The migraine cascade,https://pmc.ncbi.nlm.nih.gov/articles/PMC11235602/,11,3683
+pmc:PMC11279426,pmc,research,cc-by,2024,Overview of Hepatitis B Vaccine Non-Response and Associated B Cell Amnesia: A Scoping Review,https://pmc.ncbi.nlm.nih.gov/articles/PMC11279426/,24,7104
+pmc:PMC11415519,pmc,research,cc-by,2024,Metabolic Adaptation in Heart Failure and the Role of Ketone Bodies as Biomarkers,https://pmc.ncbi.nlm.nih.gov/articles/PMC11415519/,6,2828
+pmc:PMC11654470,pmc,research,cc-by,2024,Dengue Mimickers: Which Clinical Conditions Can Resemble Dengue Fever?,https://pmc.ncbi.nlm.nih.gov/articles/PMC11654470/,9,10502
+pmc:PMC11679914,pmc,research,cc-by,2024,Unmet Needs and Current Challenges of Rheumatoid Arthritis: Difficult-to-Treat Rheumatoid Arthritis and Late-Onset Rheumatoid Arthritis,https://pmc.ncbi.nlm.nih.gov/articles/PMC11679914/,13,4387
+pmc:PMC12094785,pmc,research,cc-by,2025,PRRT2-Related Epilepsy,https://pmc.ncbi.nlm.nih.gov/articles/PMC12094785/,14,6456
+pmc:PMC12094849,pmc,research,cc-by,2025,Pernicious Anemia Presenting With Severe Hemolytic Anemia,https://pmc.ncbi.nlm.nih.gov/articles/PMC12094849/,7,1728
+pmc:PMC12415516,pmc,research,cc-by,2025,Hypertension burden in CKD: is nocturnal hypertension the primary culprit?,https://pmc.ncbi.nlm.nih.gov/articles/PMC12415516/,9,3696
+pmc:PMC12454282,pmc,research,cc-by,2025,"Predictive Factors for Smoking Cessation Among People With Lung Cancer Attending French Cessation Services, According to Sex",https://pmc.ncbi.nlm.nih.gov/articles/PMC12454282/,12,5752
+pmc:PMC12705256,pmc,research,cc-by,2025,Do Obesity Classifications Create the Obesity Paradox? A Scoping Review of Obesity Definitions Applied in Sepsis Research,https://pmc.ncbi.nlm.nih.gov/articles/PMC12705256/,21,9118
+pmc:PMC12713880,pmc,research,cc-by,2023,"Mindfulness-based therapy for insomnia alleviates insomnia, depression, and cognitive arousal in treatment-resistant insomnia: A single-arm telemedicine trial",https://pmc.ncbi.nlm.nih.gov/articles/PMC12713880/,39,8575
+pmc:PMC12715031,pmc,research,cc-by,2025,Vonoprazan Therapy in Gastroesophageal Reflux Disease (GERD): Effects on the Severity and Frequency of GERD in Relation to Hiatus Hernia,https://pmc.ncbi.nlm.nih.gov/articles/PMC12715031/,8,3371
+pmc:PMC12733738,pmc,research,cc-by,2025,Application of Treatment Response Biomarkers from Major Depression to Perinatal Depression,https://pmc.ncbi.nlm.nih.gov/articles/PMC12733738/,24,7169
+pmc:PMC13080312,pmc,research,cc-by,2026,Anxiety during active TB and enduring post-TB anxiety-related sequelae,https://pmc.ncbi.nlm.nih.gov/articles/PMC13080312/,10,2847
+pmc:PMC13160817,pmc,research,cc-by,2026,Onco-hypertension: hypertension induced by VEGF pathway inhibition,https://pmc.ncbi.nlm.nih.gov/articles/PMC13160817/,14,4496
+pmc:PMC13167054,pmc,research,cc-by,2026,The discriminative role of angiopoietin-like protein-3 for metabolic syndrome in polycystic ovary syndrome,https://pmc.ncbi.nlm.nih.gov/articles/PMC13167054/,11,2850
+pmc:PMC13274858,pmc,research,cc-by,2026,Adverse events following HPV vaccine reported to the Vaccine Adverse Event Reporting System,https://pmc.ncbi.nlm.nih.gov/articles/PMC13274858/,15,3475
+pmc:PMC13448598,pmc,research,cc-by,2026,Parental asthma and childhood asthma phenotypes: maternal associations with persistent asthma,https://pmc.ncbi.nlm.nih.gov/articles/PMC13448598/,26,5836
+pmc:PMC13616005,pmc,research,cc-by,2026,Association between metabolic dysfunction-associated steatotic liver disease/non-alcoholic fatty liver disease and chronic kidney disease: a systematic review and meta-analysis,https://pmc.ncbi.nlm.nih.gov/articles/PMC13616005/,19,4989
+pmc:PMC4872341,pmc,research,cc-by,2016,"A meta-review of stress, coping and interventions in dementia and dementia caregiving",https://pmc.ncbi.nlm.nih.gov/articles/PMC4872341/,12,3171
+pmc:PMC4891896,pmc,research,cc-by,2016,Curcumin slows osteoarthritis progression and relieves osteoarthritis-associated pain symptoms in a post-traumatic osteoarthritis mouse model,https://pmc.ncbi.nlm.nih.gov/articles/PMC4891896/,21,5309
+pmc:PMC4983393,pmc,research,cc-by,2016,Pernicious Anemia with Autoimmune Hemolytic Anemia: A Case Report and Literature Review,https://pmc.ncbi.nlm.nih.gov/articles/PMC4983393/,5,1375
+pmc:PMC5065583,pmc,research,cc-by,2016,Iron deficiency or anemia of inflammation?,https://pmc.ncbi.nlm.nih.gov/articles/PMC5065583/,20,5567
+pmc:PMC5374563,pmc,research,cc-by,2017,World Malaria Report: time to acknowledge Plasmodium knowlesi malaria,https://pmc.ncbi.nlm.nih.gov/articles/PMC5374563/,4,965
+pmc:PMC5409942,pmc,research,cc-by,2017,"Obesity, Heart Failure, and Obesity Paradox",https://pmc.ncbi.nlm.nih.gov/articles/PMC5409942/,3,2340
+pmc:PMC5528835,pmc,research,cc-by,2017,"Insomnia with objective short sleep duration is associated with longer duration of insomnia in the Freiburg Insomnia Cohort compared to insomnia with normal sleep duration, but not with hypertension",https://pmc.ncbi.nlm.nih.gov/articles/PMC5528835/,17,4978
+pmc:PMC5836048,pmc,research,cc-by,2018,Acute Confusional Migraine: Distinct Clinical Entity or Spectrum of Migraine Biology?,https://pmc.ncbi.nlm.nih.gov/articles/PMC5836048/,10,3496
+pmc:PMC5907633,pmc,research,cc-by,2017,Precision diabetes: learning from monogenic diabetes,https://pmc.ncbi.nlm.nih.gov/articles/PMC5907633/,20,3931
+pmc:PMC6083563,pmc,research,cc-by,2018,The Polycystic Ovary Syndrome and the Metabolic Syndrome: A Possible Chronobiotic-Cytoprotective Adjuvant Therapy,https://pmc.ncbi.nlm.nih.gov/articles/PMC6083563/,5,3584
+pmc:PMC6165116,pmc,research,cc-by,2018,Estimating Vaccine-Driven Selection in Seasonal Influenza,https://pmc.ncbi.nlm.nih.gov/articles/PMC6165116/,12,5362
+pmc:PMC6398842,pmc,research,cc-by,2019,Effect of the bivalent HPV vaccine on viral load of vaccine and non-vaccine HPV types in incident clearing and persistent infections in young Dutch females,https://pmc.ncbi.nlm.nih.gov/articles/PMC6398842/,19,5119
+pmc:PMC6454763,pmc,research,cc-by,2019,Osteoarthritis- a systematic review of long-term safety implications for osteoarthritis of the knee,https://pmc.ncbi.nlm.nih.gov/articles/PMC6454763/,21,4066
+pmc:PMC6530163,pmc,research,cc-by,2019,Role of malaria partners in malaria elimination in Armenia,https://pmc.ncbi.nlm.nih.gov/articles/PMC6530163/,12,4710
+pmc:PMC6630616,pmc,research,cc-by,2019,"Simultaneous Synthesis of Vitamins D2, D4, D5, D6, and D7 from Commercially Available Phytosterol, β-Sitosterol, and Identification of Each Vitamin D by HSQC NMR",https://pmc.ncbi.nlm.nih.gov/articles/PMC6630616/,7,4470
+pmc:PMC6820825,pmc,research,cc-by,2019,Presurgical epilepsy evaluation and epilepsy surgery,https://pmc.ncbi.nlm.nih.gov/articles/PMC6820825/,11,5432
+pmc:PMC6820891,pmc,research,cc-by,2019,Effects on Stroke Metrics and Outcomes of a Nurse-led Stroke Triage Team in Acute Stroke Management,https://pmc.ncbi.nlm.nih.gov/articles/PMC6820891/,7,2632
+pmc:PMC7026048,pmc,research,cc-by,2020,Characteristics of Atrial Fibrillation Patients Suffering Esophageal Injury Caused by Ablation for Atrial Fibrillation,https://pmc.ncbi.nlm.nih.gov/articles/PMC7026048/,17,3558
+pmc:PMC7137426,pmc,research,cc-by,2020,Cost analysis of depression using the national insurance system in South Korea: a comparison of depression and treatment-resistant depression,https://pmc.ncbi.nlm.nih.gov/articles/PMC7137426/,15,5418
+pmc:PMC7491342,pmc,research,cc-by,2020,Treatment strategies for asthma: reshaping the concept of asthma management,https://pmc.ncbi.nlm.nih.gov/articles/PMC7491342/,7,5177
+pmc:PMC7593129,pmc,research,cc-by,2020,Unusual Manifestations of Dengue Fever: A Review on Expanded Dengue Syndrome,https://pmc.ncbi.nlm.nih.gov/articles/PMC7593129/,5,1857
+pmc:PMC7764041,pmc,research,cc-by,2020,Adiponectin in Chronic Kidney Disease,https://pmc.ncbi.nlm.nih.gov/articles/PMC7764041/,10,5513
+pmc:PMC7825389,pmc,research,cc-by,2021,Sexual health and COVID-19: protocol for a scoping review,https://pmc.ncbi.nlm.nih.gov/articles/PMC7825389/,12,2505
+pmc:PMC8067314,pmc,research,cc-by,2021,"Uptake of Vitamins D2, D3, D4, D5, D6, and D7 Solubilized in Mixed Micelles by Human Intestinal Cells, Caco-2, an Enhancing Effect of Lysophosphatidylcholine on the Cellular Uptake, and Estimation of Vitamins D’ Biological Activities",https://pmc.ncbi.nlm.nih.gov/articles/PMC8067314/,22,7649
+pmc:PMC8156378,pmc,research,cc-by,2021,GERD after Bariatric Surgery. Can We Expect Endoscopic Findings?,https://pmc.ncbi.nlm.nih.gov/articles/PMC8156378/,7,2721
+pmc:PMC8173159,pmc,research,cc-by,2021,Zebrafish Heart Failure Models,https://pmc.ncbi.nlm.nih.gov/articles/PMC8173159/,11,7596
+pmc:PMC8355513,pmc,research,cc-by,2021,"Neurocognition Function of Patients With Bipolar Depression, Unipolar Depression, and Depression With Bipolarity",https://pmc.ncbi.nlm.nih.gov/articles/PMC8355513/,17,5534
+pmc:PMC8398715,pmc,research,cc-by,2021,The Other Side of Malnutrition in Inflammatory Bowel Disease (IBD): Non-Alcoholic Fatty Liver Disease,https://pmc.ncbi.nlm.nih.gov/articles/PMC8398715/,7,3406
+pmc:PMC8412098,pmc,research,cc-by,2021,"Probiotics, Prebiotics, and Synbiotics in the Irritable Bowel Syndrome Treatment: A Review",https://pmc.ncbi.nlm.nih.gov/articles/PMC8412098/,10,6462
+pmc:PMC8431306,pmc,research,cc-by,2021,Designing Dementia Care Pathways to Transform Non Dementia-Friendly Hospitals: Scoping Review,https://pmc.ncbi.nlm.nih.gov/articles/PMC8431306/,15,4909
+pmc:PMC8570039,pmc,research,cc-by,2021,Differential Diagnosis of Latent Tuberculosis Infection and Active Tuberculosis: A Key to a Successful Tuberculosis Control Strategy,https://pmc.ncbi.nlm.nih.gov/articles/PMC8570039/,28,12519
+pmc:PMC8701459,pmc,research,cc-by,2021,Moxibustion for diarrhea-predominant irritable bowel syndrome,https://pmc.ncbi.nlm.nih.gov/articles/PMC8701459/,18,1764
+pmc:PMC8746577,pmc,research,cc-by,2021,"Metabolic-Associated Fatty Liver Disease (MAFLD), Diabetes, and Cardiovascular Disease: Associations with Fructose Metabolism and Gut Microbiota",https://pmc.ncbi.nlm.nih.gov/articles/PMC8746577/,9,4733
+pmc:PMC8871867,pmc,research,cc-by,2022,Anxiety Linked to COVID-19: A Systematic Review Comparing Anxiety Rates in Different Populations,https://pmc.ncbi.nlm.nih.gov/articles/PMC8871867/,27,6493
+pmc:PMC8908317,pmc,research,cc-by,2022,Vitamins D2 and D3 Have Overlapping But Different Effects on the Human Immune System Revealed Through Analysis of the Blood Transcriptome,https://pmc.ncbi.nlm.nih.gov/articles/PMC8908317/,21,7553
+pmc:PMC8921476,pmc,research,cc-by,2022,HNF1A：From Monogenic Diabetes to Type 2 Diabetes and Gestational Diabetes Mellitus,https://pmc.ncbi.nlm.nih.gov/articles/PMC8921476/,24,8068
+pmc:PMC8950643,pmc,research,cc-by,2022,Heart Failure and Drug Therapies: A Metabolic Review,https://pmc.ncbi.nlm.nih.gov/articles/PMC8950643/,15,5093
+pmc:PMC9124040,pmc,research,cc-by,2022,Septic Arthritis With Superimposed Acute Gouty Arthritis in a Rheumatoid Arthritis Patient,https://pmc.ncbi.nlm.nih.gov/articles/PMC9124040/,6,1466
+pmc:PMC9130599,pmc,research,cc-by,2022,Immune Mechanisms Underlying Hepatitis B Surface Antigen Seroclearance in Chronic Hepatitis B Patients With Viral Coinfection,https://pmc.ncbi.nlm.nih.gov/articles/PMC9130599/,17,6122
+pmc:PMC9148843,pmc,research,cc-by,2022,Interventions to mitigate COVID-19 misinformation: protocol for a scoping review,https://pmc.ncbi.nlm.nih.gov/articles/PMC9148843/,12,2282
+pmc:PMC9329413,pmc,research,cc-by,2022,Myeloid leukocytes’ diverse effects on cardiovascular and systemic inflammation in chronic kidney disease,https://pmc.ncbi.nlm.nih.gov/articles/PMC9329413/,12,6570
+pmc:PMC9368187,pmc,research,cc-by,2022,Metabolic Inflexibility as a Pathogenic Basis for Atrial Fibrillation,https://pmc.ncbi.nlm.nih.gov/articles/PMC9368187/,23,6518
+pmc:PMC9437216,pmc,research,cc-by,2022,Kidney disease and congenital heart disease: Partnership for life,https://pmc.ncbi.nlm.nih.gov/articles/PMC9437216/,11,4345
+pmc:PMC9449596,pmc,research,cc-by,2022,Systemic inflammation after stroke: implications for post‐stroke comorbidities,https://pmc.ncbi.nlm.nih.gov/articles/PMC9449596/,15,9711
+pmc:PMC9490261,pmc,research,cc-by,2022,Chronobiology of epilepsy and sudden unexpected death in epilepsy,https://pmc.ncbi.nlm.nih.gov/articles/PMC9490261/,12,7117
+pmc:PMC9503370,pmc,research,cc-by,2022,"The Lyon Consensus Criteria for GERD Diagnosis in a Greek Population: The Clinical Impact and Changes in GERD Diagnosis in a Real-World, Retrospective Study",https://pmc.ncbi.nlm.nih.gov/articles/PMC9503370/,12,4410
+pmc:PMC9582250,pmc,research,cc-by,2022,Venous stroke–a stroke subtype that should not be ignored,https://pmc.ncbi.nlm.nih.gov/articles/PMC9582250/,30,5464
+pmc:PMC9622759,pmc,research,cc-by,2022,The metabolic conditioning of obesity: A review of the pathogenesis of obesity and the epigenetic pathways that “program” obesity from conception,https://pmc.ncbi.nlm.nih.gov/articles/PMC9622759/,30,11201
+pmc:PMC9819509,pmc,research,cc-by,2022,Anxiety in the Classroom: Only Girls’ Anxiety Is Related to Same-Sex Peers’ Anxiety,https://pmc.ncbi.nlm.nih.gov/articles/PMC9819509/,11,4151

@@ -1,0 +1,223 @@
+{
+  "project": {
+    "http_routes": 11,
+    "commits": 12,
+    "git_sha": "dd00aba",
+    "ci_runs_tests": false,
+    "dockerfile_entrypoint_exists": false,
+    "migrations_dir": false
+  },
+  "loc": {
+    "lines_by_ext": {
+      "example": 18,
+      "yaml": 90,
+      "gitignore": 207,
+      "Dockerfile": 9,
+      "Procfile": 2,
+      "md": 91,
+      "py": 903,
+      "js": 204,
+      "css": 350,
+      "html": 261,
+      "txt": 18,
+      "sh": 16
+    },
+    "python_sloc_excl_tests": 534
+  },
+  "tests": {
+    "passed": 10,
+    "failed": 0,
+    "duration_s": 10.33,
+    "coverage_pct_app_src": 74,
+    "exit_code": 0
+  },
+  "lint": {
+    "ruff_issues": 0,
+    "by_rule": {}
+  },
+  "complexity": {
+    "functions": 35,
+    "avg_cyclomatic": 2.14,
+    "max_cyclomatic": 9,
+    "worst": [
+      "login=9",
+      "stream_answer=9",
+      "chat_stream=7"
+    ]
+  },
+  "security": {
+    "bandit_findings": 1,
+    "bandit_by_severity": {
+      "MEDIUM": 1
+    },
+    "bandit_issues": [
+      "B104 MEDIUM .\\wsgi.py:8 Possible binding to all interfaces."
+    ],
+    "vulnerable_packages": 12,
+    "known_vulns": 85,
+    "vulns": [
+      {
+        "package": "langchain",
+        "version": "0.3.26",
+        "ids": [
+          "PYSEC-2026-2192",
+          "PYSEC-2026-2555"
+        ]
+      },
+      {
+        "package": "langchain-openai",
+        "version": "0.3.24",
+        "ids": [
+          "PYSEC-2026-76"
+        ]
+      },
+      {
+        "package": "langchain-community",
+        "version": "0.3.26",
+        "ids": [
+          "PYSEC-2026-1515"
+        ]
+      },
+      {
+        "package": "flask",
+        "version": "3.1.1",
+        "ids": [
+          "PYSEC-2026-2151"
+        ]
+      },
+      {
+        "package": "sentence-transformers",
+        "version": "4.1.0",
+        "ids": [
+          "PYSEC-2026-4164"
+        ]
+      },
+      {
+        "package": "pypdf",
+        "version": "5.6.1",
+        "ids": [
+          "CVE-2026-113786",
+          "CVE-2026-113789",
+          "CVE-2026-113790",
+          "CVE-2026-113791",
+          "CVE-2026-113792",
+          "CVE-2026-113793",
+          "CVE-2026-113794",
+          "CVE-2026-113795",
+          "CVE-2026-115572",
+          "CVE-2026-115580",
+          "CVE-2026-115585",
+          "CVE-2026-119203",
+          "CVE-2026-119204",
+          "CVE-2026-119205",
+          "CVE-2026-119206",
+          "CVE-2026-119207",
+          "CVE-2026-119208",
+          "CVE-2026-119209",
+          "CVE-2026-57204",
+          "PYSEC-2026-1827",
+          "PYSEC-2026-1828",
+          "PYSEC-2026-1829",
+          "PYSEC-2026-1830",
+          "PYSEC-2026-1831",
+          "PYSEC-2026-1832",
+          "PYSEC-2026-1833",
+          "PYSEC-2026-3004",
+          "PYSEC-2026-3005",
+          "PYSEC-2026-3006",
+          "PYSEC-2026-3007",
+          "PYSEC-2026-3009",
+          "PYSEC-2026-3010",
+          "PYSEC-2026-3011",
+          "PYSEC-2026-3012",
+          "PYSEC-2026-3013",
+          "PYSEC-2026-3014",
+          "PYSEC-2026-3015",
+          "PYSEC-2026-3016",
+          "PYSEC-2026-3017",
+          "PYSEC-2026-3018",
+          "PYSEC-2026-3019",
+          "PYSEC-2026-3020",
+          "PYSEC-2026-3021",
+          "PYSEC-2026-3022",
+          "PYSEC-2026-3023",
+          "PYSEC-2026-3024",
+          "PYSEC-2026-3025",
+          "PYSEC-2026-3026",
+          "PYSEC-2026-3027",
+          "PYSEC-2026-3610",
+          "PYSEC-2026-3611",
+          "PYSEC-2026-3612",
+          "PYSEC-2026-3613",
+          "PYSEC-2026-3655",
+          "PYSEC-2026-3656",
+          "PYSEC-2026-3910",
+          "PYSEC-2026-3911",
+          "PYSEC-2026-3912",
+          "PYSEC-2026-3913",
+          "PYSEC-2026-4153",
+          "PYSEC-2026-4154",
+          "PYSEC-2026-4155",
+          "PYSEC-2026-4156",
+          "PYSEC-2026-4157",
+          "PYSEC-2026-4158",
+          "PYSEC-2026-4159",
+          "PYSEC-2026-4160"
+        ]
+      },
+      {
+        "package": "python-dotenv",
+        "version": "1.1.0",
+        "ids": [
+          "PYSEC-2026-2270"
+        ]
+      },
+      {
+        "package": "langchain-core",
+        "version": "0.3.86",
+        "ids": [
+          "PYSEC-2026-2193",
+          "PYSEC-2026-2562"
+        ]
+      },
+      {
+        "package": "langchain-text-splitters",
+        "version": "0.3.11",
+        "ids": [
+          "PYSEC-2026-77"
+        ]
+      },
+      {
+        "package": "pytest",
+        "version": "8.4.2",
+        "ids": [
+          "PYSEC-2026-1845"
+        ]
+      },
+      {
+        "package": "transformers",
+        "version": "4.57.6",
+        "ids": [
+          "PYSEC-2025-217",
+          "PYSEC-2026-2288",
+          "PYSEC-2026-2289",
+          "PYSEC-2026-2290",
+          "PYSEC-2026-3929",
+          "PYSEC-2026-4174"
+        ]
+      },
+      {
+        "package": "vcrpy",
+        "version": "7.0.0",
+        "ids": [
+          "GHSA-rpj2-4hq8-938g"
+        ]
+      }
+    ]
+  },
+  "deps": {
+    "direct_deps": 17,
+    "installed_packages_total": 152,
+    "site_packages_mb": 2462
+  }
+}

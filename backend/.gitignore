@@ -1,0 +1,12 @@
+.venv/
+*.db
+qdrant_data/
+data/raw/
+data/cache/
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+ingest_run.log
+eval_run.log
