@@ -10,8 +10,13 @@ Read this first when resuming. Newest entries at the top. Branch: `v2/backend`.
 | 2 | Clean repo: docs → `docs/`, one diagram system (Archify) | done (diagram refresh pending) |
 | 3 | Grow corpus toward 1,000–2,000 docs (MedlinePlus bulk XML, more labels, more papers) | code done; download running → then `export` |
 | 4 | React web app in `web/` (auth, chat SSE, citations, safety cards, feedback, settings) | done (`npm run dev`), CI added |
-| 5 | Metrics: `docs/METRICS.md` (what we measure, current values, how to improve) | todo |
-| 6 | Re-run evals on the bigger corpus; update scorecard | todo |
+| 5 | Metrics: `docs/METRICS.md` + live `GET /v1/admin/metrics` | done |
+| 6 | Re-run evals on the bigger corpus; update scorecard + METRICS.md numbers | todo (after ingest) |
+| 7 | End-to-end check: backend + web in a browser | todo |
+| 8 | Refresh Archify diagram (web app built, docs/ paths) | todo |
+
+Note: when redirecting ingest output to a log, set `PYTHONUNBUFFERED=1` or the log looks frozen.
+Local Qdrant (`backend/qdrant_data`) allows one process at a time: stop the API before ingesting.
 
 Waiting on the user: OpenAI API key (set `OPENAI_API_KEY` + `LLM_PROVIDER=openai` in `backend/.env`),
 review of `evals/golden/v2_corpus.jsonl`, clinician review of crisis copy.
