@@ -11,7 +11,9 @@ Read this first when resuming. Newest entries at the top. Branch: `v2/backend`.
 | 3 | Grow corpus toward 1,000–2,000 docs (MedlinePlus bulk XML, more labels, more papers) | code done; download running → then `export` |
 | 4 | React web app in `web/` (auth, chat SSE, citations, safety cards, feedback, settings) | done (`npm run dev`), CI added |
 | 5 | Metrics: `docs/METRICS.md` + live `GET /v1/admin/metrics` | done |
-| 6 | Re-run evals on the bigger corpus; update scorecard + METRICS.md numbers | todo (after ingest) |
+| 6 | Re-run evals on the bigger corpus; update scorecard + METRICS.md numbers | todo (corpus now 1,677 docs) |
+| 6b | Medicine check: 3 questions → OTC medicines with label dose (backend + web) | done, needs clinician review (`docs/security-analysis.md` §8) |
+| 6c | Design system artifact (from web app) | done:  |
 | 7 | End-to-end check: backend + web in a browser | todo |
 | 8 | Refresh Archify diagram (web app built, docs/ paths) | todo |
 
