@@ -32,7 +32,43 @@ doxycycline; cefixime; metronidazole; nitrofurantoin; fluconazole; acyclovir; os
 cetirizine; loratadine; fexofenadine; montelukast; salbutamol; albuterol; budesonide;
 prednisolone; prednisone; sertraline; fluoxetine; escitalopram; amitriptyline; alprazolam;
 clonazepam; gabapentin; levetiracetam; sodium valproate; carbamazepine; hydroxychloroquine;
-folic acid; ferrous sulfate; vitamin d; zinc; oral rehydration salts
+folic acid; ferrous sulfate; vitamin d; zinc; oral rehydration salts;
+glipizide; glyburide; pioglitazone; empagliflozin; dapagliflozin; linagliptin; liraglutide;
+semaglutide; dulaglutide; insulin lispro; insulin aspart; insulin detemir; valsartan;
+olmesartan; irbesartan; candesartan; ramipril; benazepril; captopril; carvedilol; bisoprolol;
+propranolol; nebivolol; labetalol; diltiazem; verapamil; nifedipine; chlorthalidone;
+spironolactone; torsemide; bumetanide; hydralazine; clonidine; isosorbide mononitrate;
+nitroglycerin; digoxin; amiodarone; simvastatin; pravastatin; lovastatin; ezetimibe;
+fenofibrate; rivaroxaban; dabigatran; heparin; enoxaparin; ticagrelor; prasugrel;
+esomeprazole; lansoprazole; rabeprazole; sucralfate; misoprostol; metoclopramide;
+prochlorperazine; promethazine; meclizine; bisacodyl; docusate; polyethylene glycol;
+lactulose; senna; mesalamine; ursodiol; cephalexin; cefuroxime; ceftriaxone; cefdinir;
+clindamycin; clarithromycin; erythromycin; levofloxacin; moxifloxacin; penicillin;
+amoxicillin and clavulanate; sulfamethoxazole and trimethoprim; tetracycline; minocycline;
+linezolid; vancomycin; rifampin; isoniazid; ethambutol; pyrazinamide; terbinafine;
+clotrimazole; miconazole; nystatin; ketoconazole; itraconazole; valacyclovir; famciclovir;
+tenofovir; emtricitabine; lamivudine; dolutegravir; efavirenz; ivermectin; albendazole;
+mebendazole; permethrin; chloroquine; artemether and lumefantrine; primaquine;
+diphenhydramine; hydroxyzine; levocetirizine; desloratadine; fluticasone; mometasone;
+beclomethasone; ipratropium; tiotropium; formoterol; salmeterol; theophylline;
+dextromethorphan; guaifenesin; pseudoephedrine; phenylephrine; benzonatate;
+methylprednisolone; dexamethasone; hydrocortisone; triamcinolone; tramadol; codeine;
+morphine; oxycodone; hydrocodone; buprenorphine; naloxone; naltrexone; methadone;
+celecoxib; meloxicam; indomethacin; ketorolac; colchicine; allopurinol; febuxostat;
+methotrexate; sulfasalazine; leflunomide; alendronate; risedronate; calcitriol;
+calcium carbonate; magnesium oxide; potassium chloride; cyanocobalamin; thiamine;
+bupropion; citalopram; paroxetine; venlafaxine; duloxetine; mirtazapine; trazodone;
+nortriptyline; lithium; quetiapine; olanzapine; risperidone; aripiprazole; haloperidol;
+lorazepam; diazepam; buspirone; zolpidem; melatonin; methylphenidate;
+amphetamine; atomoxetine; donepezil; memantine; levodopa and carbidopa; pramipexole;
+ropinirole; lamotrigine; topiramate; phenytoin; oxcarbazepine; pregabalin; sumatriptan;
+rizatriptan; baclofen; cyclobenzaprine; tizanidine; tamsulosin; finasteride; dutasteride;
+oxybutynin; tolterodine; sildenafil; tadalafil; estradiol; medroxyprogesterone;
+norethindrone; levonorgestrel; progesterone; clomiphene; letrozole; tamoxifen; anastrozole;
+testosterone; methimazole; propylthiouracil; liothyronine; acarbose; nicotine;
+varenicline; disulfiram; acamprosate; hydroquinone; tretinoin; isotretinoin; benzoyl peroxide;
+adapalene; mupirocin; silver sulfadiazine; lidocaine; timolol; latanoprost; brimonidine;
+ofloxacin; tobramycin; artificial tears
 """
 
 PAPER_TOPICS = """
@@ -40,7 +76,15 @@ asthma; type 2 diabetes; hypertension; dengue; tuberculosis; malaria; depression
 migraine; chronic kidney disease; heart failure; atrial fibrillation; obesity; vitamin d;
 covid-19; influenza vaccine; hpv vaccine; polycystic ovary syndrome; anemia; osteoarthritis;
 rheumatoid arthritis; hepatitis b; fatty liver disease; gerd; irritable bowel syndrome;
-insomnia; smoking cessation; stroke; epilepsy; dementia
+insomnia; smoking cessation; stroke; epilepsy; dementia;
+type 1 diabetes; gestational diabetes; coronary artery disease; hyperlipidemia; copd;
+pneumonia; urinary tract infection; sepsis; typhoid; chikungunya; hiv; hepatitis c;
+cirrhosis; peptic ulcer; inflammatory bowel disease; celiac disease; thyroid disease;
+osteoporosis; gout; low back pain; parkinson disease; multiple sclerosis; schizophrenia;
+bipolar disorder; adhd; autism; alcohol use disorder; breast cancer; cervical cancer;
+colorectal cancer; lung cancer; prostate cancer; psoriasis; atopic dermatitis; acne;
+glaucoma; cataract; otitis media; preeclampsia; menopause; endometriosis; childhood obesity;
+malnutrition; iron deficiency; antimicrobial resistance; physical activity; sleep apnea
 """
 
 

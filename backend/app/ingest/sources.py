@@ -14,6 +14,7 @@ import logging
 import re
 import time
 from pathlib import Path
+from xml.etree import ElementTree as ET  # noqa: S405 - type hints only
 
 import httpx
 from defusedxml import ElementTree as SafeET
@@ -109,25 +110,61 @@ def parse_medlineplus_ws(xml_bytes: bytes, wanted: str) -> SourceDoc | None:
             best = topic
             if topic.get("title", "").lower() == wanted.lower():
                 break
-    if best is None:
+    return _topic_doc(best) if best is not None else None
+
+
+def _topic_doc(topic: ET.Element) -> SourceDoc | None:
+    """One MedlinePlus <health-topic> element -> SourceDoc (NLM summary only, public domain)."""
+    sections = parse_summary_html(topic.findtext("full-summary") or "")
+    title = topic.get("title", "")
+    if not sections or not title:
         return None
-    summary = best.findtext("full-summary") or ""
-    sections = parse_summary_html(summary)
-    if not sections:
-        return None
-    slug = re.sub(r"[^a-z0-9]+", "-", best.get("title", wanted).lower()).strip("-")
-    created = best.get("date-created", "")
+    also = [a.text.strip() for a in topic.findall("also-called") if a.text and a.text.strip()]
+    if also:  # synonyms help BM25 match lay and clinical names ("HbA1C" for "A1C")
+        sections[0].text = f"Also called: {', '.join(also[:8])}.\n\n{sections[0].text}"
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    created = topic.get("date-created", "")
     year = int(created[-4:]) if created[-4:].isdigit() else None
     return SourceDoc(
         doc_id=f"medlineplus:{slug}",
         source="medlineplus",
-        title=best.get("title", wanted),
-        url=best.get("url"),
+        title=title,
+        url=topic.get("url"),
         licence="public-domain",  # NLM-authored health topic summaries only
         doc_type="consumer",
         sections=sections,
         year=year,
     )
+
+
+MEDLINEPLUS_XML_INDEX = "https://medlineplus.gov/xml.html"
+
+
+def parse_medlineplus_bulk(xml_bytes: bytes) -> list[SourceDoc]:
+    """All English health topics from the MedlinePlus bulk XML file (~1,000 topics)."""
+    root = SafeET.fromstring(xml_bytes)
+    docs = []
+    for topic in root.findall("health-topic"):  # top level only; nested ones are links
+        if topic.get("language") != "English":
+            continue
+        doc = _topic_doc(topic)
+        if doc is not None:
+            docs.append(doc)
+    return docs
+
+
+async def fetch_medlineplus_bulk(fetcher: Fetcher) -> list[SourceDoc]:
+    index = await fetcher.get("medlineplus", MEDLINEPLUS_XML_INDEX, cache_name="xml-index.html")
+    names = re.findall(rb"mplus_topics_(\d{4}-\d{2}-\d{2})\.xml", index)
+    if not names:
+        raise RuntimeError("MedlinePlus bulk XML link not found")
+    latest = max(n.decode() for n in names)
+    raw = await fetcher.get(
+        "medlineplus",
+        f"https://medlineplus.gov/xml/mplus_topics_{latest}.xml",
+        cache_name=f"mplus_topics_{latest}.xml",
+    )
+    return parse_medlineplus_bulk(raw)
 
 
 async def fetch_medlineplus(fetcher: Fetcher, topic: str) -> SourceDoc | None:

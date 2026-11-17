@@ -31,6 +31,7 @@ from app.ingest.pipeline import Ingestor, IngestReport
 from app.ingest.sources import (
     Fetcher,
     fetch_medlineplus,
+    fetch_medlineplus_bulk,
     fetch_openfda,
     fetch_pmc,
     local_pdf_doc,
@@ -46,6 +47,13 @@ async def collect_docs(
 ) -> AsyncIterator[tuple[str, SourceDoc | None, str]]:
     """Yield (label, doc or None, status) for every seed item of the selected sources."""
     sources = set(args.sources.split(","))
+    if "medlineplus_all" in sources:
+        try:
+            for doc in await fetch_medlineplus_bulk(fetcher):
+                yield f"medlineplus  {doc.title}", doc, "ok"
+        except Exception as exc:
+            log.warning("medlineplus bulk failed: %s", type(exc).__name__)
+            yield "medlineplus  bulk", None, "fetch_error"
     if "medlineplus" in sources:
         for topic in seeds.parse(seeds.CONDITIONS)[: args.limit]:
             try:
@@ -186,7 +194,7 @@ def _short(r: IngestReport) -> str:
 
 
 def _source_args(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--sources", default="medlineplus,openfda,pmc")
+    p.add_argument("--sources", default="medlineplus_all,openfda,pmc")
     p.add_argument("--limit", type=int, default=1000, help="max seed items per source")
     p.add_argument("--papers-per-topic", type=int, default=3)
     p.add_argument("--since", type=int, default=2016)

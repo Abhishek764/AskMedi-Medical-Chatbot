@@ -159,3 +159,21 @@ async def test_fetcher_caches_to_disk(tmp_path):
     a = await f.get("openfda", "https://x/y", cache_name="y.json")
     b = await f.get("openfda", "https://x/y", cache_name="y.json")
     assert a == b and len(calls) == 1
+
+
+BULK_XML = b"""<?xml version="1.0"?><health-topics total="2">
+<health-topic title="A1C" url="https://medlineplus.gov/a1c.html" language="English" date-created="12/22/2015">
+<also-called>HbA1C</also-called><full-summary>&lt;p&gt;A1C is a blood test for diabetes.&lt;/p&gt;</full-summary>
+<language-mapped-topic language="Spanish">Prueba A1C</language-mapped-topic></health-topic>
+<health-topic title="Prueba A1C" url="https://medlineplus.gov/spanish/a1c.html" language="Spanish" date-created="12/22/2015">
+<full-summary>&lt;p&gt;La prueba A1C.&lt;/p&gt;</full-summary></health-topic>
+</health-topics>"""
+
+
+def test_parse_medlineplus_bulk_keeps_english_and_synonyms():
+    from app.ingest.sources import parse_medlineplus_bulk
+
+    docs = parse_medlineplus_bulk(BULK_XML)
+    assert [d.doc_id for d in docs] == ["medlineplus:a1c"]
+    assert docs[0].sections[0].text.startswith("Also called: HbA1C.")
+    assert docs[0].licence == "public-domain" and docs[0].year == 2015
