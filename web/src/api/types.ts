@@ -40,7 +40,7 @@ export interface Citation {
   score: number
 }
 
-export type MessageStatus = 'complete' | 'refused' | 'crisis' | 'emergency' | 'aborted' | 'error'
+export type MessageStatus = 'complete' | 'refused' | 'crisis' | 'emergency' | 'aborted' | 'error' | 'triage'
 
 export interface Message {
   id: string
@@ -73,6 +73,40 @@ export interface EmergencyPayload {
   number: string
 }
 
+/** One question of the 3-step medicine check. */
+export interface TriageQuestion {
+  step: number
+  total: number
+  question: string
+  options: { id: string; label: string }[]
+  multi: boolean
+  intro?: string
+  error?: string
+}
+
+/** A non-prescription medicine, copied from its FDA Drug Facts label. */
+export interface MedicineCard {
+  name: string
+  citation: number
+  active_ingredient?: string
+  uses?: string
+  directions?: string
+  do_not_use?: string
+  ask_doctor?: string
+  ask_pharmacist?: string
+  stop_use?: string
+  pregnancy?: string
+}
+
+export interface MedicinesPayload {
+  symptom: string
+  items: MedicineCard[]
+  excluded: { name: string; reason: string }[]
+  check_interactions: boolean
+  see_doctor_if: string
+  disclaimer: string
+}
+
 /** Server-sent events emitted by POST /v1/conversations/{id}/messages. */
 export type ChatEvent =
   | { type: 'status'; data: { stage: string } }
@@ -82,6 +116,8 @@ export type ChatEvent =
   | { type: 'crisis'; data: CrisisPayload }
   | { type: 'emergency'; data: EmergencyPayload }
   | { type: 'banner'; data: { kind: 'crisis' | 'emergency' } & Partial<CrisisPayload & EmergencyPayload> }
+  | { type: 'triage'; data: TriageQuestion }
+  | { type: 'medicines'; data: MedicinesPayload }
   | { type: 'done'; data: { message_id: string; status: MessageStatus } }
   | { type: 'error'; data: { message: string } }
 

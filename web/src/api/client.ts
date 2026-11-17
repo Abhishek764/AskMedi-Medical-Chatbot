@@ -136,11 +136,16 @@ export class ApiClient {
       body: JSON.stringify({ rating, reason }),
     })
 
-  /** Ask a question and stream the answer's events. */
-  async *ask(conversationId: string, question: string, signal?: AbortSignal): AsyncGenerator<ChatEvent> {
+  /** Ask a question (or answer a medicine-check question) and stream the reply's events. */
+  async *ask(
+    conversationId: string,
+    input: string | { step: number; choices: string[] },
+    signal?: AbortSignal,
+  ): AsyncGenerator<ChatEvent> {
+    const body = typeof input === 'string' ? { question: input } : { triage: input }
     const res = await this.request(`/v1/conversations/${conversationId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ question }),
+      body: JSON.stringify(body),
       signal,
     })
     if (!res.body) throw new ApiError(500, 'no_stream', 'The server did not stream a response.')
