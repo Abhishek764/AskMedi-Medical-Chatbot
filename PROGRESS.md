@@ -7,9 +7,9 @@ Read this first when resuming. Newest entries at the top. Branch: `v2/backend`.
 | # | Task | Status |
 |---|---|---|
 | 1 | Progress log + memory | done |
-| 2 | Clean repo: docs → `docs/`, one diagram system (Archify) | todo |
-| 3 | Grow corpus toward 1,000–2,000 docs (MedlinePlus bulk XML, more labels, more papers) | todo |
-| 4 | React web app in `web/` (auth, chat SSE, citations, safety cards, feedback, settings) | todo |
+| 2 | Clean repo: docs → `docs/`, one diagram system (Archify) | done (diagram refresh pending) |
+| 3 | Grow corpus toward 1,000–2,000 docs (MedlinePlus bulk XML, more labels, more papers) | code done; download running → then `export` |
+| 4 | React web app in `web/` (auth, chat SSE, citations, safety cards, feedback, settings) | done (`npm run dev`), CI added |
 | 5 | Metrics: `docs/METRICS.md` (what we measure, current values, how to improve) | todo |
 | 6 | Re-run evals on the bigger corpus; update scorecard | todo |
 
