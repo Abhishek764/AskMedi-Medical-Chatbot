@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext'
 import { Consent, Forgot, Login, Register } from './pages/Auth'
 import Chat from './pages/Chat'
 import Landing from './pages/Landing'
+import Policies from './pages/Policies'
 import Settings from './pages/Settings'
 
 function Loading() {
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/chat" element={<Private><Chat /></Private>} />
           <Route path="/chat/:id" element={<Private><Chat /></Private>} />
           <Route path="/settings" element={<Private><Settings /></Private>} />
+          <Route path="/policies" element={<Private><Policies /></Private>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

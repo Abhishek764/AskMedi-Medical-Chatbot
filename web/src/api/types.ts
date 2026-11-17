@@ -121,6 +121,43 @@ export type ChatEvent =
   | { type: 'done'; data: { message_id: string; status: MessageStatus } }
   | { type: 'error'; data: { message: string } }
 
+// -- Insurance policy demo ---------------------------------------------------------
+export interface PolicySummary {
+  id: string
+  title: string
+  form: string
+  edition: string
+  source_url: string
+  sections: { number: string; title: string; page: number }[]
+}
+
+export type ExclusionCell =
+  | { status: 'excluded'; clause: string; page: number; page_label: string; quote: string }
+  | { status: 'not_found' }
+
+export interface Comparison {
+  policies: { id: string; title: string; form: string; edition: string }[]
+  rows: { key: string; label: string; differs: boolean; cells: Record<string, ExclusionCell> }[]
+  differences: string[]
+  note: string
+}
+
+export interface SectionDiff {
+  section: string
+  rows: {
+    summary: string
+    in_all: boolean
+    cells: Record<string, { clause: string; page: number; page_label: string; text: string }>
+  }[]
+}
+
+export interface PolicyAnswer {
+  answer: { text: string; citations: number[] }[]
+  citations: { position: number; policy: string; clause: string; url: string | null }[]
+  refused: boolean
+  message: string | null
+}
+
 export class ApiError extends Error {
   readonly status: number
   readonly code: string

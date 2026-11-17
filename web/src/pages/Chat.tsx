@@ -145,6 +145,9 @@ export default function Chat() {
             <Link to="/settings" className="text-teal-700 hover:underline">
               Settings
             </Link>
+            <Link to="/policies" className="text-teal-700 hover:underline">
+              Policy demo
+            </Link>
             <button onClick={() => logout().then(() => navigate('/'))} className="text-slate-600 hover:underline">
               Sign out
             </button>

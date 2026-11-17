@@ -3,8 +3,12 @@ import {
   ApiError,
   type AuthResponse,
   type ChatEvent,
+  type Comparison,
   type Conversation,
   type ConversationDetail,
+  type PolicyAnswer,
+  type PolicySummary,
+  type SectionDiff,
   type Tokens,
   type User,
 } from './types'
@@ -134,6 +138,19 @@ export class ApiClient {
     this.json<void>(`/v1/messages/${messageId}/feedback`, {
       method: 'POST',
       body: JSON.stringify({ rating, reason }),
+    })
+
+  listPolicies = () => this.json<PolicySummary[]>('/v1/policies')
+  comparePolicies = (ids: string[]) =>
+    this.json<Comparison>(`/v1/policies/compare?ids=${encodeURIComponent(ids.join(','))}`)
+  diffPolicies = (ids: string[], section: string) =>
+    this.json<SectionDiff>(
+      `/v1/policies/diff?ids=${encodeURIComponent(ids.join(','))}&section=${encodeURIComponent(section)}`,
+    )
+  askPolicies = (question: string, policyIds: string[]) =>
+    this.json<PolicyAnswer>('/v1/policies/ask', {
+      method: 'POST',
+      body: JSON.stringify({ question, policy_ids: policyIds }),
     })
 
   /** Ask a question (or answer a medicine-check question) and stream the reply's events. */
