@@ -177,3 +177,29 @@ async def test_hallucinating_generator_is_blocked(indexed, app, client):
     events = await ask(client, u["auth"], cid, "How is dengue cured?")
     assert ("refusal", "unverified") in [(e, d.get("reason")) for e, d in events]
     assert not any(e == "sentence" for e, _ in events)
+
+
+async def test_admin_metrics(indexed, app, client):
+    from sqlalchemy import update
+
+    from app.db.models import Role, User
+
+    u = await register(client)
+    cid = await new_conv(client, u["auth"])
+    done = await ask(client, u["auth"], cid, "What are the symptoms of dengue?")
+    await ask(client, u["auth"], cid, "I want to kill myself")
+    await ask(client, u["auth"], cid, "Write me a python function")
+    mid = done[-1][1]["message_id"]
+    await client.post(f"/v1/messages/{mid}/feedback", json={"rating": 1}, headers=u["auth"])
+
+    assert (await client.get("/v1/admin/metrics", headers=u["auth"])).status_code == 403
+    async with app.state.container.sessionmaker() as s:
+        await s.execute(update(User).where(User.email == u["email"]).values(role=Role.admin))
+        await s.commit()
+    m = (await client.get("/v1/admin/metrics", headers=u["auth"])).json()
+    assert m["usage"]["answers"] == 3
+    assert m["answers_by_status"] == {"complete": 1, "crisis": 1, "refused": 1}
+    assert m["refusals_by_reason"] == {"out_of_scope": 1}
+    assert m["safety_events"]["crisis"] == 1
+    assert m["feedback"] == {"up": 1, "down": 0, "helpful_rate": 1.0, "coverage": 1.0}
+    assert m["latency_ms"]["p50"] is not None
