@@ -9,6 +9,8 @@ and Android clients. Plan and design docs live in [`.claude/`](.claude/v2-plan.m
 
 ![AskMedi v2 stack](.claude/diagrams/v2-stack.png)
 
+Interactive, source-linked architecture: [`.claude/diagrams/v2-architecture.html`](.claude/diagrams/v2-architecture.html) (open in a browser). Corpus details: [`data/README.md`](data/README.md).
+
 ## What's in the backend
 
 | Area | What it does |
@@ -51,7 +53,7 @@ argon2id at next login; migrated users confirm age and the disclaimer once befor
 ```
 backend/   FastAPI API, answer pipeline, guards, ingestion, worker, tests
 evals/     eval harness, golden set, v1 baseline results
-data/      v1 source PDF (licence unverified; not in the v2 index)
+data/      corpus snapshot (253 docs, JSONL + manifest), raw downloads (gitignored), v1 book
 .claude/   v2 plan, security analysis, corpus plan, resources, stack diagram
 ```
 
