@@ -4,37 +4,61 @@ AskMedi answers health and medicine questions **only from trusted, licensed sour
 citation on every sentence, or it refuses**. It is a medical information tool: it does not
 diagnose, prescribe, or recommend doses to the public, and it is not a medical device.
 
-v2 replaces the v1 Flask app (kept at tag `v1-final`) with a FastAPI backend built for web
-and Android clients. Plan and design docs live in [`docs/`](docs/v2-plan.md).
+v2 replaces the v1 Flask app (kept at tag `v1-final`) with a FastAPI backend and a React web
+app; an Android app comes later on the same API.
 
-![AskMedi v2 stack](docs/diagrams/v2-architecture.png)
+- Architecture (interactive, linked to the code): [`docs/diagrams/v2-architecture.html`](docs/diagrams/v2-architecture.html), open it in a browser
+- Metrics and how to improve them: [`docs/METRICS.md`](docs/METRICS.md)
+- Corpus and licences: [`data/README.md`](data/README.md)
+- Plan, security analysis, resources: [`docs/`](docs/v2-plan.md)
+- Where work stands: [`PROGRESS.md`](PROGRESS.md)
 
-Interactive, source-linked architecture: [`docs/diagrams/v2-architecture.html`](docs/diagrams/v2-architecture.html) (open in a browser). Corpus details: [`data/README.md`](data/README.md).
+## How it works
 
-## What's in the backend
+```
+Web app (React) ──HTTPS──► Cloudflare ──► FastAPI /v1 ──► answer pipeline
+                                              │             1 input guard (crisis, emergency, scope, injection, PII)
+                                              │             2 query planner (follow-ups, synonyms, brand → generic)
+                                              │             3 Qdrant hybrid search: dense + BM25, RRF fusion
+                                              │             4 cross-encoder rerank → abstain if sources are weak
+                                              │             5 generator (extractive free mode, or OpenAI/Claude/Ollama)
+                                              │             6 verifier: citations, support, numbers, role filter
+                                              ├──► PostgreSQL (users, chats, citations, feedback, corpus registry)
+                                              └──► Redis (rate limits, quotas, answer cache, job queue)
+Offline: MedlinePlus + openFDA + PMC ──► data/raw ──► parse ──► chunk ──► embed + BM25 ──► Qdrant
+```
 
 | Area | What it does |
 |---|---|
-| **Safety guards** | Crisis and self-harm detection (first-person, means/lethality, fiction framing, Hinglish, leetspeak) and acute emergency detection run before anything else, with fixed helpline copy (India: Tele-MANAS 14416, emergency 112). Conversation risk is sticky. Also blocks prompt injection, therapist/companion personas, harmful-substance advice, prescriptions, personal diagnosis, and dosing for non-verified users. PII is redacted before logs and models. |
-| **Hybrid retrieval** | Qdrant with dense vectors **and BM25** sparse vectors (IDF applied server-side), fused with RRF, reranked by a cross-encoder, expanded from child chunks to parent sections. Query planner rewrites follow-ups, normalises abbreviations and brand names, and routes by intent. |
-| **Cite-or-refuse** | Abstain gate before generation; verifier drops sentences with missing citations, weak support, or numbers not found in the source. Free extractive mode answers with verbatim source sentences; Ollama, OpenAI or Claude plug in behind the same interface. |
-| **Corpus** | Ingestion from MedlinePlus (public domain), openFDA labels (CC0, overdosage excluded, dosing sections provider-only) and PMC open-access reviews (licence and retraction checked per article; PDF + JATS XML). Licence allowlist enforced in code. |
-| **API** | JWT auth with rotating refresh tokens, email verification, password reset, account deletion and export, provider (clinician/pharmacist) verification, conversations, SSE chat, feedback, rate limits and daily quotas. |
-| **Ops** | Postgres + Alembic, Redis, arq worker (token cleanup, monthly corpus refresh), Docker, docker-compose, Render blueprint, GitHub Actions CI. |
+| **Safety** | Crisis and self-harm detection (first-person, means/lethality, fiction framing, Hinglish, leetspeak) and acute emergency detection run first, with fixed helpline copy (India: Tele-MANAS 14416, emergency 112). Conversation risk is sticky. Blocks prompt injection, personas, harmful-substance advice, prescriptions, personal diagnosis, dosing for the public, and anything that isn't a health question. PII is redacted before logs and models. |
+| **Cite-or-refuse** | Abstains before generation when sources are weak; the verifier drops sentences with missing citations, weak support or numbers not in the source. |
+| **Corpus** | MedlinePlus health topics (public domain), FDA drug labels (CC0; overdosage excluded; dosing provider-only), PMC open-access reviews (licence and retraction checked per article). |
+| **API** | JWT with rotating refresh tokens, email verification, password reset, account export and deletion, provider verification, conversations, SSE chat, feedback, rate limits, daily quotas, admin metrics. |
+| **Web app** | Sign-up with 18+ and disclaimer confirmation, streamed answers with citation links, crisis and emergency cards with tap-to-call, feedback, conversation history, settings. |
+| **Ops** | PostgreSQL + Alembic, Redis, arq worker, Docker, docker-compose, Render blueprint, GitHub Actions CI, optional Sentry. |
 
-## Quick start (no API keys, no paid services)
+## Run it locally (no API keys, no paid services)
+
+Needs Python via [uv](https://docs.astral.sh/uv/) and Node.js 22.
 
 ```bash
+# 1. Backend
 cd backend
 uv sync --extra local                       # free local ONNX models (no torch)
-cp .env.example .env                         # then set JWT_SECRET
-uv run python -m app.ingest run --papers-per-topic 3   # downloads ~250 documents
-uv run python scripts/ask.py "What are the symptoms of dengue?"
-uv run uvicorn app.main:create_app --factory --reload  # API docs at http://localhost:8000/docs
-uv run pytest
+cp .env.example .env                         # then set JWT_SECRET to a long random string
+uv run python -m app.ingest load             # build the search index from data/corpus (offline)
+uv run uvicorn app.main:create_app --factory --reload    # API on :8000, docs at /docs
+
+# 2. Web app (second terminal)
+cd web
+npm install
+npm run dev                                  # http://localhost:5173 (proxies /v1 to :8000)
 ```
 
-Full stack with Postgres, Redis and Qdrant: `docker compose up --build` in `backend/`.
+When you have an OpenAI key, set `OPENAI_API_KEY=...` and `LLM_PROVIDER=openai` in
+`backend/.env` (never commit it). Everything else stays the same.
+
+Tests: `cd backend && uv run pytest` · `cd web && npm test`. Evals: `cd backend && uv run python -m app.eval_run run`.
 
 ## Moving from v1
 
@@ -52,13 +76,11 @@ argon2id at next login; migrated users confirm age and the disclaimer once befor
 
 ```
 backend/   FastAPI API, answer pipeline, guards, ingestion, worker, tests
-evals/     eval harness, golden set, v1 baseline results
-data/      corpus snapshot (253 docs, JSONL + manifest), raw downloads (gitignored), v1 book
-docs/     v2 plan, security analysis, corpus plan, metrics, architecture diagram
+web/       React web app (Vite, TypeScript, Tailwind)
+data/      corpus snapshot (JSONL + manifest), raw downloads (gitignored), v1 book
+evals/     golden sets, eval results (v1 baseline, v2 scorecard)
+docs/      plan, security analysis, metrics, corpus plan, architecture diagram
 ```
-
-Web (Next.js) and Android (Flutter) clients come next; see the milestones in
-[`docs/v2-plan.md`](docs/v2-plan.md).
 
 ## Disclaimer
 
