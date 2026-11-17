@@ -65,6 +65,7 @@ ignore = ["S101", "B008", "E501"]  # ruff format owns line length
 "migrations/**" = ["E501"]
 "scripts/**" = ["S311"]
 "app/**/__main__.py" = ["ASYNC240"]  # one-shot CLIs may do blocking file I/O
+"app/eval_*.py" = ["ASYNC240"]
 
 [tool.mypy]
 python_version = "3.11"

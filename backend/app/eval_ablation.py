@@ -45,9 +45,13 @@ def doc_ranking(ranked: list[object]) -> list[str]:
     return seen
 
 
-async def run(reviewed_only: bool, limit: int | None) -> dict[str, object]:
+def expected(row: dict[str, object]) -> list[str]:
+    return list(row.get("expect_docs") or [row["expect_doc"]])  # type: ignore[arg-type]
+
+
+async def run(reviewed_only: bool, limit: int | None, golden: Path = GOLDEN) -> dict[str, object]:
     rows = [
-        json.loads(line) for line in GOLDEN.read_text(encoding="utf-8").splitlines() if line.strip()
+        json.loads(line) for line in golden.read_text(encoding="utf-8").splitlines() if line.strip()
     ]
     if reviewed_only:
         rows = [r for r in rows if r.get("reviewed")]
@@ -68,7 +72,8 @@ async def run(reviewed_only: bool, limit: int | None) -> dict[str, object]:
                 )
                 latencies.append((time.perf_counter() - t0) * 1000)
                 docs = doc_ranking(ranked)
-                ranks.append(docs.index(r["expect_doc"]) + 1 if r["expect_doc"] in docs else None)
+                hits = [docs.index(d) + 1 for d in expected(r) if d in docs]
+                ranks.append(min(hits) if hits else None)
             n = len(ranks)
             results[mode] = {
                 **{f"recall@{k}": round(sum(1 for x in ranks if x and x <= k) / n, 3) for k in KS},
@@ -81,7 +86,7 @@ async def run(reviewed_only: bool, limit: int | None) -> dict[str, object]:
         await container.shutdown()
     s = get_settings()
     return {
-        "golden": GOLDEN.name,
+        "golden": golden.name,
         "reviewed_only": reviewed_only,
         "rows": len(rows),
         "config": {
@@ -99,7 +104,7 @@ def report(data: dict[str, object]) -> str:
         "# Retrieval ablation",
         "",
         f"{data['rows']} questions from `evals/golden/{data['golden']}`"
-        + (" (reviewed rows only)" if data["reviewed_only"] else " (templated, not yet reviewed)")
+        + (" (reviewed rows only)" if data["reviewed_only"] else " (not yet reviewed by a person)")
         + f". Embeddings `{data['config']['embeddings']}`, reranker `{data['config']['reranker']}`.",  # type: ignore[index]
         "A question is found at k when its expected document is in the first k distinct documents.",
         "",
@@ -120,10 +125,16 @@ def main() -> None:
     ap = argparse.ArgumentParser(prog="python -m app.eval_ablation")
     ap.add_argument("--reviewed-only", action="store_true")
     ap.add_argument("--limit", type=int)
+    ap.add_argument(
+        "--golden", default=str(GOLDEN), help="golden JSONL (expect_doc or expect_docs)"
+    )
     args = ap.parse_args()
-    data = asyncio.run(run(args.reviewed_only, args.limit))
+    golden = Path(args.golden)
+    data = asyncio.run(run(args.reviewed_only, args.limit, golden))
     OUT.mkdir(parents=True, exist_ok=True)
-    suffix = "-reviewed" if args.reviewed_only else ""
+    suffix = ("-" + golden.stem.replace("v2_", "") if golden != GOLDEN else "") + (
+        "-reviewed" if args.reviewed_only else ""
+    )
     (OUT / f"ablation{suffix}.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
     (OUT / f"ablation{suffix}.md").write_text(report(data), encoding="utf-8")
     print(report(data))
