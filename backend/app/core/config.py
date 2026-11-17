@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     qdrant_api_key: str | None = None
     qdrant_collection: str = "corpus-v1"
     raw_data_dir: str = "../data/raw"  # repo-root data/raw, relative to backend/
+    policies_dir: str = "../data/policies"  # parsed insurance policies (demo library)
     embeddings_provider: Literal["hash", "fastembed", "openai"] = "hash"
     embeddings_model: str = "BAAI/bge-small-en-v1.5"
     embeddings_dim: int = 384

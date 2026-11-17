@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.auth.email import OutboxEmailSender
 from app.core.config import Settings
 from app.core.kv import KV, build_kv
 from app.db.session import build_engine, build_sessionmaker
+from app.policies.service import COLLECTION as POLICY_COLLECTION
+from app.policies.service import PolicyLibrary
 from app.rag.bm25 import BM25Encoder
 from app.rag.embeddings import Embedder, build_embedder
 from app.rag.generate import ExtractiveGenerator, Generator, LLMGenerator
@@ -79,6 +83,15 @@ class Container:
             kv=self.kv,
             corpus_tag=settings.qdrant_collection,
             medicine=MedicineCheck(self.store, self.retriever),
+        )
+        # Insurance policy library (separate demo): own collection on the same Qdrant client.
+        self.policies = PolicyLibrary(
+            Path(settings.policies_dir),
+            VectorStore(self.store.client, POLICY_COLLECTION, self.embedder.dim),
+            self.embedder,
+            self.reranker,
+            self.bm25,
+            abstain_threshold=self.pipeline.abstain_threshold,
         )
 
     async def startup(self) -> None:
