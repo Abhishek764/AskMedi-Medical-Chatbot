@@ -5,7 +5,7 @@ allows commercial reuse; anything else is rejected in code before it reaches the
 
 | Path | What | In git? |
 |---|---|---|
-| `corpus/corpus-v1.jsonl` | 1,661 parsed documents (one JSON object per line: id, source, title, URL, licence, type, year, sections) | yes (24 MB) |
+| `corpus/corpus-v1.jsonl` | 1,677 parsed documents (incl. 16 OTC Drug Facts labels) (one JSON object per line: id, source, title, URL, licence, type, year, sections) | yes (24 MB) |
 | `corpus/manifest.csv` | One row per document: source, licence, year, title, URL, section and word counts | yes |
 | `raw/` | Original downloads: MedlinePlus XML, openFDA label JSON, PMC article PDFs + JATS XML, search results, 370 PDFs | no (~880 MB, rebuilt on demand) |
 | `Medical_book.pdf` | v1's source book | yes, **not in the v2 index** (licence unverified) |

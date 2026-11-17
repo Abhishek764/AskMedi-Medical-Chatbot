@@ -1013,6 +1013,22 @@ medlineplus:wrist-injuries-and-disorders,medlineplus,consumer,public-domain,2002
 medlineplus:x-rays,medlineplus,consumer,public-domain,2004,X-Rays,https://medlineplus.gov/xrays.html,5,306
 medlineplus:yeast-infections,medlineplus,consumer,public-domain,2000,Yeast Infections,https://medlineplus.gov/yeastinfections.html,1,149
 medlineplus:zika-virus,medlineplus,consumer,public-domain,2016,Zika Virus,https://medlineplus.gov/zikavirus.html,1,250
+openfda-otc:acetaminophen,openfda,label,cc0,2026,Acetaminophen — OTC Drug Facts (Acetaminophen),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=05618d62-ebec-4d30-989d-999891977e0e,10,446
+openfda-otc:calcium-carbonate,openfda,label,cc0,2026,Calcium Carbonate — OTC Drug Facts (Topcare Antacid Calcium),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=04b3d397-df99-44e2-a191-6e9199b08398,8,141
+openfda-otc:cetirizine-hydrochloride,openfda,label,cc0,2026,Cetirizine Hydrochloride — OTC Drug Facts (cetirizine hydrochloride),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=03c0a599-072a-10ef-e063-6394a90a9698,11,354
+openfda-otc:dextromethorphan-hydrobromide,openfda,label,cc0,2026,Dextromethorphan Hydrobromide — OTC Drug Facts (Dextromethorphan Hydrobromide),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=baf9e8c3-804e-43d6-837f-37d1246c035f,9,207
+openfda-otc:docusate-sodium,openfda,label,cc0,2026,Docusate Sodium — OTC Drug Facts (CVS Stool Softener Fruit Punch),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0e6900d6-7dc9-47d6-a006-1695feb8d5a5,6,199
+openfda-otc:famotidine,openfda,label,cc0,2026,Famotidine — OTC Drug Facts (Heartburn Relief),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=2190e348-3d91-44d8-9f4d-cd9f4e5b6292,10,267
+openfda-otc:fexofenadine-hydrochloride,openfda,label,cc0,2026,Fexofenadine Hydrochloride — OTC Drug Facts (ALLERGY),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=1b5aa481-205d-4935-ae58-fcb8cbc35c4c,10,307
+openfda-otc:guaifenesin,openfda,label,cc0,2026,Guaifenesin — OTC Drug Facts (Childrens Mucus Relief Chest Congestion),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=034d39c0-9aad-4dff-a158-a041b9f0504f,7,237
+openfda-otc:ibuprofen,openfda,label,cc0,2026,Ibuprofen — OTC Drug Facts (Ibuprofen),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=06173bcd-1e17-4bf8-95e6-d03593585446,11,801
+openfda-otc:loperamide-hydrochloride,openfda,label,cc0,2026,Loperamide Hydrochloride — OTC Drug Facts (AMAZON BASIC CARE LOPERAMIDE HYDROCHLORIDE),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=10edd7bc-fc35-abe3-e063-6394a90aeb3f,11,296
+openfda-otc:loratadine,openfda,label,cc0,2026,Loratadine — OTC Drug Facts (careone childrens allergy relief),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=06d1c443-ec23-4aa1-a7f3-f2b7ffcc2588,10,288
+openfda-otc:naproxen-sodium,openfda,label,cc0,2026,Naproxen Sodium — OTC Drug Facts (PROXEN NP 660),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=09990b2f-202e-b4df-e063-6394a90a055b,11,893
+openfda-otc:omeprazole-magnesium,openfda,label,cc0,2026,Omeprazole Magnesium — OTC Drug Facts (omeprazole),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0340ef94-d2b4-47af-a045-d0d031293984,10,641
+openfda-otc:polyethylene-glycol-3350,openfda,label,cc0,2026,Polyethylene Glycol 3350 — OTC Drug Facts (Polyethylene Glycol 3350),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=2a3ef673-418e-45d2-b17b-50d28e172333,11,283
+openfda-otc:pseudoephedrine-hydrochloride,openfda,label,cc0,2026,Pseudoephedrine Hydrochloride — OTC Drug Facts (SudoGest),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=78faa497-6743-b85b-e053-2a91aa0ae822,10,321
+openfda-otc:sennosides,openfda,label,cc0,2026,Sennosides — OTC Drug Facts (Sennosides),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=3873abcd-8312-47d1-bccf-4265e1e32861,9,289
 openfda:00040bfe-001a-484e-bec0-e21e8b27f369,openfda,label,cc0,2026,Hydrocortisone — FDA drug label (anti itch),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=00040bfe-001a-484e-bec0-e21e8b27f369,5,386
 openfda:0018ade9-5856-db6c-e063-6394a90a2ccf,openfda,label,cc0,2025,Polyethylene Glycol — FDA drug label (Foster and Thrive Dry Eye Relief),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=0018ade9-5856-db6c-e063-6394a90a2ccf,5,181
 openfda:002875d2-8c30-2d2e-e063-6294a90ae01e,openfda,label,cc0,2026,Famotidine — FDA drug label (Famotidine),https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=002875d2-8c30-2d2e-e063-6294a90ae01e,12,2598
