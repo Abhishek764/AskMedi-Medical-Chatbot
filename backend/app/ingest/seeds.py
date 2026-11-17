@@ -71,6 +71,16 @@ adapalene; mupirocin; silver sulfadiazine; lidocaine; timolol; latanoprost; brim
 ofloxacin; tobramycin; artificial tears
 """
 
+# Non-prescription medicines the symptom check can suggest, by exact openFDA generic name.
+# Their OTC "Drug Facts" labels are ingested as openfda-otc:<slug>; doses shown to people come
+# only from those labels (app/triage/symptoms.py maps symptoms to these).
+OTC_MEDICINES = """
+acetaminophen; ibuprofen; naproxen sodium; cetirizine hydrochloride; loratadine;
+fexofenadine hydrochloride; famotidine; omeprazole magnesium; calcium carbonate;
+loperamide hydrochloride; polyethylene glycol 3350; docusate sodium; sennosides;
+dextromethorphan hydrobromide; guaifenesin; pseudoephedrine hydrochloride
+"""
+
 PAPER_TOPICS = """
 asthma; type 2 diabetes; hypertension; dengue; tuberculosis; malaria; depression; anxiety;
 migraine; chronic kidney disease; heart failure; atrial fibrillation; obesity; vitamin d;

@@ -33,6 +33,7 @@ from app.ingest.sources import (
     fetch_medlineplus,
     fetch_medlineplus_bulk,
     fetch_openfda,
+    fetch_openfda_otc,
     fetch_pmc,
     local_pdf_doc,
     search_pmc,
@@ -70,6 +71,14 @@ async def collect_docs(
             except Exception as exc:
                 log.warning("openfda %s failed: %s", generic, type(exc).__name__)
                 yield f"openfda      {generic}", None, "fetch_error"
+    if "openfda_otc" in sources:
+        for generic in seeds.parse(seeds.OTC_MEDICINES)[: args.limit]:
+            try:
+                doc = await fetch_openfda_otc(fetcher, generic)
+                yield f"otc          {generic}", doc, "ok" if doc else "not_found"
+            except Exception as exc:
+                log.warning("openfda otc %s failed: %s", generic, type(exc).__name__)
+                yield f"otc          {generic}", None, "fetch_error"
     if "pmc" in sources:
         for topic in seeds.parse(seeds.PAPER_TOPICS)[: args.limit]:
             try:
@@ -194,7 +203,7 @@ def _short(r: IngestReport) -> str:
 
 
 def _source_args(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--sources", default="medlineplus_all,openfda,pmc")
+    p.add_argument("--sources", default="medlineplus_all,openfda,openfda_otc,pmc")
     p.add_argument("--limit", type=int, default=1000, help="max seed items per source")
     p.add_argument("--papers-per-topic", type=int, default=3)
     p.add_argument("--since", type=int, default=2016)

@@ -177,3 +177,38 @@ def test_parse_medlineplus_bulk_keeps_english_and_synonyms():
     assert [d.doc_id for d in docs] == ["medlineplus:a1c"]
     assert docs[0].sections[0].text.startswith("Also called: HbA1C.")
     assert docs[0].licence == "public-domain" and docs[0].year == 2015
+
+
+OTC_RECORD = {
+    "set_id": "abc",
+    "effective_time": "20260102",
+    "openfda": {"generic_name": ["ACETAMINOPHEN"], "brand_name": ["Pain Reliever"]},
+    "active_ingredient": ["Drug Facts Active ingredient (in each tablet) Acetaminophen 500 mg"],
+    "purpose": ["Purpose Pain reliever/fever reducer"],
+    "indications_and_usage": ["Uses temporarily relieves minor aches and pains due to: headache"],
+    "ask_doctor": ["Ask a doctor before use if you have liver disease"],
+    "stop_use": ["Stop use and ask a doctor if fever lasts more than 3 days"],
+    "dosage_and_administration": [
+        "Directions \u25a0 adults and children 12 years and over: take 2 tablets every 6 hours \u25a0 children under 12 years: ask a doctor"
+    ],
+}
+
+
+def test_otc_label_parsed_verbatim_with_dosing_flag():
+    from app.ingest.sources import openfda_otc_doc, pick_otc_label
+
+    combo = {**OTC_RECORD, "openfda": {"generic_name": ["ACETAMINOPHEN, PHENYLEPHRINE HCL"]}}
+    assert pick_otc_label([combo, OTC_RECORD], "acetaminophen") is OTC_RECORD
+    doc = openfda_otc_doc(OTC_RECORD, "acetaminophen")
+    s = {x.path[0]: x for x in doc.sections}
+    assert doc.doc_id == "openfda-otc:acetaminophen" and doc.licence == "cc0"
+    assert s["Active ingredient"].text == "Acetaminophen 500 mg"
+    assert s["Uses"].text.startswith("temporarily relieves")
+    assert s["Directions"].dosing is True
+    assert (
+        "- adults and children 12 years and over: take 2 tablets every 6 hours"
+        in s["Directions"].text
+    )
+    assert s["Ask a doctor before use"].text.startswith(
+        "Ask a doctor before use if you have liver disease"
+    )
