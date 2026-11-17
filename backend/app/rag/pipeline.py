@@ -23,6 +23,8 @@ from app.rag.generate import Generator
 from app.rag.query import plan_query
 from app.rag.retriever import HybridRetriever
 from app.rag.verify import verify
+from app.triage.compose import MedicineCheck, StepResult, detect, start
+from app.triage.engine import TriageState
 
 logger = logging.getLogger("askmedi.pipeline")
 
@@ -38,6 +40,8 @@ class UserContext:
     role: str = "public"
     elevated_risk: bool = False
     country: str = "IN"
+    triage: dict[str, object] | None = None  # medicine-check state stored for this conversation
+    triage_answer: tuple[int, list[str]] | None = None  # (step, option ids) when answering it
 
 
 @dataclass
@@ -65,6 +69,7 @@ class AnswerRecord:
     raise_risk: bool = False
     guard_kind: str | None = None
     cached: bool = False
+    triage_state: dict[str, object] | None = None  # None ends any medicine check in progress
 
 
 class AnswerPipeline:
@@ -78,7 +83,9 @@ class AnswerPipeline:
         kv: KV | None = None,
         cache_ttl_seconds: int = 86400,
         corpus_tag: str = "corpus-v1",
+        medicine: MedicineCheck | None = None,
     ) -> None:
+        self.medicine = medicine
         self.retriever = retriever
         self.generator = generator
         self.abstain_threshold = abstain_threshold
@@ -95,6 +102,23 @@ class AnswerPipeline:
         def done(rec: AnswerRecord) -> Event:
             rec.latency_ms = int((time.perf_counter() - t0) * 1000)
             return Event("result", {"record": rec})
+
+        if ctx.triage_answer is not None:
+            state = TriageState.from_dict(ctx.triage) if ctx.triage else None
+            if state is None or self.medicine is None:
+                msg = "That medicine check has expired. Please ask your question again."
+                yield Event("refusal", {"reason": "triage_expired", "message": msg})
+                yield done(AnswerRecord("refused", msg, "triage_expired"))
+                return
+            if ctx.elevated_risk:
+                res = start(_symptom(state), elevated_risk=True)
+            else:
+                step, choices = ctx.triage_answer
+                res = await self.medicine.answer(state, step, choices, ctx.country)
+            for ev in _step_events(res):
+                yield ev
+            yield done(_step_record(res))
+            return
 
         decision = check_input(question, role=ctx.role, elevated_risk=ctx.elevated_risk)
 
@@ -120,6 +144,17 @@ class AnswerPipeline:
                 )
             )
             return
+        symptom = detect(decision.redacted_text) if self.medicine is not None else None
+        if symptom is not None and (
+            decision.action == Action.allow
+            or decision.reason in ("dosing", "diagnosis", "prescription")
+        ):
+            res = start(symptom, elevated_risk=ctx.elevated_risk)
+            for ev in _step_events(res):
+                yield ev
+            yield done(_step_record(res))
+            return
+
         if decision.action == Action.refuse:
             reason = decision.reason
             if ctx.elevated_risk and reason in ("harmful_substance", "dosing"):
@@ -234,6 +269,28 @@ class AnswerPipeline:
     def _cache_key(self, normalised: str, role: str) -> str:
         h = hashlib.sha256(f"{self.corpus_tag}|{role}|{normalised}".encode()).hexdigest()
         return f"ans:{h}"
+
+
+def _symptom(state: TriageState):  # noqa: ANN202
+    from app.triage.symptoms import BY_KEY
+
+    return BY_KEY[state.symptom]
+
+
+def _step_events(res: StepResult) -> list[Event]:
+    return [Event(t, d) for t, d in res.events]
+
+
+def _step_record(res: StepResult) -> AnswerRecord:
+    return AnswerRecord(
+        res.status,
+        res.content,
+        res.reason,
+        citations=[CitationRecord(**c) for c in (res.citations or [])],  # type: ignore[arg-type]
+        model="medicine-check" if res.status in ("triage", "complete") else None,
+        guard_kind="emergency" if res.status == "emergency" else None,
+        triage_state=res.state.to_dict() if res.state else None,
+    )
 
 
 def _opt(v: object) -> str | None:

@@ -16,6 +16,7 @@ from app.rag.pipeline import AnswerPipeline
 from app.rag.rerank import Reranker, build_reranker
 from app.rag.retriever import HybridRetriever
 from app.rag.store import VectorStore
+from app.triage.compose import MedicineCheck
 
 
 def build_generator(s: Settings) -> Generator:
@@ -77,6 +78,7 @@ class Container:
             groundedness_threshold=settings.groundedness_threshold,
             kv=self.kv,
             corpus_tag=settings.qdrant_collection,
+            medicine=MedicineCheck(self.store, self.retriever),
         )
 
     async def startup(self) -> None:

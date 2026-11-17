@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class Strict(BaseModel):
@@ -144,8 +144,22 @@ class ConversationDetailOut(ConversationOut):
     messages: list[MessageOut]
 
 
+class TriageAnswerIn(Strict):
+    step: int = Field(ge=1, le=3)
+    choices: list[Annotated[str, Field(min_length=1, max_length=40)]] = Field(
+        min_length=1, max_length=10
+    )
+
+
 class AskIn(Strict):
-    question: str = Field(min_length=1, max_length=4000)
+    question: str = Field(default="", max_length=4000)
+    triage: TriageAnswerIn | None = None  # an answer to a medicine-check question
+
+    @model_validator(mode="after")
+    def _question_or_answer(self) -> AskIn:
+        if self.triage is None and not self.question.strip():
+            raise ValueError("question is required")
+        return self
 
 
 class FeedbackIn(Strict):
