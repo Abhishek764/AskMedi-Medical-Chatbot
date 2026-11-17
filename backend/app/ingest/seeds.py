@@ -1,6 +1,6 @@
 """Seed lists for corpus v1. Common conditions (with India-relevant ones), widely used
 generic medicines, and the topics we pull research reviews for. Grow these toward the
-~1k-document target in docs/idea.md §3; every addition is checked by the eval set."""
+~1k-document target in docs/corpus-plan.md §3; every addition is checked by the eval set."""
 
 CONDITIONS = """
 asthma; diabetes type 2; diabetes type 1; high blood pressure; heart attack; stroke;

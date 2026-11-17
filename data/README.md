@@ -44,7 +44,7 @@ uv run python -m app.ingest stats           # counts in the live index
 ```
 
 Grow the corpus by editing the seed lists in `backend/app/ingest/seeds.py` (conditions, medicines,
-paper topics), then `run` and `export`. The target is about 1,000 documents (`docs/idea.md`).
+paper topics), then `run` and `export`. The target is about 1,000 documents (`docs/corpus-plan.md`).
 
 ## `Medical_book.pdf`
 
