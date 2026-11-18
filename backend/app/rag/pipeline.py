@@ -17,6 +17,7 @@ from collections.abc import AsyncIterator
 from dataclasses import asdict, dataclass, field
 
 from app.core.kv import KV
+from app.core.metrics import timed
 from app.guards.input_guard import Action, check_input
 from app.guards.resources import DISCLAIMER, REFUSALS, crisis_payload, emergency_payload
 from app.rag.generate import Generator
@@ -186,7 +187,8 @@ class AnswerPipeline:
 
         yield Event("status", {"stage": "retrieving"})
         allow_dosing = ctx.role in ("provider", "admin")
-        result = await self.retriever.retrieve(plan, allow_dosing=allow_dosing)
+        with timed("retrieve"):
+            result = await self.retriever.retrieve(plan, allow_dosing=allow_dosing)
         if not result.passages or result.top_score < self.abstain_threshold:
             msg = REFUSALS["no_sources"]
             yield Event("refusal", {"reason": "no_sources", "message": msg})
@@ -194,10 +196,12 @@ class AnswerPipeline:
             return
 
         yield Event("status", {"stage": "checking sources"})
-        draft = await self.generator.generate(plan.standalone, result.passages, role=ctx.role)
-        checked = verify(
-            draft, result.passages, role=ctx.role, threshold=self.groundedness_threshold
-        )
+        with timed("generate"):
+            draft = await self.generator.generate(plan.standalone, result.passages, role=ctx.role)
+        with timed("verify"):
+            checked = verify(
+                draft, result.passages, role=ctx.role, threshold=self.groundedness_threshold
+            )
         if not checked.ok:
             reason = checked.reason or "unverified"
             msg = REFUSALS.get(reason, REFUSALS["unverified"])

@@ -25,6 +25,7 @@ from app.api.v1.schemas import (
 )
 from app.core.errors import AppError, NotFound
 from app.core.logging import log_event
+from app.core.metrics import record_answer
 from app.core.ratelimit import enforce_daily_quota, enforce_limit
 from app.db.models import (
     Citation,
@@ -246,6 +247,16 @@ async def _persist(sessionmaker, conv_id: uuid.UUID, user_id: uuid.UUID, rec: An
                 conv.risk_level = RiskLevel.elevated
             conv.updated_at = func.now()
         await s.commit()
+        record_answer(
+            rec.status,
+            rec.refusal_reason,
+            rec.latency_ms,
+            model=rec.model,
+            tokens_in=rec.tokens_in,
+            tokens_out=rec.tokens_out,
+            guard_kind=rec.guard_kind,
+            cached=rec.cached,
+        )
         log_event(
             logger,
             "answer",

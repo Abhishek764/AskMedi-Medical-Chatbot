@@ -8,10 +8,13 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
+
+from app.core.metrics import LLM_CALLS, LLM_LATENCY
 
 logger = logging.getLogger("askmedi.llm")
 
@@ -39,12 +42,25 @@ class _HTTPChat:
         self._client = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=timeout)
 
     async def _post(self, path: str, body: dict[str, object]) -> dict[str, object]:
+        model = str(getattr(self, "name", type(self).__name__))
+        t = time.perf_counter()
         try:
             r = await self._client.post(path, json=body)
             r.raise_for_status()
-            return r.json()  # type: ignore[no-any-return]
+            data = r.json()
+        except httpx.HTTPStatusError as exc:
+            code = exc.response.status_code
+            LLM_CALLS.labels(
+                model, "rate_limited" if code == 429 else f"http_{code // 100}xx"
+            ).inc()
+            raise LLMError(f"{type(self).__name__} failed: HTTP {code}") from exc
         except (httpx.HTTPError, ValueError) as exc:
+            LLM_CALLS.labels(model, "error").inc()
             raise LLMError(f"{type(self).__name__} failed: {type(exc).__name__}") from exc
+        finally:
+            LLM_LATENCY.labels(model).observe(time.perf_counter() - t)
+        LLM_CALLS.labels(model, "ok").inc()
+        return data  # type: ignore[no-any-return]
 
     async def aclose(self) -> None:
         await self._client.aclose()

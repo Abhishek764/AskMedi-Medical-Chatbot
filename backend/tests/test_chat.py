@@ -203,3 +203,15 @@ async def test_admin_metrics(indexed, app, client):
     assert m["safety_events"]["crisis"] == 1
     assert m["feedback"] == {"up": 1, "down": 0, "helpful_rate": 1.0, "coverage": 1.0}
     assert m["latency_ms"]["p50"] is not None
+    assert len(m["daily"]) == 1
+    today = m["daily"][0]
+    assert today["answers"] == 3 and today["safety_events"] == sum(m["safety_events"].values())
+    assert today["by_status"] == {"complete": 1, "crisis": 1, "refused": 1}
+    assert m["llm"]["fallback"] == "extractive"
+
+    prom = await client.get("/metrics")
+    assert prom.status_code == 200
+    text = prom.text
+    assert 'askmedi_answers_total{reason="none",status="complete"}' in text
+    assert 'askmedi_guard_events_total{kind="crisis"}' in text
+    assert 'route="/v1/conversations/{conversation_id}/messages"' in text

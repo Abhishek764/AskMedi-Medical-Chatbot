@@ -88,6 +88,9 @@ class Settings(BaseSettings):
     # Observability (optional)
     sentry_dsn: str | None = None
     sentry_traces_sample_rate: float = 0.05
+    # GET /metrics (Prometheus). Open in dev/test; outside dev it needs this bearer token,
+    # and without one the endpoint is disabled.
+    metrics_token: str | None = None
 
     @model_validator(mode="after")
     def _check_prod_secrets(self) -> Settings:
