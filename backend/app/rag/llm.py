@@ -15,6 +15,7 @@ from typing import Protocol
 import httpx
 
 from app.core.metrics import LLM_CALLS, LLM_LATENCY
+from app.core.tracing import llm_call
 
 logger = logging.getLogger("askmedi.llm")
 
@@ -44,26 +45,47 @@ class _HTTPChat:
     async def _post(self, path: str, body: dict[str, object]) -> dict[str, object]:
         model = str(getattr(self, "name", type(self).__name__))
         t = time.perf_counter()
-        try:
-            r = await self._client.post(path, json=body)
-            r.raise_for_status()
-            data = r.json()
-        except httpx.HTTPStatusError as exc:
-            code = exc.response.status_code
-            LLM_CALLS.labels(
-                model, "rate_limited" if code == 429 else f"http_{code // 100}xx"
-            ).inc()
-            raise LLMError(f"{type(self).__name__} failed: HTTP {code}") from exc
-        except (httpx.HTTPError, ValueError) as exc:
-            LLM_CALLS.labels(model, "error").inc()
-            raise LLMError(f"{type(self).__name__} failed: {type(exc).__name__}") from exc
-        finally:
-            LLM_LATENCY.labels(model).observe(time.perf_counter() - t)
+        with llm_call(model) as info:
+            try:
+                r = await self._client.post(path, json=body)
+                r.raise_for_status()
+                data = r.json()
+            except httpx.HTTPStatusError as exc:
+                code = exc.response.status_code
+                info["outcome"] = "rate_limited" if code == 429 else f"http_{code // 100}xx"
+                LLM_CALLS.labels(model, info["outcome"]).inc()
+                raise LLMError(f"{type(self).__name__} failed: HTTP {code}") from exc
+            except (httpx.HTTPError, ValueError) as exc:
+                info["outcome"] = "error"
+                LLM_CALLS.labels(model, "error").inc()
+                raise LLMError(f"{type(self).__name__} failed: {type(exc).__name__}") from exc
+            finally:
+                LLM_LATENCY.labels(model).observe(time.perf_counter() - t)
+            info["outcome"] = "ok"
+            info["tokens_in"], info["tokens_out"] = _usage(data)
         LLM_CALLS.labels(model, "ok").inc()
         return data  # type: ignore[no-any-return]
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+
+def _usage(data: object) -> tuple[int, int]:
+    """Token counts from any provider's response (OpenAI, Anthropic, Gemini, Ollama)."""
+    if not isinstance(data, dict):
+        return 0, 0
+    u = data.get("usage") or data.get("usageMetadata") or {}
+    if not isinstance(u, dict):
+        u = {}
+    pairs = (
+        ("prompt_tokens", "completion_tokens"),
+        ("input_tokens", "output_tokens"),
+        ("promptTokenCount", "candidatesTokenCount"),
+    )
+    for a, b in pairs:
+        if a in u or b in u:
+            return int(u.get(a) or 0), int(u.get(b) or 0)
+    return int(data.get("prompt_eval_count") or 0), int(data.get("eval_count") or 0)
 
 
 def _shape_error(exc: Exception) -> LLMError:

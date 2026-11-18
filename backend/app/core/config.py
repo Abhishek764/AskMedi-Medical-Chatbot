@@ -91,6 +91,12 @@ class Settings(BaseSettings):
     # GET /metrics (Prometheus). Open in dev/test; outside dev it needs this bearer token,
     # and without one the endpoint is disabled.
     metrics_token: str | None = None
+    # Step tracing (app/core/tracing.py). Off unless a key is set. TRACE_CONTENT=false sends
+    # metadata only (ids, scores, statuses); true also sends PII-redacted question/answer text.
+    logfire_token: str | None = None
+    langsmith_api_key: str | None = None
+    langsmith_project: str = "askmedi"
+    trace_content: bool = False
 
     @model_validator(mode="after")
     def _check_prod_secrets(self) -> Settings:

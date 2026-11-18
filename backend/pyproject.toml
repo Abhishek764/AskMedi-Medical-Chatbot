@@ -24,11 +24,16 @@ dependencies = [
     "bcrypt>=5.0.0",
     "sentry-sdk[fastapi]>=2.10",
     "prometheus-client>=0.20",
+    "logfire[fastapi,httpx,sqlalchemy]>=3.0",
+    "langsmith>=0.3",
 ]
 
 [project.optional-dependencies]
 # Free local models (ONNX, no torch): dense embeddings + cross-encoder rerank.
 local = ["fastembed>=0.4"]
+evals = [
+    "ragas>=0.3",
+]
 
 [dependency-groups]
 dev = [
@@ -71,3 +76,8 @@ ignore = ["S101", "B008", "E501"]  # ruff format owns line length
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
+
+[tool.uv]
+# Ragas pulls scikit-network for its test-set generator only (unused here); it has no wheel
+# for Python 3.14 and fails to build, so leave it out. The Ragas metrics don't import it.
+override-dependencies = ["scikit-network; sys_platform == 'never'"]

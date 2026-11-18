@@ -16,6 +16,7 @@ import time
 from collections.abc import AsyncIterator
 from dataclasses import asdict, dataclass, field
 
+from app.core import tracing
 from app.core.kv import KV
 from app.core.metrics import timed
 from app.guards.input_guard import Action, check_input
@@ -98,6 +99,38 @@ class AnswerPipeline:
     async def answer_stream(
         self, question: str, history: list[str], ctx: UserContext
     ) -> AsyncIterator[Event]:
+        """Run one turn, traced (Logfire / LangSmith) when tracing is configured."""
+        tr = tracing.start_answer(
+            {
+                "question": tracing.text(question)
+                if ctx.triage_answer is None
+                else "(medicine check)"
+            },
+            {"role": ctx.role, "history_turns": len(history), "elevated_risk": ctx.elevated_risk},
+        )
+        rec: AnswerRecord | None = None
+        try:
+            async for ev in self._answer_stream(question, history, ctx, tr):
+                if ev.type == "result":
+                    rec = ev.data["record"]  # type: ignore[assignment]
+                yield ev
+        finally:
+            if rec is None:
+                tr.end(status="aborted")
+            else:
+                tr.end(
+                    status=rec.status,
+                    reason=rec.refusal_reason,
+                    model=rec.model,
+                    citations=len(rec.citations),
+                    latency_ms=rec.latency_ms,
+                    cached=rec.cached,
+                    answer=tracing.text(rec.content),
+                )
+
+    async def _answer_stream(
+        self, question: str, history: list[str], ctx: UserContext, tr: tracing.AnswerTrace
+    ) -> AsyncIterator[Event]:
         t0 = time.perf_counter()
 
         def done(rec: AnswerRecord) -> Event:
@@ -115,13 +148,22 @@ class AnswerPipeline:
                 res = start(_symptom(state), elevated_risk=True)
             else:
                 step, choices = ctx.triage_answer
-                res = await self.medicine.answer(state, step, choices, ctx.country)
+                with tr.step("medicine_check", step=step, choices=list(choices)) as st:
+                    res = await self.medicine.answer(state, step, choices, ctx.country)
+                    st.set(status=res.status)
             for ev in _step_events(res):
                 yield ev
             yield done(_step_record(res))
             return
 
-        decision = check_input(question, role=ctx.role, elevated_risk=ctx.elevated_risk)
+        with tr.step("input_guard") as st:
+            decision = check_input(question, role=ctx.role, elevated_risk=ctx.elevated_risk)
+            st.set(
+                action=decision.action.value,
+                reason=decision.reason,
+                flags=sorted(decision.flags),
+                pii=list(decision.pii_kinds),
+            )
 
         if decision.action == Action.crisis:
             payload = crisis_payload(ctx.country)
@@ -187,8 +229,14 @@ class AnswerPipeline:
 
         yield Event("status", {"stage": "retrieving"})
         allow_dosing = ctx.role in ("provider", "admin")
-        with timed("retrieve"):
+        with timed("retrieve"), tr.step("retrieve", run_type="retriever") as st:
             result = await self.retriever.retrieve(plan, allow_dosing=allow_dosing)
+            st.set(
+                top_score=round(result.top_score, 4),
+                candidates=result.candidates,
+                doc_ids=[p.doc_id for p in result.passages],
+                abstain=not result.passages or result.top_score < self.abstain_threshold,
+            )
         if not result.passages or result.top_score < self.abstain_threshold:
             msg = REFUSALS["no_sources"]
             yield Event("refusal", {"reason": "no_sources", "message": msg})
@@ -196,12 +244,21 @@ class AnswerPipeline:
             return
 
         yield Event("status", {"stage": "checking sources"})
-        with timed("generate"):
+        with timed("generate"), tr.step("generate", passages=len(result.passages)) as st:
             draft = await self.generator.generate(plan.standalone, result.passages, role=ctx.role)
-        with timed("verify"):
+            st.set(
+                model=draft.model,
+                sentences=len(draft.sentences),
+                insufficient=draft.insufficient,
+                notes=list(draft.notes),
+                tokens_in=draft.tokens_in,
+                tokens_out=draft.tokens_out,
+            )
+        with timed("verify"), tr.step("verify") as st:
             checked = verify(
                 draft, result.passages, role=ctx.role, threshold=self.groundedness_threshold
             )
+            st.set(ok=checked.ok, reason=checked.reason, dropped=checked.dropped)
         if not checked.ok:
             reason = checked.reason or "unverified"
             msg = REFUSALS.get(reason, REFUSALS["unverified"])

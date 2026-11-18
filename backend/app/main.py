@@ -12,6 +12,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.core import tracing
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging, request_id_var
@@ -31,11 +32,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
         container = Container(settings)
         await container.startup()
+        tracing.instrument_engine(container.engine)
         app.state.container = container
         try:
             yield
         finally:
             await container.shutdown()
+            tracing.shutdown()
 
     app = FastAPI(
         title=f"{settings.app_name} API",
@@ -45,6 +48,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         redoc_url=None,
     )
     app.state.settings = settings
+    tracing.configure(settings, app)
 
     app.add_middleware(
         CORSMiddleware,
