@@ -41,3 +41,8 @@ async def test_inmemory_kv_ttl_and_incr():
     now[0] = 11
     assert await kv.get("k") is None
     assert await kv.incr("k", ttl_seconds=10) == 1
+
+
+async def test_readyz_reports_free_mode_without_keys(client):
+    r = await client.get("/readyz")
+    assert r.json()["llm"] == {"models": [], "fallback": "extractive"}

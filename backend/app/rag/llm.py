@@ -142,16 +142,78 @@ class OllamaChat(_HTTPChat):
             raise _shape_error(exc) from exc
 
 
-class FallbackChat:
-    """Try the primary model; on failure use the secondary (vendor outage protection)."""
+class GeminiChat(_HTTPChat):
+    """Google Gemini via the Generative Language API (works with a free AI Studio key).
 
-    def __init__(self, primary: ChatModel, secondary: ChatModel) -> None:
-        self.primary, self.secondary = primary, secondary
-        self.name = primary.name
+    Free-tier note: Google may use free-tier prompts to improve its products, so use it for
+    testing with sample questions, not with real patients' messages.
+    """
+
+    def __init__(
+        self, api_key: str, model: str = "gemini-3.1-flash-lite", timeout: float = 30
+    ) -> None:
+        super().__init__(
+            "https://generativelanguage.googleapis.com/v1beta", {"x-goog-api-key": api_key}, timeout
+        )
+        self.name = model
 
     async def complete(self, system: str, user: str, *, json_mode: bool = True) -> ChatResult:
+        config: dict[str, object] = {"temperature": 0, "maxOutputTokens": 1024}
+        if json_mode:
+            config["responseMimeType"] = "application/json"
+        data = await self._post(
+            f"/models/{self.name}:generateContent",
+            {
+                "system_instruction": {"parts": [{"text": system}]},
+                "contents": [{"role": "user", "parts": [{"text": user}]}],
+                "generationConfig": config,
+            },
+        )
         try:
-            return await self.primary.complete(system, user, json_mode=json_mode)
-        except LLMError:
-            logger.warning("primary LLM failed; using fallback %s", self.secondary.name)
-            return await self.secondary.complete(system, user, json_mode=json_mode)
+            candidates = data.get("candidates") or []
+            if not candidates:  # blocked by the provider's safety filter, or empty
+                reason = (data.get("promptFeedback") or {}).get("blockReason", "no candidates")  # type: ignore[union-attr]
+                raise LLMError(f"Gemini returned no answer: {reason}")
+            parts = candidates[0].get("content", {}).get("parts") or []  # type: ignore[union-attr]
+            text = "".join(str(p.get("text", "")) for p in parts if isinstance(p, dict))
+            if not text:
+                raise LLMError("Gemini returned an empty answer")
+            usage = data.get("usageMetadata") or {}
+            return ChatResult(
+                text,
+                self.name,
+                int(usage.get("promptTokenCount", 0)),  # type: ignore[union-attr]
+                int(usage.get("candidatesTokenCount", 0)),  # type: ignore[union-attr]
+            )
+        except (KeyError, IndexError, TypeError, ValueError, AttributeError) as exc:
+            raise _shape_error(exc) from exc
+
+
+class FallbackChat:
+    """Try each model in order; move to the next on failure (outage or rate limit)."""
+
+    def __init__(self, *models: ChatModel) -> None:
+        if not models:
+            raise ValueError("FallbackChat needs at least one model")
+        self.models = models
+        self.name = models[0].name
+
+    @property
+    def primary(self) -> ChatModel:
+        return self.models[0]
+
+    async def complete(self, system: str, user: str, *, json_mode: bool = True) -> ChatResult:
+        last: LLMError | None = None
+        for model in self.models:
+            try:
+                return await model.complete(system, user, json_mode=json_mode)
+            except LLMError as exc:
+                logger.warning("LLM %s failed (%s); trying the next one", model.name, exc)
+                last = exc
+        raise last or LLMError("no model available")
+
+    async def aclose(self) -> None:
+        for model in self.models:
+            close = getattr(model, "aclose", None)
+            if close is not None:
+                await close()

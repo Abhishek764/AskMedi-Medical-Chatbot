@@ -108,6 +108,11 @@ class LLMGenerator:
         self.chat = chat
         self.name = chat.name
 
+    async def aclose(self) -> None:
+        close = getattr(self.chat, "aclose", None)
+        if close is not None:
+            await close()
+
     async def generate(self, question: str, passages: list[Retrieved], *, role: str) -> Draft:
         try:
             res = await self.chat.complete(
@@ -118,6 +123,28 @@ class LLMGenerator:
         draft = parse_draft(res.text, self.name)
         draft.tokens_in, draft.tokens_out = res.tokens_in, res.tokens_out
         return draft
+
+
+class ResilientGenerator:
+    """An LLM generator that falls back to extractive answers when every model fails
+    (outage, rate limit, blocked output, bad JSON), so chat keeps working on a free tier."""
+
+    def __init__(self, primary: Generator, fallback: Generator) -> None:
+        self.primary, self.fallback = primary, fallback
+        self.name = primary.name
+
+    async def generate(self, question: str, passages: list[Retrieved], *, role: str) -> Draft:
+        draft = await self.primary.generate(question, passages, role=role)
+        if draft.notes and draft.insufficient:  # llm_error or bad_json, not a real "no answer"
+            backup = await self.fallback.generate(question, passages, role=role)
+            backup.notes = [*draft.notes, "fell_back_to_extractive"]
+            return backup
+        return draft
+
+    async def aclose(self) -> None:
+        close = getattr(self.primary, "aclose", None)
+        if close is not None:
+            await close()
 
 
 def parse_draft(text: str, model: str) -> Draft:

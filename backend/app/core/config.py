@@ -66,13 +66,19 @@ class Settings(BaseSettings):
     context_k: int = 5
     abstain_threshold: float | None = None  # None -> the reranker's own default
 
-    # Generation
-    llm_provider: Literal["extractive", "ollama", "openai", "anthropic"] = "extractive"
-    llm_model: str = "gpt-4o-mini"
+    # Generation. "auto": the first provider with a key, in the order OpenAI, Gemini, Claude,
+    # the others as fallbacks; no key at all -> extractive (free, no model). Whatever the
+    # provider, if every model fails the answer falls back to extractive.
+    llm_provider: Literal["auto", "extractive", "ollama", "openai", "gemini", "anthropic"] = "auto"
     llm_timeout_seconds: float = 30.0
-    ollama_url: str = "http://localhost:11434"
     openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    gemini_api_key: str | None = None  # free key: https://aistudio.google.com/apikey
+    gemini_model: str = "gemini-3.1-flash-lite"
     anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-haiku-5-5"
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.1:8b"
     cohere_api_key: str | None = None
     groundedness_threshold: float = 0.5
 
@@ -98,6 +104,8 @@ class Settings(BaseSettings):
             raise ValueError("OPENAI_API_KEY required when LLM_PROVIDER=openai")
         if self.llm_provider == "anthropic" and not self.anthropic_api_key:
             raise ValueError("ANTHROPIC_API_KEY required when LLM_PROVIDER=anthropic")
+        if self.llm_provider == "gemini" and not self.gemini_api_key:
+            raise ValueError("GEMINI_API_KEY required when LLM_PROVIDER=gemini")
         if self.rerank_provider == "cohere" and not self.cohere_api_key:
             raise ValueError("COHERE_API_KEY required when RERANK_PROVIDER=cohere")
         return self
