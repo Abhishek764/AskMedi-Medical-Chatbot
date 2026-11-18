@@ -1,6 +1,7 @@
 import { readEvents } from './sse'
 import {
   ApiError,
+  type AdminMetrics,
   type AuthResponse,
   type ChatEvent,
   type Comparison,
@@ -139,6 +140,8 @@ export class ApiClient {
       method: 'POST',
       body: JSON.stringify({ rating, reason }),
     })
+
+  adminMetrics = (days: number) => this.json<AdminMetrics>(`/v1/admin/metrics?days=${days}`)
 
   listPolicies = () => this.json<PolicySummary[]>('/v1/policies')
   comparePolicies = (ids: string[]) =>

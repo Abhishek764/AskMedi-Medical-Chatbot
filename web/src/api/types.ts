@@ -158,6 +158,30 @@ export interface PolicyAnswer {
   message: string | null
 }
 
+export interface DailyMetrics {
+  date: string
+  answers: number
+  by_status: Record<string, number>
+  avg_latency_ms: number | null
+  safety_events: number
+}
+
+/** GET /v1/admin/metrics (admin only). */
+export interface AdminMetrics {
+  window_days: number
+  usage: { answers: number; active_conversations: number; users_total: number; new_users: number }
+  answers_by_status: Record<string, number>
+  answer_rate: number | null
+  refusals_by_reason: Record<string, number>
+  safety_events: Record<string, number>
+  latency_ms: { p50: number | null; p95: number | null; max: number | null }
+  tokens: { in: number; out: number }
+  feedback: { up: number; down: number; helpful_rate: number | null; coverage: number | null }
+  corpus: { documents_by_source: Record<string, number>; documents: number }
+  daily: DailyMetrics[]
+  llm: { models: string[]; fallback: string }
+}
+
 export class ApiError extends Error {
   readonly status: number
   readonly code: string

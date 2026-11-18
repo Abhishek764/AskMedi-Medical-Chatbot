@@ -148,6 +148,11 @@ export default function Chat() {
             <Link to="/policies" className="text-teal-700 hover:underline">
               Policy demo
             </Link>
+            {user?.role === 'admin' ? (
+              <Link to="/admin" className="text-teal-700 hover:underline">
+                Dashboard
+              </Link>
+            ) : null}
             <button onClick={() => logout().then(() => navigate('/'))} className="text-slate-600 hover:underline">
               Sign out
             </button>
