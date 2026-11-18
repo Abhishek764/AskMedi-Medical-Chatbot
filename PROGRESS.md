@@ -13,7 +13,7 @@ Read this first when resuming. Newest entries at the top. Branch: `v2/backend`.
 | 5 | Metrics: `docs/METRICS.md` + live `GET /v1/admin/metrics` | done |
 | 6 | Re-run evals on the bigger corpus; update scorecard + METRICS.md numbers | todo (corpus now 1,677 docs) |
 | 6b | Medicine check: 3 questions → OTC medicines with label dose (backend + web) | done, needs clinician review (`docs/security-analysis.md` §8) |
-| 6c | Design system artifact (from web app) | done:  |
+| 6c | Design system artifact (from web app) | done |
 | 6d | Gemini free tier (LLM_PROVIDER=auto: OpenAI → Gemini → Claude → extractive) | done (gemini-3.1-flash-lite) |
 | 6e | Insurance policy demo (FEMA SFIP: compare, diff, cited Q&A) + CI eval gate + ablation | done |
 | 7 | End-to-end check: `backend/scripts/smoke.py` (chat, guards, medicine check, policies) | done 2026-11-18, all pass |
