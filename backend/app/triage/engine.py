@@ -176,13 +176,6 @@ def decide(state: TriageState) -> Outcome:
             symptom,
             reasons=(f"Medicine choice and dose {why} need a pharmacist or doctor.",),
         )
-    doctor = [
-        flag_by_id[f].label if f in flag_by_id else LONG.label.format(days=symptom.max_days)
-        for f in flags
-    ]
-    if doctor:
-        return Outcome("doctor", symptom, reasons=tuple(doctor))
-
     excluded: dict[str, str] = {}
     for key in [*health, who]:
         if key in EXCLUSIONS:
@@ -191,6 +184,13 @@ def decide(state: TriageState) -> Outcome:
                 excluded.setdefault(m, reason)
     allowed = tuple(m for m in symptom.medicines if m not in excluded)
     shown_excluded = tuple((m, excluded[m]) for m in symptom.medicines if m in excluded)
+
+    doctor = [
+        flag_by_id[f].label if f in flag_by_id else LONG.label.format(days=symptom.max_days)
+        for f in flags
+    ]
+    if doctor:  # also report health exclusions, so the user sees every reason at once
+        return Outcome("doctor", symptom, excluded=shown_excluded, reasons=tuple(doctor))
     if not allowed:
         return Outcome(
             "pharmacist",

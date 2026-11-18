@@ -38,8 +38,13 @@ INTRO = (
 )
 
 DOCTOR = (
-    "Based on your answers, please see a doctor rather than treating this yourself, "
-    "because of: {reasons}. A doctor can find the cause and the right treatment."
+    "I can't suggest a medicine for {label} with these answers. The medicine labels "
+    "themselves say to stop and see a doctor when there is: {reasons}. Please see a doctor "
+    "today: they can find the cause and give a treatment that is safe for you."
+)
+DOCTOR_URGENT = (
+    "Go to an emergency department now if you get confusion, a stiff neck, trouble "
+    "breathing, a rash that doesn't fade when pressed, or you can't keep fluids down."
 )
 PHARMACIST = "{reason} Please ask a pharmacist or doctor before taking anything for {label}."
 NOT_IN_ELEVATED = (
@@ -122,7 +127,10 @@ class MedicineCheck:
                 [("emergency", payload)], "emergency", str(payload["message"]), "triage_emergency"
             )
         if out.kind == "doctor":
-            msg = DOCTOR.format(reasons="; ".join(r.lower() for r in out.reasons))
+            msg = DOCTOR.format(label=label, reasons="; ".join(r.lower() for r in out.reasons))
+            if out.excluded:
+                msg += " Also: " + _excluded_text(out.excluded)
+            msg += " " + DOCTOR_URGENT
             return StepResult(
                 [("refusal", {"reason": "see_doctor", "message": msg})],
                 "refused",

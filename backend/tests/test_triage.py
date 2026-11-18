@@ -119,3 +119,11 @@ def test_state_round_trip_and_tampering():
     assert TriageState.from_dict(s.to_dict()) == s
     assert TriageState.from_dict({"symptom": "made-up", "step": 1, "answers": {}}) is None
     assert TriageState.from_dict({"symptom": "cough", "step": 9, "answers": {}}) is None
+
+
+def test_doctor_outcome_also_lists_health_exclusions():
+    # Red flag + liver disease + blood thinner: the user should see every reason, not only the flag.
+    out = run("fever", "adult", ["long"], ["liver", "thinners"])
+    assert out.kind == "doctor"
+    excluded = {m for m, _ in out.excluded}
+    assert ACETAMINOPHEN in excluded and IBUPROFEN in excluded
