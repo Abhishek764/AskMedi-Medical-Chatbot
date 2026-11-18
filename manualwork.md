@@ -9,7 +9,7 @@ exactly what to type or click, and how to know it worked. Commands run in **Git 
 | 1 | Review the eval questions | 45 min | Makes the retrieval numbers trustworthy enough to quote |
 | 2 | Run the app and click through it | 20 min | Confirms the website works end to end on your machine |
 | 3 | Build the insurance policy library | 5 min | Needed before the policy demo page shows anything |
-| 4 | Add your OpenAI key (when you have it) | 10 min | Better-written answers; unlocks the answer-quality evals |
+| 4 | Rotate Gemini key; add OpenAI key later | 5 min | Better-written answers; unlocks the answer-quality evals |
 | 5 | (Optional) Add a commercial specimen policy | 20 min | Makes the Outmarket demo closer to their product |
 | 6 | Record the 2-minute Loom demo | 30 min | Goes in your email |
 | 7 | Put the real numbers in your email | 10 min | Only quote what the tools measured |
@@ -95,21 +95,29 @@ saves them to `data/policies/`, and indexes them. **Done when** it prints three 
 git add data/policies && git commit -m "feat(data): add parsed FEMA flood policy forms"
 ```
 
-## 4. Add your OpenAI key (10 min, when you have it)
+## 4. Answer writer: Gemini now, OpenAI later (5 min)
 
-1. Create a key at https://platform.openai.com/api-keys and add a small spending limit
-   (Settings → Limits, e.g. $10/month).
-2. Open `backend/.env` and add or change these lines:
+Already done: `backend/.env` has `LLM_PROVIDER=auto` and your Gemini free-tier key, so answers
+are written by `gemini-3.1-flash-lite` today. If Gemini fails or hits its rate limit, the app
+falls back to extractive answers (copied source sentences) on its own.
+
+1. **Rotate the Gemini key.** It was pasted in chat. Make a new one at
+   https://aistudio.google.com/apikey, delete the old one, and put the new one in `backend/.env`
+   as `GEMINI_API_KEY=...`.
+2. Free-tier prompts may be used by Google to improve its products. Test with sample
+   questions only, never real patients' messages.
+3. When you have OpenAI credit: create a key at https://platform.openai.com/api-keys, set a
+   spending limit (Settings → Limits, e.g. $10/month), and add it to `backend/.env`:
 
    ```
    OPENAI_API_KEY=sk-...your key...
-   LLM_PROVIDER=openai
-   LLM_MODEL=gpt-4o-mini
    ```
 
-3. **Never commit `.env`.** Check with `git status`: `.env` must not appear.
-4. Restart the backend and ask a question — answers now read like prose, still with citations.
-5. Re-run the evals and compare with the free-mode results:
+   Leave `LLM_PROVIDER=auto`. OpenAI becomes primary and Gemini its fallback, with no code change.
+4. **Never commit `.env`.** Check with `git status`: `.env` must not appear.
+5. Restart the backend. Check which model is live: `curl http://127.0.0.1:8000/readyz` shows
+   `"llm": {"models": [...]}` (dev only).
+6. Re-run the evals and compare with the free-mode results:
 
    ```bash
    cd backend
@@ -178,7 +186,11 @@ Ask them to mark anything unsafe or missing. Each change becomes a row in
 
 ## 10. Deploy (half a day)
 
-1. **Qdrant Cloud:** create a free cluster at https://cloud.qdrant.io, copy its URL and API key.
+1. **Qdrant Cloud:** your cluster already exists (sa-east-1). In `backend/.env` the URL is a
+   commented line. Copy the **full** API key from https://cloud.qdrant.io (Data Access
+   Control → API keys; the screenshot cut it off), paste it into `QDRANT_API_KEY=`, and
+   remove the leading `# ` from both `QDRANT_URL` and `QDRANT_API_KEY`. Then do step 4 below
+   to load the data. Until then the app uses the local `qdrant_data/` folder.
 2. **Render:** sign in at https://render.com → *New* → *Blueprint* → pick this repository.
    Render reads `render.yaml` and creates the API, worker, PostgreSQL and Key Value.
 3. In the Render dashboard set the secret values: `QDRANT_URL`, `QDRANT_API_KEY`, and later
