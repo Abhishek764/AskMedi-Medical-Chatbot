@@ -26,6 +26,9 @@ export default function Chat() {
   const [menuOpen, setMenuOpen] = useState(false)
   const abort = useRef<AbortController | null>(null)
   const bottom = useRef<HTMLDivElement>(null)
+  // A conversation this page just created and is streaming into: its URL change must not
+  // reload it from the server, or the empty server copy would replace the live reply.
+  const justCreated = useRef<string | null>(null)
 
   const loadList = useCallback(() => api.listConversations().then(setConversations).catch(() => {}), [])
   useEffect(() => {
@@ -35,6 +38,10 @@ export default function Chat() {
   useEffect(() => {
     setError(null)
     if (!id) return setTurns([])
+    if (id === justCreated.current) {
+      justCreated.current = null
+      return
+    }
     api
       .getConversation(id)
       .then((c) => setTurns(turnsFromMessages(c.messages)))
@@ -55,6 +62,7 @@ export default function Chat() {
     try {
       if (!convId) {
         convId = (await api.createConversation()).id
+        justCreated.current = convId
         navigate(`/chat/${convId}`, { replace: true })
       }
       const key = crypto.randomUUID()
