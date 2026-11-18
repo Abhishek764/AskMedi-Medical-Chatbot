@@ -18,6 +18,10 @@ Read this first when resuming. Newest entries at the top. Branch: `v2/backend`.
 | 6e | Insurance policy demo (FEMA SFIP: compare, diff, cited Q&A) + CI eval gate + ablation | done |
 | 7 | End-to-end check: `backend/scripts/smoke.py` (chat, guards, medicine check, policies) | done 2026-11-18, all pass |
 | 7b | Hard-set ablation (`eval_ablation --golden ../evals/golden/v2_hard.jsonl`, stop API first) | todo |
+| 7c | Observability: Prometheus `/metrics`, Grafana stack (`deploy/observability`), `/admin` dashboard, `app.admin promote` | done 2026-11-18 |
+| 7d | Tracing: Logfire + LangSmith step traces (`app/core/tracing.py`), off until keys set | done (keys: manualwork step 11) |
+| 7e | NeMo Guardrails input/output rails (`GUARDRAILS_PROVIDER=nemo`, `backend/guardrails/`) | done, on in local .env |
+| 7f | Ragas suite `app.eval_ragas`: hard set ID recall 0.872 / precision 0.296 (47 q) | done; judged run limited by Gemini free tier |
 | 8 | Refresh Archify diagram (web app built, docs/ paths) | todo |
 
 Note: when redirecting ingest output to a log, set `PYTHONUNBUFFERED=1` or the log looks frozen.
@@ -35,7 +39,7 @@ review of `evals/golden/v2_corpus.jsonl`, clinician review of crisis copy.
 
 ## How to resume
 ```bash
-cd backend && uv sync --extra local && uv run pytest          # backend green?
+cd backend && uv sync --extra local --extra evals --extra rails && uv run pytest          # backend green?
 uv run uvicorn app.main:create_app --factory --port 8000      # API
 cd ../web && npm install && npm run dev                       # web on :5173
 cd ../backend && uv run python scripts/smoke.py               # end-to-end smoke

@@ -63,13 +63,16 @@ def _load(path: Path, limit: int | None) -> list[dict[str, Any]]:
     return rows[:limit] if limit else rows
 
 
-async def _sample(container: Container, q: str) -> dict[str, Any]:
-    """Retrieve (as the pipeline does) and answer; collect what Ragas needs."""
+async def _sample(container: Container, q: str, answer_it: bool) -> dict[str, Any]:
+    """Retrieve (as the pipeline does) and, for judge metrics, answer; collect what Ragas needs."""
     plan = plan_query(q, [])
     res = await container.retriever.retrieve(plan, allow_dosing=False)
     doc_ids = list(dict.fromkeys(p.doc_id for p in res.passages))
     contexts = [p.parent_text or p.text for p in res.passages]
-    status, answer = "error", ""
+    status, answer = "not_run", ""
+    if not answer_it:  # ID metrics only need retrieval: no LLM calls
+        return {"doc_ids": doc_ids, "contexts": contexts, "status": status, "answer": answer}
+    status = "error"
     async for ev in container.pipeline.answer_stream(q, [], UserContext()):
         if ev.type == "result":
             rec = ev.data["record"]
@@ -101,7 +104,7 @@ async def run(container: Container, golden: Path, limit: int | None, judge: bool
 
     async def one(row: dict[str, Any]) -> dict[str, Any]:
         q = str(row["question"])
-        s = await _sample(container, q)
+        s = await _sample(container, q, answer_it=bool(judge_metrics))
         sample = SingleTurnSample(
             user_input=q,
             # Ragas rejects an empty list; a blank id scores 0, which is right for no retrieval
@@ -160,7 +163,7 @@ async def run(container: Container, golden: Path, limit: int | None, judge: bool
             k: sum(isinstance(r.get(k), float) for r in results)
             for k in ("faithfulness", "context_relevance")
         },
-        "answered": sum(r["status"] == "complete" for r in results),
+        "answered": sum(r["status"] == "complete" for r in results) if judge_metrics else None,
     }
     return {"summary": summary, "rows": results}
 
@@ -182,8 +185,9 @@ def _report(data: dict[str, Any]) -> str:
     lines = [
         "# Ragas evaluation",
         "",
-        f"Golden set `{s['golden']}`, {s['rows']} questions, {s['answered']} answered. "
-        f"Judge: {s['judge_model'] or 'none (ID metrics only)'}. {s['seconds']} s.",
+        f"Golden set `{s['golden']}`, {s['rows']} questions"
+        + (f", {s['answered']} answered. " if s["answered"] is not None else " (retrieval only). ")
+        + f"Judge: {s['judge_model'] or 'none (ID metrics only)'}. {s['seconds']} s.",
         "",
         "| Metric | Score | Rows |",
         "|---|---|---|",

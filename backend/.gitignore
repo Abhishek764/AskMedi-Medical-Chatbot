@@ -13,3 +13,4 @@ eval_run.log
 ablation_run.log
 server.log
 web.log
+ragas_run.log

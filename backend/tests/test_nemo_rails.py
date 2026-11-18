@@ -75,6 +75,7 @@ def _wrapper(check, *, fail_closed: bool = False, timeout: float = 1.0) -> NemoR
 
 
 async def test_nemo_wrapper_maps_status():
+    pytest.importorskip("nemoguardrails")
     from nemoguardrails.rails.llm.options import RailsResult, RailStatus
 
     async def blocked(messages, rail_types):

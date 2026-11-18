@@ -1,0 +1,772 @@
+{
+  "summary": {
+    "golden": "v2_hard.jsonl",
+    "rows": 47,
+    "judge_model": null,
+    "seconds": 433.9,
+    "metrics": {
+      "id_context_recall": 0.8723,
+      "id_context_precision": 0.2965,
+      "faithfulness": null,
+      "context_relevance": null
+    },
+    "judged_rows": {
+      "faithfulness": 0,
+      "context_relevance": 0
+    },
+    "answered": null
+  },
+  "rows": [
+    {
+      "id": "v2h001",
+      "question": "what causes high bp",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:blood-pressure-medicines",
+        "medlineplus:high-blood-pressure",
+        "medlineplus:high-blood-pressure-in-pregnancy"
+      ],
+      "expected": [
+        "medlineplus:high-blood-pressure"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h002",
+      "question": "signs of sugar disease in adults",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:diabetes-type-1",
+        "medlineplus:hypoglycemia",
+        "medlineplus:hyperglycemia",
+        "pmc:PMC9858810",
+        "medlineplus:diabetes-complications"
+      ],
+      "expected": [
+        "medlineplus:diabetes-type-2",
+        "medlineplus:diabetes"
+      ],
+      "id_context_recall": 0.0,
+      "id_context_precision": 0.0
+    },
+    {
+      "id": "v2h003",
+      "question": "warning signs of a heart attack in women",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:heart-disease-in-women",
+        "medlineplus:heart-attack",
+        "openfda:1ab45be4-b2b9-4374-95ab-620e0f90fb70"
+      ],
+      "expected": [
+        "medlineplus:heart-attack"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h004",
+      "question": "why does acid come up my throat at night",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:gerd",
+        "medlineplus:heartburn",
+        "medlineplus:hiatal-hernia",
+        "medlineplus:esophagus-disorders",
+        "medlineplus:throat-disorders"
+      ],
+      "expected": [
+        "medlineplus:gerd",
+        "medlineplus:heartburn"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.4
+    },
+    {
+      "id": "v2h005",
+      "question": "sneezing and runny nose every spring",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:hay-fever",
+        "openfda:00fa0879-a086-4a92-b184-4c7c6821b15f",
+        "medlineplus:common-cold",
+        "openfda:07460764-43fa-49fd-ae77-d4571cb9f944",
+        "openfda-otc:cetirizine-hydrochloride"
+      ],
+      "expected": [
+        "medlineplus:hay-fever"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h006",
+      "question": "how is TB spread",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:tuberculosis",
+        "pmc:PMC10828526",
+        "pmc:PMC8570039"
+      ],
+      "expected": [
+        "medlineplus:tuberculosis"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h007",
+      "question": "breakbone fever symptoms",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:dengue",
+        "medlineplus:tailbone-disorders",
+        "pmc:PMC4754000",
+        "medlineplus:bone-infections",
+        "medlineplus:hay-fever"
+      ],
+      "expected": [
+        "medlineplus:dengue"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h008",
+      "question": "mosquito disease with chills and shivering",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:mosquito-bites",
+        "medlineplus:malaria",
+        "pmc:PMC11654470",
+        "pmc:PMC4754000"
+      ],
+      "expected": [
+        "medlineplus:malaria"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h009",
+      "question": "burning when peeing and need to pee often",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:prostate-cancer",
+        "medlineplus:vulvar-disorders",
+        "medlineplus:hyperglycemia",
+        "medlineplus:urinary-tract-infections",
+        "medlineplus:diabetes"
+      ],
+      "expected": [
+        "medlineplus:urinary-tract-infections"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h010",
+      "question": "sharp pain in my side from stones",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:kidney-stones",
+        "medlineplus:gallstones",
+        "medlineplus:pelvic-pain",
+        "medlineplus:non-drug-pain-management",
+        "medlineplus:back-pain"
+      ],
+      "expected": [
+        "medlineplus:kidney-stones"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h011",
+      "question": "wear and tear arthritis in the knees",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:osteoarthritis",
+        "pmc:PMC9124040",
+        "medlineplus:rheumatoid-arthritis",
+        "medlineplus:arthritis",
+        "medlineplus:knee-injuries-and-disorders"
+      ],
+      "expected": [
+        "medlineplus:osteoarthritis"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h012",
+      "question": "underactive thyroid tiredness and weight gain",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:hypothyroidism",
+        "medlineplus:hyperthyroidism",
+        "pmc:PMC11544504"
+      ],
+      "expected": [
+        "medlineplus:hypothyroidism"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h013",
+      "question": "low hemoglobin causes",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC10138976",
+        "pmc:PMC13466916",
+        "medlineplus:anemia"
+      ],
+      "expected": [
+        "medlineplus:anemia",
+        "medlineplus:iron"
+      ],
+      "id_context_recall": 0.5,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h014",
+      "question": "one-sided throbbing headache with nausea and light sensitivity",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:migraine",
+        "pmc:PMC5836048",
+        "medlineplus:fibromyalgia",
+        "openfda:022b0913-f683-4af8-a862-f81b315909b2"
+      ],
+      "expected": [
+        "medlineplus:migraine"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h015",
+      "question": "wheezing and tight chest triggered by dust",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:acute-bronchitis",
+        "medlineplus:asthma",
+        "medlineplus:asthma-in-children"
+      ],
+      "expected": [
+        "medlineplus:asthma"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h016",
+      "question": "smoker's lung disease that makes you breathless",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:breathing-problems",
+        "medlineplus:copd",
+        "medlineplus:lung-diseases",
+        "medlineplus:pulmonary-fibrosis",
+        "medlineplus:interstitial-lung-diseases"
+      ],
+      "expected": [
+        "medlineplus:copd"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h017",
+      "question": "stomach cramps with loose motions some days and constipation on others",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:constipation",
+        "medlineplus:diarrhea",
+        "medlineplus:irritable-bowel-syndrome",
+        "medlineplus:c-diff-infections",
+        "medlineplus:diverticulosis-and-diverticulitis"
+      ],
+      "expected": [
+        "medlineplus:irritable-bowel-syndrome"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h018",
+      "question": "red scaly patches on elbows and knees",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:psoriatic-arthritis",
+        "medlineplus:psoriasis",
+        "medlineplus:eczema",
+        "medlineplus:infectious-arthritis",
+        "medlineplus:arthritis"
+      ],
+      "expected": [
+        "medlineplus:psoriasis"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h019",
+      "question": "lung infection with fever and cough with phlegm",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:pneumonia",
+        "openfda-otc:guaifenesin",
+        "pmc:PMC10502314",
+        "medlineplus:acute-bronchitis",
+        "medlineplus:respiratory-syncytial-virus-infections"
+      ],
+      "expected": [
+        "medlineplus:pneumonia"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h020",
+      "question": "face drooping and arm weakness suddenly",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:hemorrhagic-stroke",
+        "medlineplus:ischemic-stroke",
+        "medlineplus:acute-flaccid-myelitis",
+        "medlineplus:stroke",
+        "medlineplus:bell-s-palsy"
+      ],
+      "expected": [
+        "medlineplus:stroke"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h021",
+      "question": "irregular heartbeat afib",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:atrial-fibrillation",
+        "medlineplus:arrhythmia",
+        "pmc:PMC9368187"
+      ],
+      "expected": [
+        "medlineplus:atrial-fibrillation"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.3333333333333333
+    },
+    {
+      "id": "v2h022",
+      "question": "sunshine vitamin deficiency",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC11242131",
+        "medlineplus:vitamin-d-deficiency",
+        "pmc:PMC8067314"
+      ],
+      "expected": [
+        "medlineplus:vitamin-d"
+      ],
+      "id_context_recall": 0.0,
+      "id_context_precision": 0.0
+    },
+    {
+      "id": "v2h023",
+      "question": "itchy blisters all over a child's body",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:itching",
+        "medlineplus:chickenpox",
+        "medlineplus:shingles",
+        "medlineplus:eczema",
+        "medlineplus:rashes"
+      ],
+      "expected": [
+        "medlineplus:chickenpox"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h024",
+      "question": "painful band of rash on one side of the body",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:shingles",
+        "medlineplus:lyme-disease",
+        "medlineplus:rashes",
+        "medlineplus:itching"
+      ],
+      "expected": [
+        "medlineplus:shingles"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h025",
+      "question": "big toe joint suddenly red, hot and swollen at night",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:gout",
+        "medlineplus:infectious-arthritis",
+        "medlineplus:lupus",
+        "medlineplus:endocarditis"
+      ],
+      "expected": [
+        "medlineplus:gout"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h026",
+      "question": "blocked nose and pain around the cheeks and forehead",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:facial-injuries-and-disorders",
+        "medlineplus:sinusitis",
+        "medlineplus:rosacea",
+        "medlineplus:frostbite",
+        "medlineplus:nose-injuries-and-disorders"
+      ],
+      "expected": [
+        "medlineplus:sinusitis"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h027",
+      "question": "hep B how do you get it",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:histoplasmosis",
+        "medlineplus:hepatitis-b",
+        "medlineplus:infectious-diseases",
+        "medlineplus:meningococcal-disease"
+      ],
+      "expected": [
+        "medlineplus:hepatitis-b"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h028",
+      "question": "feeling low and lost interest in everything for weeks",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:depression",
+        "medlineplus:stress",
+        "medlineplus:sexual-problems-in-men",
+        "medlineplus:drugs-and-young-people",
+        "medlineplus:seasonal-affective-disorder"
+      ],
+      "expected": [
+        "medlineplus:depression"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h029",
+      "question": "can't fall asleep at night",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:insomnia",
+        "medlineplus:sleep-disorders"
+      ],
+      "expected": [
+        "medlineplus:insomnia"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.5
+    },
+    {
+      "id": "v2h030",
+      "question": "pimples on the face in teenagers",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:acne",
+        "pmc:PMC12062723",
+        "medlineplus:rosacea",
+        "pmc:PMC8005239"
+      ],
+      "expected": [
+        "medlineplus:acne"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h031",
+      "question": "runny nose, sore throat and sneezing from a virus",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:common-cold",
+        "medlineplus:respiratory-syncytial-virus-infections",
+        "openfda:00fa0879-a086-4a92-b184-4c7c6821b15f",
+        "medlineplus:flu",
+        "medlineplus:hay-fever"
+      ],
+      "expected": [
+        "medlineplus:common-cold"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h032",
+      "question": "who should get the seasonal influenza shot",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC10176301",
+        "pmc:PMC6165116"
+      ],
+      "expected": [
+        "medlineplus:flu"
+      ],
+      "id_context_recall": 0.0,
+      "id_context_precision": 0.0
+    },
+    {
+      "id": "v2h033",
+      "question": "irregular periods, extra facial hair and cysts on the ovaries",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:polycystic-ovary-syndrome",
+        "medlineplus:ovarian-cysts",
+        "medlineplus:ovarian-disorders",
+        "medlineplus:primary-ovarian-insufficiency"
+      ],
+      "expected": [
+        "medlineplus:polycystic-ovary-syndrome"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h034",
+      "question": "health risks of a BMI over 30",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC5409942",
+        "pmc:PMC9213608",
+        "medlineplus:obesity",
+        "pmc:PMC12511246"
+      ],
+      "expected": [
+        "medlineplus:obesity"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h035",
+      "question": "swollen ankles and breathless lying flat, weak heart pumping",
+      "status": "not_run",
+      "retrieved": [
+        "medlineplus:heart-failure",
+        "medlineplus:diabetic-heart-disease",
+        "medlineplus:heart-valve-diseases",
+        "medlineplus:edema"
+      ],
+      "expected": [
+        "medlineplus:heart-failure"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h036",
+      "question": "side effects of crocin",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC6454763",
+        "openfda:08d0a109-3307-47b5-8ff2-c0ad83e66f08",
+        "openfda:1f53de80-efc8-4930-b3e3-fba0d026af05",
+        "openfda:03f6f6ae-66bc-6819-8ba9-7c9c3fbef90d"
+      ],
+      "expected": [
+        "openfda-otc:acetaminophen",
+        "openfda:00c121ff-141d-410b-8632-c884a3909552"
+      ],
+      "id_context_recall": 0.0,
+      "id_context_precision": 0.0
+    },
+    {
+      "id": "v2h037",
+      "question": "is dolo 650 safe with alcohol",
+      "status": "not_run",
+      "retrieved": [
+        "pmc:PMC6454763",
+        "openfda:08d0a109-3307-47b5-8ff2-c0ad83e66f08",
+        "openfda:1d3a45f3-3854-4d0c-9241-770aa24063fd",
+        "openfda:09a7af47-423a-1e8b-e063-6394a90a99ef"
+      ],
+      "expected": [
+        "openfda-otc:acetaminophen",
+        "openfda:00c121ff-141d-410b-8632-c884a3909552"
+      ],
+      "id_context_recall": 0.0,
+      "id_context_precision": 0.0
+    },
+    {
+      "id": "v2h038",
+      "question": "glycomet stomach upset",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:05999192-ebc6-4198-bd1e-f46abbfb4f8a",
+        "openfda:58e23b30-451c-f451-e063-6394a90a35a7"
+      ],
+      "expected": [
+        "openfda:05999192-ebc6-4198-bd1e-f46abbfb4f8a"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.5
+    },
+    {
+      "id": "v2h039",
+      "question": "lipitor muscle pain",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:09c6c750-ae05-459f-83e8-4a9e4fd85212",
+        "openfda:030c0f79-6bb5-4876-bf8e-b7a25b25dd38"
+      ],
+      "expected": [
+        "openfda:09c6c750-ae05-459f-83e8-4a9e4fd85212"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.5
+    },
+    {
+      "id": "v2h040",
+      "question": "bp tablet amlodipine ankle swelling",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:003dd1ec-16f8-4f96-b6a8-c4689d35892a",
+        "openfda:155c7549-b7d6-0c06-e063-6294a90ac65c"
+      ],
+      "expected": [
+        "openfda:003dd1ec-16f8-4f96-b6a8-c4689d35892a"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.5
+    },
+    {
+      "id": "v2h041",
+      "question": "omez how long can I take it",
+      "status": "not_run",
+      "retrieved": [
+        "openfda-otc:omeprazole-magnesium",
+        "openfda:062800b1-790a-41c3-a8be-94143d2c7fb6"
+      ],
+      "expected": [
+        "openfda-otc:omeprazole-magnesium",
+        "openfda:062800b1-790a-41c3-a8be-94143d2c7fb6"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 1.0
+    },
+    {
+      "id": "v2h042",
+      "question": "brufen should it be taken with food",
+      "status": "not_run",
+      "retrieved": [
+        "openfda-otc:ibuprofen",
+        "openfda:178dc379-e2b8-4b47-9f0c-3fc7fb435c36",
+        "openfda:312cd403-b211-64ef-e063-6394a90aab88",
+        "openfda:5e64036a-ee3e-42e7-9e59-881f88a4e298"
+      ],
+      "expected": [
+        "openfda-otc:ibuprofen",
+        "openfda:01f8fe3a-8810-4b38-8860-d95e05d37709"
+      ],
+      "id_context_recall": 0.5,
+      "id_context_precision": 0.25
+    },
+    {
+      "id": "v2h043",
+      "question": "asthalin inhaler makes my hands shake",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:1810ff8e-d505-bf9c-e063-6394a90a6540",
+        "openfda:12d9728e-6b5c-4aee-bfb0-745e542ed2e4"
+      ],
+      "expected": [
+        "openfda:1810ff8e-d505-bf9c-e063-6394a90a6540"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.5
+    },
+    {
+      "id": "v2h044",
+      "question": "thyronorm should I take it on an empty stomach",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:21caded0-2ed7-4f7d-9856-27ef7c1a47c8",
+        "openfda:01d2c8c9-db54-4002-8f79-4ec396531024",
+        "openfda:13ca3456-e5bf-4bb1-af95-b1378658a358",
+        "openfda:00f77203-3615-47e8-ae25-6e1cf8a2a00a",
+        "openfda:42bdd912-2393-44c4-b7e0-47672ca28991"
+      ],
+      "expected": [
+        "openfda:01d2c8c9-db54-4002-8f79-4ec396531024"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    },
+    {
+      "id": "v2h045",
+      "question": "augmentin causing loose motions",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:0425932a-f6e1-49a6-8480-720f179ace14"
+      ],
+      "expected": [
+        "openfda:0425932a-f6e1-49a6-8480-720f179ace14"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 1.0
+    },
+    {
+      "id": "v2h046",
+      "question": "does zyrtec make you drowsy",
+      "status": "not_run",
+      "retrieved": [
+        "openfda-otc:cetirizine-hydrochloride",
+        "openfda:04b08c52-5390-4cdb-a9e7-fca81fffdc73"
+      ],
+      "expected": [
+        "openfda-otc:cetirizine-hydrochloride",
+        "openfda:04b08c52-5390-4cdb-a9e7-fca81fffdc73"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 1.0
+    },
+    {
+      "id": "v2h047",
+      "question": "losar side effects dizziness",
+      "status": "not_run",
+      "retrieved": [
+        "openfda:021cd76a-b093-4704-8410-5e7d01e20a54",
+        "openfda:0adb2f88-8a6f-4f33-9e2d-73f537e05313",
+        "openfda:0d2f8fea-3675-40d2-afd9-9fcb148dbd4b",
+        "openfda:3cc750a5-cc88-4b42-b4ab-a87e760f291d",
+        "openfda:04b3301f-e054-ed5d-e063-6294a90a819c"
+      ],
+      "expected": [
+        "openfda:021cd76a-b093-4704-8410-5e7d01e20a54"
+      ],
+      "id_context_recall": 1.0,
+      "id_context_precision": 0.2
+    }
+  ]
+}
