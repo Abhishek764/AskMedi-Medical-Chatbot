@@ -20,6 +20,7 @@ from app.core import tracing
 from app.core.kv import KV
 from app.core.metrics import timed
 from app.guards.input_guard import Action, check_input
+from app.guards.nemo import Rails
 from app.guards.resources import DISCLAIMER, REFUSALS, crisis_payload, emergency_payload
 from app.rag.generate import Generator
 from app.rag.query import plan_query
@@ -86,8 +87,10 @@ class AnswerPipeline:
         cache_ttl_seconds: int = 86400,
         corpus_tag: str = "corpus-v1",
         medicine: MedicineCheck | None = None,
+        rails: Rails | None = None,
     ) -> None:
         self.medicine = medicine
+        self.rails = rails  # NeMo Guardrails (optional second layer)
         self.retriever = retriever
         self.generator = generator
         self.abstain_threshold = abstain_threshold
@@ -207,6 +210,16 @@ class AnswerPipeline:
             yield done(AnswerRecord("refused", msg, reason, guard_kind=reason))
             return
 
+        if self.rails is not None:
+            with tr.step("nemo_input_rail") as st:
+                verdict = await self.rails.check_input(decision.redacted_text)
+                st.set(blocked=verdict.blocked, rail=verdict.rail, error=verdict.error)
+            if verdict.blocked:
+                msg = REFUSALS["rail_input"]
+                yield Event("refusal", {"reason": "rail_input", "message": msg})
+                yield done(AnswerRecord("refused", msg, "rail_input", guard_kind="rail_input"))
+                return
+
         banners: list[Event] = []
         if "crisis_topic" in decision.flags or ctx.elevated_risk:
             banners.append(Event("banner", {"kind": "crisis", **crisis_payload(ctx.country)}))
@@ -311,6 +324,26 @@ class AnswerPipeline:
             .replace("  ", " ")
             .strip()
         )
+        if self.rails is not None:
+            with tr.step("nemo_output_rail") as st:
+                verdict = await self.rails.check_output(decision.redacted_text, content)
+                st.set(blocked=verdict.blocked, rail=verdict.rail, error=verdict.error)
+            if verdict.blocked:
+                msg = REFUSALS["rail_output"]
+                yield Event("refusal", {"reason": "rail_output", "message": msg})
+                yield done(
+                    AnswerRecord(
+                        "refused",
+                        msg,
+                        "rail_output",
+                        model=draft.model,
+                        tokens_in=draft.tokens_in,
+                        tokens_out=draft.tokens_out,
+                        guard_kind="rail_output",
+                    )
+                )
+                return
+
         rec = AnswerRecord(
             "complete",
             content,

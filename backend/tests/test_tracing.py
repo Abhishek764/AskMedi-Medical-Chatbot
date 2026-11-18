@@ -102,9 +102,7 @@ async def test_llm_call_is_a_child_of_the_step(traced, monkeypatch):
         )
 
     chat = GeminiChat("k", "gemini-test")
-    chat._client = httpx.AsyncClient(
-        base_url="https://x", transport=httpx.MockTransport(handler)
-    )
+    chat._client = httpx.AsyncClient(base_url="https://x", transport=httpx.MockTransport(handler))
     tr = tracing.start_answer({"q": 1}, {})
     with tr.step("generate"):
         await chat.complete("s", "u")

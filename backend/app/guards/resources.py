@@ -114,6 +114,14 @@ REFUSALS: dict[str, str] = {
         "I can't help with that. If you're having thoughts of harming yourself, please contact "
         "one of the helplines shown. You don't have to go through this alone."
     ),
+    "rail_input": (
+        "I can't help with that request. I can answer general questions about health, "
+        "symptoms and medicines."
+    ),
+    "rail_output": (
+        "I wrote an answer but held it back because it may read as personal medical advice. "
+        "A doctor or pharmacist is the best person to ask about your situation."
+    ),
 }
 
 DISCLAIMER = (

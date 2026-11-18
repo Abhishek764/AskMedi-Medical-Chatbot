@@ -10,6 +10,7 @@ from app.auth.email import OutboxEmailSender
 from app.core.config import Settings
 from app.core.kv import KV, build_kv
 from app.db.session import build_engine, build_sessionmaker
+from app.guards.nemo import build_rails
 from app.policies.service import COLLECTION as POLICY_COLLECTION
 from app.policies.service import PolicyLibrary
 from app.rag.bm25 import BM25Encoder
@@ -102,6 +103,7 @@ class Container:
             kv=self.kv,
             corpus_tag=settings.qdrant_collection,
             medicine=MedicineCheck(self.store, self.retriever),
+            rails=build_rails(settings),
         )
         # Insurance policy library (separate demo): own collection on the same Qdrant client.
         self.policies = PolicyLibrary(

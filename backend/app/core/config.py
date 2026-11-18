@@ -82,6 +82,14 @@ class Settings(BaseSettings):
     cohere_api_key: str | None = None
     groundedness_threshold: float = 0.5
 
+    # Guardrails. builtin = deterministic rules only (app/guards). nemo = those rules first,
+    # then NeMo Guardrails input/output rails judged by the OpenAI/Gemini key
+    # (needs `uv sync --extra rails`; config in backend/guardrails/).
+    guardrails_provider: Literal["builtin", "nemo"] = "builtin"
+    guardrails_config_dir: str = "./guardrails"
+    guardrails_timeout_seconds: float = 8.0
+    guardrails_fail_closed: bool = False
+
     # Crisis resources (verify numbers with a clinician before launch)
     crisis_country: str = "IN"
 
@@ -115,6 +123,8 @@ class Settings(BaseSettings):
             raise ValueError("ANTHROPIC_API_KEY required when LLM_PROVIDER=anthropic")
         if self.llm_provider == "gemini" and not self.gemini_api_key:
             raise ValueError("GEMINI_API_KEY required when LLM_PROVIDER=gemini")
+        if self.guardrails_provider == "nemo" and not (self.openai_api_key or self.gemini_api_key):
+            raise ValueError("GUARDRAILS_PROVIDER=nemo needs OPENAI_API_KEY or GEMINI_API_KEY")
         if self.rerank_provider == "cohere" and not self.cohere_api_key:
             raise ValueError("COHERE_API_KEY required when RERANK_PROVIDER=cohere")
         return self

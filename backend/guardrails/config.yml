@@ -1,0 +1,11 @@
+# NeMo Guardrails config for AskMedi (used when GUARDRAILS_PROVIDER=nemo).
+# The model is injected in code (app/guards/nemo.py) from the same keys as the answer writer,
+# so no key lives in this file. These rails run IN ADDITION to the deterministic guards in
+# app/guards (crisis, emergency, injection, scope), which always run first.
+rails:
+  input:
+    flows:
+      - self check input
+  output:
+    flows:
+      - self check output
