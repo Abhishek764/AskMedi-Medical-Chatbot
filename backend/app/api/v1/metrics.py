@@ -150,7 +150,8 @@ async def metrics(
             "new_users": new_users,
         },
         "answers_by_status": {str(k): v for k, v in by_status.items()},
-        "answer_rate": _pct(complete, answers),
+        # Medicine-check question steps ("triage") are not answers: leave them out of the rate.
+        "answer_rate": _pct(complete, answers - by_status.get("triage", 0)),
         "refusals_by_reason": {str(k): v for k, v in by_reason.items()},
         "safety_events": {str(k): v for k, v in guard.items()},
         "latency_ms": {
