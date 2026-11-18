@@ -16,6 +16,7 @@ exactly what to type or click, and how to know it worked. Commands run in **Git 
 | 8 | Open and merge the pull request | 10 min | Makes v2 the main version on GitHub |
 | 9 | Clinician review | external | Required before real users get medicine suggestions |
 | 10 | Deploy (Render + Qdrant Cloud) | half a day | Turns "production-grade" into "in production" |
+| 11 | Turn on Logfire + LangSmith tracing, make yourself admin | 15 min | Lets you open any answer and see every step |
 
 ---
 
@@ -214,3 +215,31 @@ Ask them to mark anything unsafe or missing. Each change becomes a row in
 
 Before letting real users in: privacy policy, terms of use and a medical disclaimer page
 (a lawyer should look at these, especially for showing medicine doses in India).
+
+## 11. Turn on tracing and the dashboard (15 min)
+
+Everything is built; it only needs your accounts. Full reference: `docs/OBSERVABILITY.md`.
+
+1. **Make yourself admin** (sign up in the web app first, with your own email):
+
+   ```bash
+   cd backend
+   uv run python -m app.admin promote YOUR-EMAIL
+   ```
+
+   Sign out and in again. A **Dashboard** link appears under your email in the chat sidebar
+   (or open http://localhost:5173/admin).
+2. **Pydantic Logfire** (free tier): sign in at https://logfire.pydantic.dev, create a project
+   called `askmedi`, then *Settings → Write tokens → New token*. Paste it in `backend/.env`:
+   `LOGFIRE_TOKEN=...`
+3. **LangSmith** (free developer plan): sign in at https://smith.langchain.com, then
+   *Settings → API Keys → Create API key*. Paste it in `backend/.env`:
+   `LANGSMITH_API_KEY=...` (leave `LANGSMITH_PROJECT=askmedi`).
+4. Restart the backend and ask one question. Within a minute you should see a trace named
+   `answer` in both tools, with the steps `input_guard → retrieve → generate → llm … → verify`.
+5. Leave `TRACE_CONTENT=false` unless you are testing with made-up questions: with `true`
+   the question and answer text are sent to these services.
+6. (Optional) Grafana: install/start Docker Desktop, then
+   `docker compose -f deploy/observability/docker-compose.yml up -d` and open
+   http://localhost:3001.
+
