@@ -215,3 +215,20 @@ async def test_admin_metrics(indexed, app, client):
     assert 'askmedi_answers_total{reason="none",status="complete"}' in text
     assert 'askmedi_guard_events_total{kind="crisis"}' in text
     assert 'route="/v1/conversations/{conversation_id}/messages"' in text
+
+
+async def test_answer_rate_ignores_medicine_check_steps(indexed, app, client):
+    from sqlalchemy import update
+
+    from app.db.models import Role, User
+
+    u = await register(client)
+    cid = await new_conv(client, u["auth"])
+    await ask(client, u["auth"], cid, "What are the symptoms of dengue?")
+    await ask(client, u["auth"], cid, "I have a headache, what medicine can I take?")  # a step
+    async with app.state.container.sessionmaker() as s:
+        await s.execute(update(User).where(User.email == u["email"]).values(role=Role.admin))
+        await s.commit()
+    m = (await client.get("/v1/admin/metrics", headers=u["auth"])).json()
+    assert m["answers_by_status"] == {"complete": 1, "triage": 1}
+    assert m["answer_rate"] == 1.0
