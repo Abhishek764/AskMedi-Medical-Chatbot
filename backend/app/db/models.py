@@ -44,6 +44,7 @@ class MessageStatus(enum.StrEnum):
     emergency = "emergency"
     aborted = "aborted"
     error = "error"
+    triage = "triage"  # a medicine-check question
 
 
 class RiskLevel(enum.StrEnum):

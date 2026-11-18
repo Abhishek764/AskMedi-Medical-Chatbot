@@ -1,0 +1,48 @@
+{
+  "golden": "v2_corpus.jsonl",
+  "reviewed_only": false,
+  "rows": 382,
+  "config": {
+    "embeddings": "BAAI/bge-small-en-v1.5",
+    "reranker": "Xenova/ms-marco-MiniLM-L-6-v2",
+    "collection": "corpus-v1"
+  },
+  "results": {
+    "dense": {
+      "recall@1": 0.932,
+      "recall@3": 0.99,
+      "recall@5": 0.995,
+      "recall@10": 0.995,
+      "mrr": 0.96,
+      "p50_ms": 1618,
+      "rows": 382
+    },
+    "bm25": {
+      "recall@1": 0.654,
+      "recall@3": 0.856,
+      "recall@5": 0.898,
+      "recall@10": 0.937,
+      "mrr": 0.762,
+      "p50_ms": 2446,
+      "rows": 382
+    },
+    "hybrid": {
+      "recall@1": 0.877,
+      "recall@3": 0.987,
+      "recall@5": 0.992,
+      "recall@10": 0.995,
+      "mrr": 0.93,
+      "p50_ms": 3765,
+      "rows": 382
+    },
+    "hybrid_rerank": {
+      "recall@1": 0.929,
+      "recall@3": 0.982,
+      "recall@5": 0.984,
+      "recall@10": 0.987,
+      "mrr": 0.955,
+      "p50_ms": 6266,
+      "rows": 382
+    }
+  }
+}

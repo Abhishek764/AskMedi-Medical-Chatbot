@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { api } from '../api/client'
-import type { Citation, CrisisPayload, EmergencyPayload, MessageStatus } from '../api/types'
+import type {
+  Citation,
+  CrisisPayload,
+  EmergencyPayload,
+  MedicinesPayload,
+  MessageStatus,
+  TriageQuestion,
+} from '../api/types'
 import { Citations, WithMarkers } from './Citations'
+import { MedicineCards, TriageCard } from './MedicineCheck'
 import { CrisisCard, EmergencyCard, SafetyBanner } from './SafetyCards'
 
 /** One chat turn as the UI shows it, built from saved messages or live stream events. */
@@ -18,9 +26,21 @@ export interface TurnModel {
   emergency?: EmergencyPayload
   banners: { kind: 'crisis' | 'emergency'; phone?: string }[]
   refusalReason?: string
+  triage?: TriageQuestion
+  medicines?: MedicinesPayload
 }
 
-export function Turn({ turn }: { turn: TurnModel }) {
+export type AnswerHandler = (step: number, choices: string[], labels: string[]) => void
+
+export function Turn({
+  turn,
+  active = false,
+  onAnswer,
+}: {
+  turn: TurnModel
+  active?: boolean
+  onAnswer?: AnswerHandler
+}) {
   if (turn.role === 'user') {
     return (
       <div className="flex justify-end">
@@ -36,21 +56,29 @@ export function Turn({ turn }: { turn: TurnModel }) {
       {turn.banners.map((b) => (
         <SafetyBanner key={b.kind} kind={b.kind} phone={b.phone} />
       ))}
+      {turn.triage ? (
+        <TriageCard q={turn.triage} active={active && !!onAnswer} onAnswer={onAnswer ?? (() => {})} />
+      ) : null}
       {turn.crisis ? <CrisisCard data={turn.crisis} /> : null}
       {turn.emergency ? <EmergencyCard data={turn.emergency} /> : null}
-      {!turn.crisis && !turn.emergency && (turn.text || turn.status === 'streaming') ? (
+      {!turn.crisis && !turn.emergency && !turn.triage && (turn.text || turn.medicines || turn.status === 'streaming') ? (
         <div
           className={`rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm ${
             refused ? 'border border-slate-300 bg-slate-50 text-slate-700' : 'bg-white text-slate-900'
           }`}
         >
-          {turn.text ? (
+          {turn.text || turn.medicines ? (
             <p className="leading-relaxed">
               <WithMarkers text={turn.text} />
             </p>
           ) : (
             <p className="animate-pulse text-sm text-slate-500">{turn.stage ?? 'Thinking'}…</p>
           )}
+          {turn.medicines ? (
+            <div className="mt-3">
+              <MedicineCards data={turn.medicines} />
+            </div>
+          ) : null}
           <Citations items={turn.citations} />
           {turn.disclaimer ? <p className="mt-2 text-[11px] text-slate-500">{turn.disclaimer}</p> : null}
         </div>

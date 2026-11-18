@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     qdrant_api_key: str | None = None
     qdrant_collection: str = "corpus-v1"
     raw_data_dir: str = "../data/raw"  # repo-root data/raw, relative to backend/
+    policies_dir: str = "../data/policies"  # parsed insurance policies (demo library)
     embeddings_provider: Literal["hash", "fastembed", "openai"] = "hash"
     embeddings_model: str = "BAAI/bge-small-en-v1.5"
     embeddings_dim: int = 384
@@ -65,15 +66,32 @@ class Settings(BaseSettings):
     context_k: int = 5
     abstain_threshold: float | None = None  # None -> the reranker's own default
 
-    # Generation
-    llm_provider: Literal["extractive", "ollama", "openai", "anthropic"] = "extractive"
-    llm_model: str = "gpt-4o-mini"
+    # Generation. "auto": the first provider with a key, in the order OpenAI, Gemini, Claude,
+    # the others as fallbacks; no key at all -> extractive (free, no model). Whatever the
+    # provider, if every model fails the answer falls back to extractive.
+    llm_provider: Literal["auto", "extractive", "ollama", "openai", "gemini", "anthropic"] = "auto"
     llm_timeout_seconds: float = 30.0
-    ollama_url: str = "http://localhost:11434"
     openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    gemini_api_key: str | None = None  # free key: https://aistudio.google.com/apikey
+    gemini_model: str = "gemini-3.1-flash-lite"
     anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-haiku-5-5"
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.1:8b"
     cohere_api_key: str | None = None
     groundedness_threshold: float = 0.5
+
+    # Guardrails. builtin = deterministic rules only (app/guards). nemo = those rules first,
+    # then NeMo Guardrails input/output rails judged by the OpenAI/Gemini key
+    # (needs `uv sync --extra rails`; config in backend/guardrails/).
+    guardrails_provider: Literal["builtin", "nemo"] = "builtin"
+    guardrails_config_dir: str = "./guardrails"
+    guardrails_timeout_seconds: float = 8.0
+    # Judge model for the rails; empty = the answer model. A different model spreads free-tier
+    # load (quotas are per model) so rails don't compete with answer writing.
+    guardrails_model: str | None = None
+    guardrails_fail_closed: bool = False
 
     # Crisis resources (verify numbers with a clinician before launch)
     crisis_country: str = "IN"
@@ -81,6 +99,15 @@ class Settings(BaseSettings):
     # Observability (optional)
     sentry_dsn: str | None = None
     sentry_traces_sample_rate: float = 0.05
+    # GET /metrics (Prometheus). Open in dev/test; outside dev it needs this bearer token,
+    # and without one the endpoint is disabled.
+    metrics_token: str | None = None
+    # Step tracing (app/core/tracing.py). Off unless a key is set. TRACE_CONTENT=false sends
+    # metadata only (ids, scores, statuses); true also sends PII-redacted question/answer text.
+    logfire_token: str | None = None
+    langsmith_api_key: str | None = None
+    langsmith_project: str = "askmedi"
+    trace_content: bool = False
 
     @model_validator(mode="after")
     def _check_prod_secrets(self) -> Settings:
@@ -97,6 +124,10 @@ class Settings(BaseSettings):
             raise ValueError("OPENAI_API_KEY required when LLM_PROVIDER=openai")
         if self.llm_provider == "anthropic" and not self.anthropic_api_key:
             raise ValueError("ANTHROPIC_API_KEY required when LLM_PROVIDER=anthropic")
+        if self.llm_provider == "gemini" and not self.gemini_api_key:
+            raise ValueError("GEMINI_API_KEY required when LLM_PROVIDER=gemini")
+        if self.guardrails_provider == "nemo" and not (self.openai_api_key or self.gemini_api_key):
+            raise ValueError("GUARDRAILS_PROVIDER=nemo needs OPENAI_API_KEY or GEMINI_API_KEY")
         if self.rerank_provider == "cohere" and not self.cohere_api_key:
             raise ValueError("COHERE_API_KEY required when RERANK_PROVIDER=cohere")
         return self

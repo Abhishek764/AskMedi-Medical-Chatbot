@@ -45,7 +45,7 @@ export default function Chat() {
     bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [turns])
 
-  const ask = async (question: string) => {
+  const ask = async (question: string, answer?: { step: number; choices: string[] }) => {
     const q = question.trim()
     if (!q || busy) return
     setBusy(true)
@@ -60,7 +60,7 @@ export default function Chat() {
       const key = crypto.randomUUID()
       setTurns((t) => [...t, userTurn(`${key}-q`, q), pendingAssistant(key)])
       abort.current = new AbortController()
-      for await (const ev of api.ask(convId, q, abort.current.signal)) {
+      for await (const ev of api.ask(convId, answer ?? q, abort.current.signal)) {
         setTurns((t) => t.map((turn) => (turn.key === key ? applyEvent(turn, ev) : turn)))
       }
       loadList()
@@ -145,6 +145,14 @@ export default function Chat() {
             <Link to="/settings" className="text-teal-700 hover:underline">
               Settings
             </Link>
+            <Link to="/policies" className="text-teal-700 hover:underline">
+              Policy demo
+            </Link>
+            {user?.role === 'admin' ? (
+              <Link to="/admin" className="text-teal-700 hover:underline">
+                Dashboard
+              </Link>
+            ) : null}
             <button onClick={() => logout().then(() => navigate('/'))} className="text-slate-600 hover:underline">
               Sign out
             </button>
@@ -181,7 +189,14 @@ export default function Chat() {
                 </div>
               </div>
             ) : (
-              turns.map((t) => <Turn key={t.key} turn={t} />)
+              turns.map((t, i) => (
+                <Turn
+                  key={t.key}
+                  turn={t}
+                  active={!busy && i === turns.length - 1}
+                  onAnswer={(step, choices, labels) => ask(labels.join(', '), { step, choices })}
+                />
+              ))
             )}
             <div ref={bottom} />
           </div>

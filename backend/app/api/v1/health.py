@@ -26,6 +26,10 @@ async def readyz(request: Request) -> JSONResponse:
         "vector_store": await container.store.ping(),
     }
     ok = all(checks.values())
-    return JSONResponse(
-        {"status": "ok" if ok else "degraded", "checks": checks}, status_code=200 if ok else 503
-    )
+    body: dict[str, object] = {"status": "ok" if ok else "degraded", "checks": checks}
+    if container.settings.env != "prod":  # handy in dev/staging; not advertised in production
+        gen = container.generator
+        chat = getattr(getattr(gen, "primary", gen), "chat", None)
+        models = [m.name for m in getattr(chat, "models", [chat] if chat else [])]
+        body["llm"] = {"models": models, "fallback": "extractive"}
+    return JSONResponse(body, status_code=200 if ok else 503)

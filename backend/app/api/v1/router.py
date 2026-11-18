@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, conversations, health, metrics, users
+from app.api.v1 import auth, conversations, health, metrics, policies, users
 
 v1 = APIRouter(prefix="/v1")
 v1.include_router(auth.router)
 v1.include_router(users.router)
 v1.include_router(conversations.router)
 v1.include_router(metrics.router)
+v1.include_router(policies.router)
 
 api_router = APIRouter()
 api_router.include_router(health.router)

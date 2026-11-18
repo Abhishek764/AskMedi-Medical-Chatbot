@@ -25,6 +25,7 @@ from app.api.v1.schemas import (
 )
 from app.core.errors import AppError, NotFound
 from app.core.logging import log_event
+from app.core.metrics import record_answer
 from app.core.ratelimit import enforce_daily_quota, enforce_limit
 from app.db.models import (
     Citation,
@@ -39,6 +40,7 @@ from app.db.models import (
 from app.guards.pii import redact
 from app.guards.resources import REFUSALS
 from app.rag.pipeline import AnswerRecord, UserContext
+from app.triage.engine import TriageState, question_for
 
 router = APIRouter(tags=["conversations"])
 logger = logging.getLogger("askmedi.chat")
@@ -136,12 +138,21 @@ async def ask(
     turns = sum(1 for m in conv.messages if m.role == "user")
     if turns >= settings.max_turns_per_conversation:
         raise AppError(REFUSALS["conversation_limit"], code="conversation_limit")
-    await enforce_daily_quota(container.kv, str(user.id), settings.daily_question_quota)
 
-    history = [m.content for m in conv.messages if m.role == "user"][-3:]
+    triage_key = f"triage:{conv.id}"
+    stored = await container.kv.get(triage_key)
+    triage_state = json.loads(stored) if stored else None
+    if body.triage is None:
+        # A new question counts toward the daily quota; answering a check question doesn't.
+        await enforce_daily_quota(container.kv, str(user.id), settings.daily_question_quota)
+        shown = body.question
+    else:
+        shown = _answer_labels(triage_state, body.triage.step, body.triage.choices)
+
+    history = [m.content for m in conv.messages if m.role == "user" and m.content][-3:]
     if not conv.messages:
-        conv.title = redact(body.question).text[:60]
-    user_msg = Message(conversation_id=conv.id, role="user", content=body.question)
+        conv.title = redact(shown).text[:60]
+    user_msg = Message(conversation_id=conv.id, role="user", content=shown)
     session.add(user_msg)
     await session.commit()
 
@@ -149,9 +160,12 @@ async def ask(
         role=user.role.value,
         elevated_risk=conv.risk_level == RiskLevel.elevated,
         country=settings.crisis_country,
+        triage=triage_state,
+        triage_answer=(body.triage.step, body.triage.choices) if body.triage else None,
     )
     pipeline = container.pipeline
     sessionmaker = container.sessionmaker
+    kv = container.kv
     conv_id, user_id = conv.id, user.id
 
     async def stream() -> AsyncIterator[bytes]:
@@ -166,6 +180,10 @@ async def ask(
             record = AnswerRecord("error", "Something went wrong. Please try again.", "error")
             yield _sse("error", {"message": record.content})
         assert record is not None
+        if record.triage_state is not None:
+            await kv.set(triage_key, json.dumps(record.triage_state), ttl_seconds=3600)
+        else:  # any other answer ends a medicine check in progress
+            await kv.delete(triage_key)
         message_id = await _persist(sessionmaker, conv_id, user_id, record)
         yield _sse("done", {"message_id": str(message_id), "status": record.status})
 
@@ -174,6 +192,15 @@ async def ask(
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+def _answer_labels(state: dict[str, object] | None, step: int, choices: list[str]) -> str:
+    """The option labels the person picked, as their message text (ids are validated later)."""
+    parsed = TriageState.from_dict(state) if state else None
+    if parsed is None or parsed.step != step:
+        return ", ".join(choices)
+    labels = {o.id: o.label for o in question_for(parsed).options}
+    return ", ".join(labels.get(c, c) for c in choices)
 
 
 async def _persist(sessionmaker, conv_id: uuid.UUID, user_id: uuid.UUID, rec: AnswerRecord):
@@ -220,6 +247,16 @@ async def _persist(sessionmaker, conv_id: uuid.UUID, user_id: uuid.UUID, rec: An
                 conv.risk_level = RiskLevel.elevated
             conv.updated_at = func.now()
         await s.commit()
+        record_answer(
+            rec.status,
+            rec.refusal_reason,
+            rec.latency_ms,
+            model=rec.model,
+            tokens_in=rec.tokens_in,
+            tokens_out=rec.tokens_out,
+            guard_kind=rec.guard_kind,
+            cached=rec.cached,
+        )
         log_event(
             logger,
             "answer",

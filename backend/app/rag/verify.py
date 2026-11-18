@@ -68,7 +68,10 @@ def verify(
     role: str,
     threshold: float = 0.5,
     min_kept_ratio: float = 0.5,
+    medical: bool = True,
 ) -> Verification:
+    """`medical=False` (insurance documents) keeps citation, support and number checks but
+    skips the dosing and diagnosis filters, which would misfire on policy wording."""
     if draft.insufficient or not draft.sentences:
         return Verification([], ok=False, reason="no_sources")
     ids = {ref(i): i for i in range(len(passages))}
@@ -88,12 +91,14 @@ def verify(
         if not numbers_supported(s.text, sources):
             dropped["number"] += 1
             continue
-        if role not in ("provider", "admin") and (
-            _DOSING.search(s.text) or _DIAGNOSIS.search(s.text)
+        if (
+            medical
+            and role not in ("provider", "admin")
+            and (_DOSING.search(s.text) or _DIAGNOSIS.search(s.text))
         ):
             dropped["role_filter"] += 1
             continue
-        if _DIAGNOSIS.search(s.text):
+        if medical and _DIAGNOSIS.search(s.text):
             dropped["role_filter"] += 1
             continue
         scores.append(score)

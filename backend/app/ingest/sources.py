@@ -236,6 +236,66 @@ async def fetch_openfda(fetcher: Fetcher, generic: str) -> SourceDoc | None:
     return openfda_doc(record, generic) if record else None
 
 
+def otc_slug(generic: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", generic.lower()).strip("-")
+
+
+def pick_otc_label(results: list[dict[str, object]], generic: str) -> dict[str, object] | None:
+    """Newest single-ingredient OTC label whose generic name is exactly `generic` and that
+    prints both Uses and Directions (combination products are never chosen)."""
+    g = generic.lower()
+
+    def ok(r: dict[str, object]) -> bool:
+        names = [n.lower() for n in ((r.get("openfda") or {}).get("generic_name") or [])]  # type: ignore[union-attr]
+        return (
+            g in names
+            and bool(r.get("dosage_and_administration"))
+            and bool(r.get("indications_and_usage"))
+        )
+
+    candidates = [r for r in results if ok(r)]
+    candidates.sort(key=lambda r: -int(str(r.get("effective_time", "0"))[:8] or 0))
+    return candidates[0] if candidates else None
+
+
+def openfda_otc_doc(record: dict[str, object], generic: str) -> SourceDoc | None:
+    from app.ingest.parsers import parse_otc_label
+
+    sections = parse_otc_label(record)
+    if not any(s.path[0] == "Directions" for s in sections):
+        return None
+    brand = ", ".join(((record.get("openfda") or {}).get("brand_name") or [])[:1])  # type: ignore[union-attr]
+    set_id = str(record.get("set_id", ""))
+    eff = str(record.get("effective_time", ""))
+    return SourceDoc(
+        doc_id=f"openfda-otc:{otc_slug(generic)}",  # one OTC label per generic, stable id
+        source="openfda",
+        title=f"{generic.title()} — OTC Drug Facts" + (f" ({brand})" if brand else ""),
+        url=f"https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid={set_id}",
+        licence="cc0",
+        doc_type="label",
+        sections=sections,
+        year=int(eff[:4]) if eff[:4].isdigit() else None,
+    )
+
+
+async def fetch_openfda_otc(fetcher: Fetcher, generic: str) -> SourceDoc | None:
+    try:
+        raw = await fetcher.get(
+            "openfda",
+            OPENFDA_LABEL,
+            params={
+                "search": f'openfda.generic_name.exact:"{generic.upper()}" AND openfda.product_type:"HUMAN OTC DRUG"',
+                "limit": "25",
+            },
+            cache_name=f"otc-{otc_slug(generic)}.json",
+        )
+    except FileNotFoundError:
+        return None
+    record = pick_otc_label(json.loads(raw).get("results", []), generic)
+    return openfda_otc_doc(record, generic) if record else None
+
+
 # -- PMC Open Access ------------------------------------------------------------------
 ESEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 S3 = "https://pmc-oa-opendata.s3.amazonaws.com"

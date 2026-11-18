@@ -1,0 +1,47 @@
+{"id": "v2h001", "question": "what causes high bp", "expect_docs": ["medlineplus:high-blood-pressure"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h002", "question": "signs of sugar disease in adults", "expect_docs": ["medlineplus:diabetes-type-2", "medlineplus:diabetes"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h003", "question": "warning signs of a heart attack in women", "expect_docs": ["medlineplus:heart-attack"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h004", "question": "why does acid come up my throat at night", "expect_docs": ["medlineplus:gerd", "medlineplus:heartburn"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h005", "question": "sneezing and runny nose every spring", "expect_docs": ["medlineplus:hay-fever"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h006", "question": "how is TB spread", "expect_docs": ["medlineplus:tuberculosis"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h007", "question": "breakbone fever symptoms", "expect_docs": ["medlineplus:dengue"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h008", "question": "mosquito disease with chills and shivering", "expect_docs": ["medlineplus:malaria"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h009", "question": "burning when peeing and need to pee often", "expect_docs": ["medlineplus:urinary-tract-infections"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h010", "question": "sharp pain in my side from stones", "expect_docs": ["medlineplus:kidney-stones"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h011", "question": "wear and tear arthritis in the knees", "expect_docs": ["medlineplus:osteoarthritis"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h012", "question": "underactive thyroid tiredness and weight gain", "expect_docs": ["medlineplus:hypothyroidism"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h013", "question": "low hemoglobin causes", "expect_docs": ["medlineplus:anemia", "medlineplus:iron"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h014", "question": "one-sided throbbing headache with nausea and light sensitivity", "expect_docs": ["medlineplus:migraine"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h015", "question": "wheezing and tight chest triggered by dust", "expect_docs": ["medlineplus:asthma"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h016", "question": "smoker's lung disease that makes you breathless", "expect_docs": ["medlineplus:copd"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h017", "question": "stomach cramps with loose motions some days and constipation on others", "expect_docs": ["medlineplus:irritable-bowel-syndrome"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h018", "question": "red scaly patches on elbows and knees", "expect_docs": ["medlineplus:psoriasis"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h019", "question": "lung infection with fever and cough with phlegm", "expect_docs": ["medlineplus:pneumonia"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h020", "question": "face drooping and arm weakness suddenly", "expect_docs": ["medlineplus:stroke"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h021", "question": "irregular heartbeat afib", "expect_docs": ["medlineplus:atrial-fibrillation"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h022", "question": "sunshine vitamin deficiency", "expect_docs": ["medlineplus:vitamin-d"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h023", "question": "itchy blisters all over a child's body", "expect_docs": ["medlineplus:chickenpox"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h024", "question": "painful band of rash on one side of the body", "expect_docs": ["medlineplus:shingles"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h025", "question": "big toe joint suddenly red, hot and swollen at night", "expect_docs": ["medlineplus:gout"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h026", "question": "blocked nose and pain around the cheeks and forehead", "expect_docs": ["medlineplus:sinusitis"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h027", "question": "hep B how do you get it", "expect_docs": ["medlineplus:hepatitis-b"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h028", "question": "feeling low and lost interest in everything for weeks", "expect_docs": ["medlineplus:depression"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h029", "question": "can't fall asleep at night", "expect_docs": ["medlineplus:insomnia"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h030", "question": "pimples on the face in teenagers", "expect_docs": ["medlineplus:acne"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h031", "question": "runny nose, sore throat and sneezing from a virus", "expect_docs": ["medlineplus:common-cold"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h032", "question": "who should get the seasonal influenza shot", "expect_docs": ["medlineplus:flu"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h033", "question": "irregular periods, extra facial hair and cysts on the ovaries", "expect_docs": ["medlineplus:polycystic-ovary-syndrome"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h034", "question": "health risks of a BMI over 30", "expect_docs": ["medlineplus:obesity"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h035", "question": "swollen ankles and breathless lying flat, weak heart pumping", "expect_docs": ["medlineplus:heart-failure"], "slice": "consumer_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h036", "question": "side effects of crocin", "expect_docs": ["openfda-otc:acetaminophen", "openfda:00c121ff-141d-410b-8632-c884a3909552"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h037", "question": "is dolo 650 safe with alcohol", "expect_docs": ["openfda-otc:acetaminophen", "openfda:00c121ff-141d-410b-8632-c884a3909552"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h038", "question": "glycomet stomach upset", "expect_docs": ["openfda:05999192-ebc6-4198-bd1e-f46abbfb4f8a"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h039", "question": "lipitor muscle pain", "expect_docs": ["openfda:09c6c750-ae05-459f-83e8-4a9e4fd85212"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h040", "question": "bp tablet amlodipine ankle swelling", "expect_docs": ["openfda:003dd1ec-16f8-4f96-b6a8-c4689d35892a"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h041", "question": "omez how long can I take it", "expect_docs": ["openfda-otc:omeprazole-magnesium", "openfda:062800b1-790a-41c3-a8be-94143d2c7fb6"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h042", "question": "brufen should it be taken with food", "expect_docs": ["openfda-otc:ibuprofen", "openfda:01f8fe3a-8810-4b38-8860-d95e05d37709"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h043", "question": "asthalin inhaler makes my hands shake", "expect_docs": ["openfda:1810ff8e-d505-bf9c-e063-6394a90a6540"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h044", "question": "thyronorm should I take it on an empty stomach", "expect_docs": ["openfda:01d2c8c9-db54-4002-8f79-4ec396531024"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h045", "question": "augmentin causing loose motions", "expect_docs": ["openfda:0425932a-f6e1-49a6-8480-720f179ace14"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h046", "question": "does zyrtec make you drowsy", "expect_docs": ["openfda-otc:cetirizine-hydrochloride", "openfda:04b08c52-5390-4cdb-a9e7-fca81fffdc73"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}
+{"id": "v2h047", "question": "losar side effects dizziness", "expect_docs": ["openfda:021cd76a-b093-4704-8410-5e7d01e20a54"], "slice": "drug_hard", "source": "handwritten", "reviewed": false}

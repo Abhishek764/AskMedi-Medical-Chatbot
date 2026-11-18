@@ -1,10 +1,15 @@
 import { readEvents } from './sse'
 import {
   ApiError,
+  type AdminMetrics,
   type AuthResponse,
   type ChatEvent,
+  type Comparison,
   type Conversation,
   type ConversationDetail,
+  type PolicyAnswer,
+  type PolicySummary,
+  type SectionDiff,
   type Tokens,
   type User,
 } from './types'
@@ -136,11 +141,31 @@ export class ApiClient {
       body: JSON.stringify({ rating, reason }),
     })
 
-  /** Ask a question and stream the answer's events. */
-  async *ask(conversationId: string, question: string, signal?: AbortSignal): AsyncGenerator<ChatEvent> {
+  adminMetrics = (days: number) => this.json<AdminMetrics>(`/v1/admin/metrics?days=${days}`)
+
+  listPolicies = () => this.json<PolicySummary[]>('/v1/policies')
+  comparePolicies = (ids: string[]) =>
+    this.json<Comparison>(`/v1/policies/compare?ids=${encodeURIComponent(ids.join(','))}`)
+  diffPolicies = (ids: string[], section: string) =>
+    this.json<SectionDiff>(
+      `/v1/policies/diff?ids=${encodeURIComponent(ids.join(','))}&section=${encodeURIComponent(section)}`,
+    )
+  askPolicies = (question: string, policyIds: string[]) =>
+    this.json<PolicyAnswer>('/v1/policies/ask', {
+      method: 'POST',
+      body: JSON.stringify({ question, policy_ids: policyIds }),
+    })
+
+  /** Ask a question (or answer a medicine-check question) and stream the reply's events. */
+  async *ask(
+    conversationId: string,
+    input: string | { step: number; choices: string[] },
+    signal?: AbortSignal,
+  ): AsyncGenerator<ChatEvent> {
+    const body = typeof input === 'string' ? { question: input } : { triage: input }
     const res = await this.request(`/v1/conversations/${conversationId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ question }),
+      body: JSON.stringify(body),
       signal,
     })
     if (!res.body) throw new ApiError(500, 'no_stream', 'The server did not stream a response.')

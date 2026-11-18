@@ -85,6 +85,51 @@ LABEL_SECTIONS: list[tuple[str, str, bool]] = [
 ]
 _SECTION_NUMBER = re.compile(r"^\s*\d+(\.\d+)*\s+(?:[A-Z&]{2,}\s+)+")
 
+# OTC "Drug Facts" panel, in the order printed on the box. Headings are the keys the symptom
+# check reads, so keep them stable. Directions carry the label dose and are flagged dosing.
+OTC_SECTIONS: list[tuple[str, str, bool]] = [
+    ("active_ingredient", "Active ingredient", False),
+    ("purpose", "Purpose", False),
+    ("indications_and_usage", "Uses", False),
+    ("do_not_use", "Do not use", False),
+    ("ask_doctor", "Ask a doctor before use", False),
+    ("ask_doctor_or_pharmacist", "Ask a doctor or pharmacist before use", False),
+    ("when_using", "When using this product", False),
+    ("stop_use", "Stop use and ask a doctor", False),
+    ("pregnancy_or_breast_feeding", "Pregnancy or breast-feeding", False),
+    ("warnings", "Warnings", False),
+    ("dosage_and_administration", "Directions", True),
+]
+_OTC_BULLETS = re.compile(r"\s*[■▪●•]\s*")
+# Labels repeat the heading at the start of each field ("Uses temporarily relieves ...").
+_OTC_LEADS = re.compile(
+    r"^(active ingredients?(\s*\([^)]*\))?|purposes?|uses|directions|do not use|"
+    r"ask a doctor( or pharmacist)? before use( if you( have| are)?)?|"
+    r"when using this product|stop use and ask a doctor if|if pregnant or breast-feeding,?)\s*:?\s*",
+    re.I,
+)
+
+
+def parse_otc_label(record: dict[str, object]) -> list[Section]:
+    out = []
+    for field, heading, dosing in OTC_SECTIONS:
+        val = record.get(field)
+        if not isinstance(val, list) or not val:
+            continue
+        text = clean("\n\n".join(str(v) for v in val))
+        text = _OTC_BULLETS.sub("\n- ", text).strip()
+        text = re.sub(r"^drug facts\s*", "", text, flags=re.I)
+        if heading not in (
+            "Ask a doctor before use",
+            "Ask a doctor or pharmacist before use",
+            "Stop use and ask a doctor",
+            "Pregnancy or breast-feeding",
+        ):
+            text = _OTC_LEADS.sub("", text, count=1)
+        if len(text) > 3:
+            out.append(Section([heading], text, dosing=dosing))
+    return out
+
 
 def parse_label(record: dict[str, object]) -> list[Section]:
     out = []

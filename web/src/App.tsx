@@ -2,8 +2,10 @@ import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { Consent, Forgot, Login, Register } from './pages/Auth'
+import Admin from './pages/Admin'
 import Chat from './pages/Chat'
 import Landing from './pages/Landing'
+import Policies from './pages/Policies'
 import Settings from './pages/Settings'
 
 function Loading() {
@@ -17,6 +19,12 @@ function Private({ children }: { children: ReactNode }) {
   if (!user) return <Navigate to="/login" replace />
   if (user.consent_required) return <Navigate to="/consent" replace />
   return children
+}
+
+/** Admins only (the API enforces this too; this just avoids showing an empty page). */
+function AdminOnly({ children }: { children: ReactNode }) {
+  const { user } = useAuth()
+  return user?.role === 'admin' ? children : <Navigate to="/chat" replace />
 }
 
 /** Signed-in, consent not required yet (the consent page itself). */
@@ -47,6 +55,8 @@ export default function App() {
           <Route path="/chat" element={<Private><Chat /></Private>} />
           <Route path="/chat/:id" element={<Private><Chat /></Private>} />
           <Route path="/settings" element={<Private><Settings /></Private>} />
+          <Route path="/policies" element={<Private><Policies /></Private>} />
+          <Route path="/admin" element={<Private><AdminOnly><Admin /></AdminOnly></Private>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

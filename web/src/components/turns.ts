@@ -51,6 +51,10 @@ export function applyEvent(turn: TurnModel, ev: ChatEvent): TurnModel {
       if (turn.banners.some((b) => b.kind === ev.data.kind)) return turn
       return { ...turn, banners: [...turn.banners, { kind: ev.data.kind, phone }] }
     }
+    case 'triage':
+      return { ...turn, triage: ev.data, text: ev.data.question, status: 'triage' }
+    case 'medicines':
+      return { ...turn, medicines: ev.data }
     case 'done':
       return { ...turn, status: ev.data.status, messageId: ev.data.message_id, stage: undefined }
     case 'error':

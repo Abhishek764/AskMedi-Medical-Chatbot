@@ -118,3 +118,24 @@ Also map the API to the **OWASP API Security Top 10 (2023)**: BOLA, broken auth,
 8. 500 requests in a minute from one account → 429, no LLM calls after the limit.
 9. Question containing a phone number and Aadhaar → redacted in LLM input, logs, and traces.
 10. Non-medical request ("write me Python code") → scope refusal, no LLM generation.
+
+## 8. Medicine check (added 2026-11-17, needs clinician sign-off)
+
+Product decision: when someone asks what to take for a common symptom, AskMedi now suggests
+non-prescription medicines with the label dose, after three questions. This replaces the earlier
+"never give the public a dose" rule for this one path. How the risk is contained:
+
+| Risk | Control | Where |
+|---|---|---|
+| A model invents or miscalculates a dose | No model in this path. Doses are copied verbatim from the newest single-ingredient OTC "Drug Facts" label (openFDA, CC0); combination products are never chosen | `backend/app/ingest/sources.py` (`fetch_openfda_otc`), `backend/app/triage/compose.py` |
+| Prescription drugs | Only 16 listed OTC medicines can appear | `backend/app/ingest/seeds.py` `OTC_MEDICINES`, `backend/app/triage/symptoms.py` |
+| A serious condition treated at home | Symptom-specific warning signs: emergency ones show the emergency card, others send the person to a doctor; so does a symptom lasting past its self-care window | `symptoms.py` red flags |
+| Children, pregnancy, breastfeeding | No medicine shown; ask a pharmacist or doctor | `engine.py` `decide` |
+| Contraindications | NSAIDs removed for kidney disease, stomach ulcer or bleeding, heart disease or high blood pressure, asthma, blood thinners, pain-reliever allergy and age 65+; paracetamol removed for liver disease or daily alcohol; pseudoephedrine removed for heart disease or high blood pressure. Removed medicines are named with the reason | `engine.py` `EXCLUSIONS` |
+| Overdose risk after a crisis message | No medicines at all in a conversation flagged after a crisis turn | `compose.py` `start` |
+| Tampered answers | Option ids validated server-side per step; state kept server-side (KV, 1 hour) | `engine.py` `apply_answer`, `conversations.py` |
+| US labels used in India | The disclaimer says strengths differ by brand and country: follow the pack's own label | `compose.py` `LABEL_DISCLAIMER` |
+
+Open items before launch: clinician review of every red flag, exclusion and symptom mapping
+(`backend/tests/test_triage.py` holds a row per rule); labels for the Indian market (CDSCO) if
+launching in India; decide whether provider accounts should skip the check.

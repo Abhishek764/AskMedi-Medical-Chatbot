@@ -132,11 +132,49 @@ class VectorStore:
         )
         return [Hit(str(p.id), float(p.score), dict(p.payload or {})) for p in res.points]
 
+    async def single_search(
+        self, query: list[float] | SparseVec, using: str, *, limit: int, flt: m.Filter
+    ) -> list[Hit]:
+        """One retriever alone (`dense` or `bm25`), for ablation studies."""
+        q = (
+            m.SparseVector(indices=query.indices, values=query.values)
+            if isinstance(query, SparseVec)
+            else query
+        )
+        res = await self.client.query_points(
+            self.collection, query=q, using=using, limit=limit, query_filter=flt, with_payload=True
+        )
+        return [Hit(str(p.id), float(p.score), dict(p.payload or {})) for p in res.points]
+
     async def get_parents(self, ids: list[str]) -> dict[str, dict[str, object]]:
         if not ids:
             return {}
         recs = await self.client.retrieve(self.parents, ids=ids, with_payload=True)
         return {str(r.id): dict(r.payload or {}) for r in recs}
+
+    async def doc_sections(self, doc_id: str) -> tuple[dict[str, str], dict[str, object] | None]:
+        """All parent sections of one document as {section heading: text}, plus one child's
+        payload (title, url, source) for citing it. Reads stored text; no search involved."""
+        flt = m.Filter(must=[m.FieldCondition(key="doc_id", match=m.MatchValue(value=doc_id))])
+        parents, _ = await self.client.scroll(
+            self.parents, scroll_filter=flt, limit=64, with_payload=True
+        )
+        sections: dict[str, str] = {}
+        for p in parents:
+            payload = p.payload or {}
+            header = str(payload.get("header", ""))
+            name = header.split(" › ", 1)[1].split(" · ")[0] if " › " in header else header
+            text = str(payload.get("text", ""))
+            sections[name] = f"{sections[name]}\n{text}" if name in sections else text
+        children, _ = await self.client.scroll(
+            self.collection, scroll_filter=flt, limit=1, with_payload=True
+        )
+        meta = (
+            (dict(children[0].payload or {}) | {"chunk_id": str(children[0].id)})
+            if children
+            else None
+        )
+        return sections, meta
 
     async def count(self) -> int:
         if not await self.client.collection_exists(self.collection):

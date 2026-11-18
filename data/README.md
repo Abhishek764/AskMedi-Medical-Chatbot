@@ -5,24 +5,24 @@ allows commercial reuse; anything else is rejected in code before it reaches the
 
 | Path | What | In git? |
 |---|---|---|
-| `corpus/corpus-v1.jsonl` | 253 parsed documents (one JSON object per line: id, source, title, URL, licence, type, year, sections) | yes (5 MB) |
+| `corpus/corpus-v1.jsonl` | 1,677 parsed documents (incl. 16 OTC Drug Facts labels) (one JSON object per line: id, source, title, URL, licence, type, year, sections) | yes (24 MB) |
 | `corpus/manifest.csv` | One row per document: source, licence, year, title, URL, section and word counts | yes |
-| `raw/` | Original downloads: MedlinePlus XML, openFDA label JSON, PMC article PDFs + JATS XML, search results | no (~193 MB, rebuilt on demand) |
+| `raw/` | Original downloads: MedlinePlus XML, openFDA label JSON, PMC article PDFs + JATS XML, search results, 370 PDFs | no (~880 MB, rebuilt on demand) |
 | `Medical_book.pdf` | v1's source book | yes, **not in the v2 index** (licence unverified) |
 
 ## Corpus v1 (2026-11-17)
 
 | Source | Docs | Words | Licence | Used for |
 |---|---|---|---|---|
-| [MedlinePlus](https://medlineplus.gov) health topics (NLM) | 107 | 55k | public domain | Plain-language consumer answers |
-| [openFDA](https://open.fda.gov) drug labels | 62 | 280k | CC0 | Drug uses, warnings, side effects, interactions |
-| [PMC Open Access](https://pmc.ncbi.nlm.nih.gov/tools/openftlist/) reviews (2016+) | 84 | 408k | CC BY (83), CC0 (1) | Evidence questions |
-| **Total** | **253** | **743k** | | 4,906 indexed chunks |
+| [MedlinePlus](https://medlineplus.gov) health topics (NLM), all English topics | 1,014 | 351k | public domain | Plain-language consumer answers |
+| [openFDA](https://open.fda.gov) drug labels | 288 | 1.29M | CC0 | Drug uses, warnings, side effects, interactions |
+| [PMC Open Access](https://pmc.ncbi.nlm.nih.gov/tools/openftlist/) reviews (2016+) | 359 | 1.67M | CC BY (356), CC0 (3) | Evidence questions |
+| **Total** | **1,661** | **3.3M** | | 22,284 indexed chunks |
 
 Rules applied during ingestion (`backend/app/ingest/`):
 - **Licence allowlist:** public domain, CC0, CC BY, CC BY-SA. NC and ND licences are rejected.
 - **PMC:** licence and retraction status are read from PMC's own metadata, then cross-checked against
-  the licence inside the article XML. Five papers whose two licence records disagreed were dropped.
+  the licence inside the article XML. Papers whose two licence records disagreed (15 so far) and retracted papers are dropped.
 - **openFDA:** the *Overdosage* section is never ingested. *Dosage and Administration* sections are
   flagged so only verified clinicians and pharmacists can retrieve them.
 - **MedlinePlus:** only NLM-written health-topic summaries (public domain). A.D.A.M. encyclopedia

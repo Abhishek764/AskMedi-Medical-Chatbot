@@ -85,3 +85,57 @@ describe('turn building', () => {
     expect(run([banner, banner]).banners).toEqual([{ kind: 'emergency', phone: '112' }])
   })
 })
+
+describe('medicine check', () => {
+  const question: ChatEvent = {
+    type: 'triage',
+    data: {
+      step: 2,
+      total: 3,
+      question: 'Do you have any of these?',
+      multi: true,
+      options: [
+        { id: 'thunderclap', label: 'Sudden, very severe headache' },
+        { id: 'none', label: 'None of these' },
+      ],
+    },
+  }
+
+  it('sends chosen option ids for multi-choice questions', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    const sent: unknown[] = []
+    const t = [question].reduce(applyEvent, pendingAssistant('q'))
+    render(<Turn turn={t} active onAnswer={(step, choices, labels) => sent.push({ step, choices, labels })} />)
+    fireEvent.click(screen.getByRole('button', { name: /None of these/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(sent).toEqual([{ step: 2, choices: ['none'], labels: ['None of these'] }])
+  })
+
+  it('locks old questions', () => {
+    const t = [question].reduce(applyEvent, pendingAssistant('q'))
+    render(<Turn turn={t} active={false} />)
+    expect(screen.getByRole('button', { name: /None of these/ })).toBeDisabled()
+  })
+
+  it('shows label directions and excluded medicines', () => {
+    const t = (
+      [
+        {
+          type: 'medicines',
+          data: {
+            symptom: 'headache',
+            items: [{ name: 'Paracetamol (acetaminophen)', citation: 1, directions: 'take 2 tablets every 6 hours' }],
+            excluded: [{ name: 'Ibuprofen', reason: 'you take a blood thinner' }],
+            check_interactions: false,
+            see_doctor_if: 'Your symptoms last more than 3 days.',
+            disclaimer: 'From FDA labels.',
+          },
+        },
+        { type: 'done', data: { message_id: 'm', status: 'complete' } },
+      ] as ChatEvent[]
+    ).reduce(applyEvent, pendingAssistant('m'))
+    render(<Turn turn={t} />)
+    expect(screen.getByText('take 2 tablets every 6 hours')).toBeInTheDocument()
+    expect(screen.getByText(/is not shown because you take a blood thinner/)).toBeInTheDocument()
+  })
+})

@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import func, select
 
 from app.api.deps import SessionDep, require_role
@@ -25,7 +25,7 @@ def _pct(part: int, whole: int) -> float | None:
 
 @router.get("/admin/metrics")
 async def metrics(
-    _: AdminDep, session: SessionDep, days: int = Query(7, ge=1, le=365)
+    request: Request, _: AdminDep, session: SessionDep, days: int = Query(7, ge=1, le=365)
 ) -> dict[str, object]:
     since = datetime.now(UTC) - timedelta(days=days)
     assistant = (Message.role == "assistant") & (Message.created_at >= since)
@@ -100,6 +100,43 @@ async def metrics(
         ).all()
     )
 
+    day = func.date(Message.created_at)
+    daily_rows = (
+        await session.execute(
+            select(day, Message.status, func.count(), func.avg(Message.latency_ms))
+            .where(assistant)
+            .group_by(day, Message.status)
+            .order_by(day)
+        )
+    ).all()
+    daily: dict[str, dict[str, object]] = {}
+    for d, status, n, avg_ms in daily_rows:
+        row = daily.setdefault(str(d), {"date": str(d), "answers": 0, "by_status": {}, "_lat": []})
+        row["answers"] = int(row["answers"]) + n  # type: ignore[call-overload]
+        row["by_status"][str(status)] = n  # type: ignore[index]
+        if avg_ms is not None:
+            row["_lat"].append((float(avg_ms), n))  # type: ignore[attr-defined]
+    for row in daily.values():
+        lat = row.pop("_lat")
+        total = sum(n for _, n in lat)  # type: ignore[attr-defined]
+        row["avg_latency_ms"] = (
+            round(sum(a * n for a, n in lat) / total) if total else None  # type: ignore[attr-defined]
+        )
+    guard_daily_rows = (
+        await session.execute(
+            select(func.date(GuardEvent.created_at), func.count())
+            .where(GuardEvent.created_at >= since)
+            .group_by(func.date(GuardEvent.created_at))
+        )
+    ).all()
+    for d, n in guard_daily_rows:
+        daily.setdefault(
+            str(d),
+            {"date": str(d), "answers": 0, "by_status": {}, "avg_latency_ms": None},
+        )["safety_events"] = n
+    for row in daily.values():
+        row.setdefault("safety_events", 0)
+
     def pctl(p: float) -> int | None:
         return latencies[min(len(latencies) - 1, int(p * len(latencies)))] if latencies else None
 
@@ -132,4 +169,17 @@ async def metrics(
             "documents_by_source": {str(k): v for k, v in docs.items()},
             "documents": sum(docs.values()),
         },
+        "daily": [daily[k] for k in sorted(daily)],
+        "llm": {
+            "models": [getattr(m, "name", "?") for m in _llm_models(request)],
+            "fallback": "extractive",
+        },
     }
+
+
+def _llm_models(request: Request) -> list[object]:
+    gen = getattr(request.app.state.container, "generator", None)
+    chat = getattr(getattr(gen, "primary", gen), "chat", None)
+    if chat is None:
+        return []
+    return list(getattr(chat, "models", [chat]))

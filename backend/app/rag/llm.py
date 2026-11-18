@@ -8,10 +8,14 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
+
+from app.core.metrics import LLM_CALLS, LLM_LATENCY
+from app.core.tracing import llm_call
 
 logger = logging.getLogger("askmedi.llm")
 
@@ -39,15 +43,49 @@ class _HTTPChat:
         self._client = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=timeout)
 
     async def _post(self, path: str, body: dict[str, object]) -> dict[str, object]:
-        try:
-            r = await self._client.post(path, json=body)
-            r.raise_for_status()
-            return r.json()  # type: ignore[no-any-return]
-        except (httpx.HTTPError, ValueError) as exc:
-            raise LLMError(f"{type(self).__name__} failed: {type(exc).__name__}") from exc
+        model = str(getattr(self, "name", type(self).__name__))
+        t = time.perf_counter()
+        with llm_call(model) as info:
+            try:
+                r = await self._client.post(path, json=body)
+                r.raise_for_status()
+                data = r.json()
+            except httpx.HTTPStatusError as exc:
+                code = exc.response.status_code
+                info["outcome"] = "rate_limited" if code == 429 else f"http_{code // 100}xx"
+                LLM_CALLS.labels(model, info["outcome"]).inc()
+                raise LLMError(f"{type(self).__name__} failed: HTTP {code}") from exc
+            except (httpx.HTTPError, ValueError) as exc:
+                info["outcome"] = "error"
+                LLM_CALLS.labels(model, "error").inc()
+                raise LLMError(f"{type(self).__name__} failed: {type(exc).__name__}") from exc
+            finally:
+                LLM_LATENCY.labels(model).observe(time.perf_counter() - t)
+            info["outcome"] = "ok"
+            info["tokens_in"], info["tokens_out"] = _usage(data)
+        LLM_CALLS.labels(model, "ok").inc()
+        return data  # type: ignore[no-any-return]
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+
+def _usage(data: object) -> tuple[int, int]:
+    """Token counts from any provider's response (OpenAI, Anthropic, Gemini, Ollama)."""
+    if not isinstance(data, dict):
+        return 0, 0
+    u = data.get("usage") or data.get("usageMetadata") or {}
+    if not isinstance(u, dict):
+        u = {}
+    pairs = (
+        ("prompt_tokens", "completion_tokens"),
+        ("input_tokens", "output_tokens"),
+        ("promptTokenCount", "candidatesTokenCount"),
+    )
+    for a, b in pairs:
+        if a in u or b in u:
+            return int(u.get(a) or 0), int(u.get(b) or 0)
+    return int(data.get("prompt_eval_count") or 0), int(data.get("eval_count") or 0)
 
 
 def _shape_error(exc: Exception) -> LLMError:
@@ -142,16 +180,78 @@ class OllamaChat(_HTTPChat):
             raise _shape_error(exc) from exc
 
 
-class FallbackChat:
-    """Try the primary model; on failure use the secondary (vendor outage protection)."""
+class GeminiChat(_HTTPChat):
+    """Google Gemini via the Generative Language API (works with a free AI Studio key).
 
-    def __init__(self, primary: ChatModel, secondary: ChatModel) -> None:
-        self.primary, self.secondary = primary, secondary
-        self.name = primary.name
+    Free-tier note: Google may use free-tier prompts to improve its products, so use it for
+    testing with sample questions, not with real patients' messages.
+    """
+
+    def __init__(
+        self, api_key: str, model: str = "gemini-3.1-flash-lite", timeout: float = 30
+    ) -> None:
+        super().__init__(
+            "https://generativelanguage.googleapis.com/v1beta", {"x-goog-api-key": api_key}, timeout
+        )
+        self.name = model
 
     async def complete(self, system: str, user: str, *, json_mode: bool = True) -> ChatResult:
+        config: dict[str, object] = {"temperature": 0, "maxOutputTokens": 1024}
+        if json_mode:
+            config["responseMimeType"] = "application/json"
+        data = await self._post(
+            f"/models/{self.name}:generateContent",
+            {
+                "system_instruction": {"parts": [{"text": system}]},
+                "contents": [{"role": "user", "parts": [{"text": user}]}],
+                "generationConfig": config,
+            },
+        )
         try:
-            return await self.primary.complete(system, user, json_mode=json_mode)
-        except LLMError:
-            logger.warning("primary LLM failed; using fallback %s", self.secondary.name)
-            return await self.secondary.complete(system, user, json_mode=json_mode)
+            candidates = data.get("candidates") or []
+            if not candidates:  # blocked by the provider's safety filter, or empty
+                reason = (data.get("promptFeedback") or {}).get("blockReason", "no candidates")  # type: ignore[union-attr]
+                raise LLMError(f"Gemini returned no answer: {reason}")
+            parts = candidates[0].get("content", {}).get("parts") or []  # type: ignore[union-attr]
+            text = "".join(str(p.get("text", "")) for p in parts if isinstance(p, dict))
+            if not text:
+                raise LLMError("Gemini returned an empty answer")
+            usage = data.get("usageMetadata") or {}
+            return ChatResult(
+                text,
+                self.name,
+                int(usage.get("promptTokenCount", 0)),  # type: ignore[union-attr]
+                int(usage.get("candidatesTokenCount", 0)),  # type: ignore[union-attr]
+            )
+        except (KeyError, IndexError, TypeError, ValueError, AttributeError) as exc:
+            raise _shape_error(exc) from exc
+
+
+class FallbackChat:
+    """Try each model in order; move to the next on failure (outage or rate limit)."""
+
+    def __init__(self, *models: ChatModel) -> None:
+        if not models:
+            raise ValueError("FallbackChat needs at least one model")
+        self.models = models
+        self.name = models[0].name
+
+    @property
+    def primary(self) -> ChatModel:
+        return self.models[0]
+
+    async def complete(self, system: str, user: str, *, json_mode: bool = True) -> ChatResult:
+        last: LLMError | None = None
+        for model in self.models:
+            try:
+                return await model.complete(system, user, json_mode=json_mode)
+            except LLMError as exc:
+                logger.warning("LLM %s failed (%s); trying the next one", model.name, exc)
+                last = exc
+        raise last or LLMError("no model available")
+
+    async def aclose(self) -> None:
+        for model in self.models:
+            close = getattr(model, "aclose", None)
+            if close is not None:
+                await close()

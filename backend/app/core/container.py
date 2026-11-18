@@ -2,35 +2,60 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.auth.email import OutboxEmailSender
 from app.core.config import Settings
 from app.core.kv import KV, build_kv
 from app.db.session import build_engine, build_sessionmaker
+from app.guards.nemo import build_rails
+from app.policies.service import COLLECTION as POLICY_COLLECTION
+from app.policies.service import PolicyLibrary
 from app.rag.bm25 import BM25Encoder
 from app.rag.embeddings import Embedder, build_embedder
-from app.rag.generate import ExtractiveGenerator, Generator, LLMGenerator
-from app.rag.llm import AnthropicChat, ChatModel, FallbackChat, OllamaChat, OpenAIChat
+from app.rag.generate import ExtractiveGenerator, Generator, LLMGenerator, ResilientGenerator
+from app.rag.llm import AnthropicChat, ChatModel, FallbackChat, GeminiChat, OllamaChat, OpenAIChat
 from app.rag.pipeline import AnswerPipeline
 from app.rag.rerank import Reranker, build_reranker
 from app.rag.retriever import HybridRetriever
 from app.rag.store import VectorStore
+from app.triage.compose import MedicineCheck
+
+PROVIDER_ORDER: dict[str, tuple[str, ...]] = {
+    "auto": ("openai", "gemini", "anthropic"),
+    "openai": ("openai", "gemini", "anthropic"),
+    "gemini": ("gemini", "openai", "anthropic"),
+    "anthropic": ("anthropic", "openai", "gemini"),
+    "ollama": ("ollama",),
+}
+
+
+def llm_chain(s: Settings) -> list[ChatModel]:
+    """Models to try, in order: the chosen provider first, then any other provider with a key."""
+    t = s.llm_timeout_seconds
+    makers: dict[str, ChatModel | None] = {
+        "openai": OpenAIChat(s.openai_api_key, s.openai_model, t) if s.openai_api_key else None,
+        "gemini": GeminiChat(s.gemini_api_key, s.gemini_model, t) if s.gemini_api_key else None,
+        "anthropic": AnthropicChat(s.anthropic_api_key, s.anthropic_model, t)
+        if s.anthropic_api_key
+        else None,
+        "ollama": OllamaChat(s.ollama_url, s.ollama_model, timeout=t * 4)
+        if s.llm_provider == "ollama"
+        else None,
+    }
+    return [m for name in PROVIDER_ORDER.get(s.llm_provider, ()) if (m := makers[name]) is not None]
 
 
 def build_generator(s: Settings) -> Generator:
     if s.llm_provider == "extractive":
         return ExtractiveGenerator()
-    chat: ChatModel
-    if s.llm_provider == "ollama":
-        chat = OllamaChat(s.ollama_url, s.llm_model, timeout=s.llm_timeout_seconds * 4)
-    elif s.llm_provider == "openai":
-        chat = OpenAIChat(s.openai_api_key or "", s.llm_model, s.llm_timeout_seconds)
-    else:
-        chat = AnthropicChat(s.anthropic_api_key or "", s.llm_model, s.llm_timeout_seconds)
-    if s.llm_provider == "openai" and s.anthropic_api_key:
-        chat = FallbackChat(chat, AnthropicChat(s.anthropic_api_key))
-    return LLMGenerator(chat)
+    chain = llm_chain(s)
+    if not chain:  # "auto" with no key yet: free extractive mode
+        return ExtractiveGenerator()
+    chat: ChatModel = chain[0] if len(chain) == 1 else FallbackChat(*chain)
+    return ResilientGenerator(LLMGenerator(chat), ExtractiveGenerator())
 
 
 class Container:
@@ -77,6 +102,17 @@ class Container:
             groundedness_threshold=settings.groundedness_threshold,
             kv=self.kv,
             corpus_tag=settings.qdrant_collection,
+            medicine=MedicineCheck(self.store, self.retriever),
+            rails=build_rails(settings),
+        )
+        # Insurance policy library (separate demo): own collection on the same Qdrant client.
+        self.policies = PolicyLibrary(
+            Path(settings.policies_dir),
+            VectorStore(self.store.client, POLICY_COLLECTION, self.embedder.dim),
+            self.embedder,
+            self.reranker,
+            self.bm25,
+            abstain_threshold=self.pipeline.abstain_threshold,
         )
 
     async def startup(self) -> None:

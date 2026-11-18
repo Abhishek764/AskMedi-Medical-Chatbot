@@ -10,3 +10,7 @@ data/cache/
 .coverage
 ingest_run.log
 eval_run.log
+ablation_run.log
+server.log
+web.log
+ragas_run.log
