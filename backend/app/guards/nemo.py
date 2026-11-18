@@ -49,10 +49,11 @@ def _judge_llm(settings: Settings) -> Any:
 
     common: dict[str, Any] = {"temperature": 0, "max_retries": 1, "timeout": 15}
     if settings.openai_api_key:
-        return ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, **common)
+        model = settings.guardrails_model or settings.openai_model
+        return ChatOpenAI(model=model, api_key=settings.openai_api_key, **common)
     if settings.gemini_api_key:
         return ChatOpenAI(
-            model=settings.gemini_model,
+            model=settings.guardrails_model or settings.gemini_model,
             base_url=GEMINI_OPENAI_URL,
             api_key=settings.gemini_api_key,
             **common,

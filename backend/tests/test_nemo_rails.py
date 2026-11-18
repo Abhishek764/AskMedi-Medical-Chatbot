@@ -105,3 +105,13 @@ def test_guardrails_config_loads():
     assert cfg.rails.output.flows == ["self check output"]
     tasks = {p.task for p in cfg.prompts}
     assert {"self_check_input", "self_check_output"} <= tasks
+
+
+def test_guardrails_model_override(settings):
+    pytest.importorskip("langchain_openai")
+    from app.guards.nemo import _judge_llm
+
+    s = settings.model_copy(update={"gemini_api_key": "k", "guardrails_model": "judge-x"})
+    assert _judge_llm(s).model_name == "judge-x"
+    s = settings.model_copy(update={"gemini_api_key": "k", "gemini_model": "answer-y"})
+    assert _judge_llm(s).model_name == "answer-y"

@@ -88,6 +88,9 @@ class Settings(BaseSettings):
     guardrails_provider: Literal["builtin", "nemo"] = "builtin"
     guardrails_config_dir: str = "./guardrails"
     guardrails_timeout_seconds: float = 8.0
+    # Judge model for the rails; empty = the answer model. A different model spreads free-tier
+    # load (quotas are per model) so rails don't compete with answer writing.
+    guardrails_model: str | None = None
     guardrails_fail_closed: bool = False
 
     # Crisis resources (verify numbers with a clinician before launch)
