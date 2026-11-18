@@ -1,0 +1,35 @@
+# Local observability stack: Prometheus scrapes the API's /metrics, Grafana shows the
+# provisioned "AskMedi" dashboard. Start the API on the host first (port 8000), then:
+#
+#   docker compose -f deploy/observability/docker-compose.yml up -d
+#   open http://localhost:3001  (Grafana, anonymous viewer; admin / admin to edit)
+#   open http://localhost:9090  (Prometheus)
+#
+# In production point Prometheus at the deployed API and set METRICS_TOKEN on both sides
+# (see prometheus.yml).
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    depends_on: [prometheus]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/askmedi.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"

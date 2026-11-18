@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: askmedi-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+    # Outside dev the API needs METRICS_TOKEN; uncomment and put the same value here:
+    # authorization:
+    #   type: Bearer
+    #   credentials: change-me
