@@ -30,7 +30,8 @@ CRISIS_FIRST_PERSON = compile_all(
         r"\bsaying goodbye (to everyone|forever)\b",
         # Hinglish
         r"\b(marna|mar jana|mar jaun|mar jaunga|mar jaungi|khudkushi|aatmahatya)\b",
-        r"\bjeena nahi (chahta|chahti)\b",
+        r"\bjeena nahi (chahta|chahti|hai)\b",
+        r"\bjeen(a|e) (ka|ki) (mann?|mood|ichh?a|icchh?a|iccha) nahi\b",
         r"\bzindagi (khatam|khtm)\b",
     ]
 )
