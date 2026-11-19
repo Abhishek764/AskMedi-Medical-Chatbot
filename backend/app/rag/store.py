@@ -45,18 +45,28 @@ class VectorStore:
                 vectors_config={"dense": m.VectorParams(size=self.dim, distance=m.Distance.COSINE)},
                 sparse_vectors_config={"bm25": m.SparseVectorParams(modifier=m.Modifier.IDF)},
             )
-            for field, schema in [
-                ("doc_id", m.PayloadSchemaType.KEYWORD),
-                ("doc_type", m.PayloadSchemaType.KEYWORD),
-                ("licence", m.PayloadSchemaType.KEYWORD),
-                ("lang", m.PayloadSchemaType.KEYWORD),
-                ("retracted", m.PayloadSchemaType.BOOL),
-                ("dosing", m.PayloadSchemaType.BOOL),
-                ("year", m.PayloadSchemaType.INTEGER),
-            ]:
-                await self.client.create_payload_index(self.collection, field, schema)
         if not await self.client.collection_exists(self.parents):
             await self.client.create_collection(self.parents, vectors_config={})
+        # Every filtered field needs an index: Qdrant Cloud's strict mode rejects filters on
+        # unindexed fields (local mode doesn't, so a miss only shows in production).
+        # Creating an existing index is a no-op, so this also repairs copied collections.
+        for collection, fields in (
+            (
+                self.collection,
+                [
+                    ("doc_id", m.PayloadSchemaType.KEYWORD),
+                    ("doc_type", m.PayloadSchemaType.KEYWORD),
+                    ("licence", m.PayloadSchemaType.KEYWORD),
+                    ("lang", m.PayloadSchemaType.KEYWORD),
+                    ("retracted", m.PayloadSchemaType.BOOL),
+                    ("dosing", m.PayloadSchemaType.BOOL),
+                    ("year", m.PayloadSchemaType.INTEGER),
+                ],
+            ),
+            (self.parents, [("doc_id", m.PayloadSchemaType.KEYWORD)]),
+        ):
+            for field, schema in fields:
+                await self.client.create_payload_index(collection, field, schema)
 
     async def upsert(
         self,

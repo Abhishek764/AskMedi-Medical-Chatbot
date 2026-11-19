@@ -74,3 +74,21 @@ def test_intent_routing():
         "research",
     )
     assert plan_query("side effects of metformin").intent == "drug"
+
+
+async def test_ensure_indexes_doc_id_on_parents_even_when_collections_exist():
+    """Qdrant Cloud (strict mode) rejects filters on unindexed fields; doc_sections and
+    delete_doc filter the parents collection by doc_id. Local mode ignores indexes, so spy."""
+    client = AsyncQdrantClient(":memory:")
+    store = VectorStore(client, "test", 8)
+    await store.ensure()  # creates both collections
+    calls: list[tuple[str, str]] = []
+
+    async def spy(collection_name, field_name, field_schema=None, **kw):
+        calls.append((collection_name, field_name))
+
+    client.create_payload_index = spy  # type: ignore[method-assign]
+    await store.ensure()  # collections already exist (e.g. copied to Qdrant Cloud)
+    assert (store.parents, "doc_id") in calls
+    assert ("test", "doc_id") in calls
+    await store.close()
