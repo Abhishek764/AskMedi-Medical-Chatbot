@@ -96,7 +96,11 @@ def instrument_engine(engine: AsyncEngine) -> None:
     if _state.logfire:
         import logfire
 
-        logfire.instrument_sqlalchemy(engine=engine.sync_engine)
+        try:
+            logfire.instrument_sqlalchemy(engine=engine.sync_engine)
+        except Exception:  # noqa: BLE001 - never fail startup over telemetry
+            # e.g. instrumentation pins sqlalchemy < 2.1 while 2.1.x is installed
+            logger.warning("Logfire SQLAlchemy instrumentation skipped", exc_info=True)
 
 
 def shutdown() -> None:

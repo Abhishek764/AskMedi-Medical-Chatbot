@@ -208,6 +208,13 @@ the embedding model plus reranker need about 530 MB). Hugging Face Docker Spaces
    uv run python scripts/loadtest.py --base https://askmedi.onrender.com --users 20 --rps 5 --duration 60
    ```
 
+7. Optional, website on Vercel (the API stays on Render): https://vercel.com → *Add New* →
+   *Project* → import this repo → **Root Directory** `web` → *Deploy*. `web/vercel.json`
+   proxies `/v1` to `https://askmedi-hj7z.onrender.com`, so the browser sees one origin and the
+   refresh cookie keeps working. If Render gave the service another name, change the three
+   URLs in `web/vercel.json`. Add the Vercel domain to `CORS_ORIGINS` on Render. In Vercel
+   *Settings → Git*, set the production branch to the branch you deploy (`v2/backend` or `main`).
+
 Limits: the free service sleeps after 15 min without visitors (first request then waits ~1 min);
 rate limits and quotas live in memory and reset when it restarts; Gemini free tier is slow
 at peak times (answers fall back to extractive). The paid path is still `render.yaml`.
