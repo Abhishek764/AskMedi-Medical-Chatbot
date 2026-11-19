@@ -7,6 +7,9 @@
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB)
 ![tests](https://img.shields.io/badge/tests-236%20backend%20%C2%B7%2011%20web-0f766e)
 
+**[▶ Live demo: askmedi-ten.vercel.app](https://askmedi-ten.vercel.app)**. It runs on free
+hosting, so the first question after a quiet spell can take about a minute while the API wakes up.
+
 AskMedi answers health questions from 1,677 licence-checked documents (MedlinePlus, FDA drug
 labels, PubMed Central reviews). Retrieval is hybrid (dense + BM25 + cross-encoder rerank).
 A verifier removes any sentence it can't trace to a passage. Safety runs before any model is
