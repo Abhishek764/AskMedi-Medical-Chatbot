@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
-# AskMedi on a free Hugging Face Docker Space: API + built web app in one container, one origin.
-# Build context = the Space repo that deploy/hf/push.sh assembles (backend/, web/, policies/).
-# Postgres (Neon), vectors (Qdrant Cloud) and the LLM key come from Space secrets.
+# AskMedi in one container (Render free web service or a Hugging Face Docker Space): API + built web app in one container, one origin.
+# Build context = repo root (Render) or the Space repo that deploy/single/push.sh assembles.
+# Postgres (Neon), vectors (Qdrant Cloud) and the LLM key come from host secrets.
 
 FROM node:22-slim AS web
 WORKDIR /web
@@ -30,7 +30,7 @@ RUN useradd --create-home --uid 1000 askmedi
 WORKDIR /app
 COPY --from=build --chown=askmedi:askmedi /app /app
 COPY --from=web --chown=askmedi:askmedi /web/dist /app/web
-COPY --chown=askmedi:askmedi policies /app/policies
+COPY --chown=askmedi:askmedi data/policies /app/policies
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 PORT=7860 \
     FASTEMBED_CACHE_PATH=/app/models \
     ENV=prod DB_AUTO_CREATE=false ALLOW_INPROCESS_KV=true \

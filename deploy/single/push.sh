@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Assemble the Hugging Face Space repo from this repository and push it.
-#   HF_TOKEN=hf_xxx HF_SPACE=<user>/askmedi bash deploy/hf/push.sh
+#   HF_TOKEN=hf_xxx HF_SPACE=<user>/askmedi bash deploy/single/push.sh
 # The Space must already exist (Docker SDK). Secrets are set in the Space settings, not here.
 set -euo pipefail
 
@@ -12,14 +12,13 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
 cd "$repo_root"
-mkdir -p "$work/backend" "$work/web" "$work/policies"
-cp deploy/hf/Dockerfile deploy/hf/README.md "$work/"
+mkdir -p "$work/backend" "$work/web"
+cp deploy/single/Dockerfile deploy/single/README.md "$work/"
 # Tracked files only: no .env, venv, local databases or node_modules.
 git archive HEAD backend/pyproject.toml backend/uv.lock backend/alembic.ini \
   backend/app backend/migrations | (cd "$work" && tar -x)
 git archive HEAD web | (cd "$work" && tar -x)
-git archive HEAD data/policies | (cd "$work" && tar -x) && cp -r "$work/data/policies/." "$work/policies/" \
-  && rm -rf "$work/data"
+git archive HEAD data/policies | (cd "$work" && tar -x)
 printf 'node_modules\n' > "$work/.dockerignore"
 
 cd "$work"

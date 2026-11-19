@@ -15,7 +15,7 @@ exactly what to type or click, and how to know it worked. Commands run in **Git 
 | 7 | Put the real numbers in your email | 10 min | Only quote what the tools measured |
 | 8 | Open and merge the pull request | 10 min | Makes v2 the main version on GitHub |
 | 9 | Clinician review | external | Required before real users get medicine suggestions |
-| 10 | Deploy free (Hugging Face Space + Neon + Qdrant Cloud) | 30 min | Turns "production-grade" into "in production" |
+| 10 | Deploy free (Render free + Neon + Qdrant Cloud) | 20 min | Turns "production-grade" into "in production" |
 | 11 | Turn on Logfire + LangSmith tracing, make yourself admin | 15 min | Lets you open any answer and see every step |
 
 ---
@@ -185,47 +185,30 @@ Send a doctor or pharmacist:
 Ask them to mark anything unsafe or missing. Each change becomes a row in
 `backend/tests/test_triage.py` or `test_guards.py`; send me their notes and I'll implement them.
 
-## 10. Deploy for free (about 30 min)
+## 10. Deploy for free (about 20 min)
 
-Free stack: **Hugging Face Space** (Docker, 16 GB RAM: runs the API, local models and the
-website in one container), **Neon** Postgres (created: project `askmedi`, us-east-1),
-**Qdrant Cloud** free cluster, Gemini free key. Render's free plan (512 MB) is too small:
-the embedding model plus reranker need about 620 MB.
+Free stack, no card: **Render** free web service (API and website in one container),
+**Neon** Postgres (created: project `askmedi`, us-east-1), **Qdrant Cloud** free cluster
+(index already copied with `scripts/copy_index.py`), Gemini free key, Logfire free tracing.
+Render's free plan has 512 MB of memory, so the local reranker is off (`RERANK_PROVIDER=none`:
+the embedding model plus reranker need about 530 MB). Hugging Face Docker Spaces need PRO now;
+`deploy/single/push.sh` still works there if you subscribe.
 
-1. **Qdrant Cloud:** copy the **full** API key from https://cloud.qdrant.io (Data Access
-   Control → API keys). In `backend/.env` paste it into `QDRANT_API_KEY=` and remove the
-   leading `# ` from `QDRANT_URL` and `QDRANT_API_KEY`. Then copy the local index (corpus and
-   policies, nothing re-embedded):
-
-   ```bash
-   cd backend
-   uv run --no-sync python scripts/copy_index.py
-   ```
-
-2. **Hugging Face:** sign up at https://huggingface.co → *New Space* → name `askmedi`,
-   SDK **Docker** (blank template), hardware *CPU basic (free)*, Public.
-3. Create a **write** token at https://huggingface.co/settings/tokens.
-4. Space → *Settings* → *Variables and secrets*: add each line of `backend/.env.space`
-   (gitignored; already holds the Neon URL, a fresh JWT secret and the Gemini key) as a
-   **secret**, filling in `QDRANT_URL`, `QDRANT_API_KEY` and your username in `CORS_ORIGINS`.
-5. Push the code (from Git Bash, repo root):
-
-   ```bash
-   HF_TOKEN=hf_xxx HF_SPACE=<your-hf-username>/askmedi bash deploy/hf/push.sh
-   ```
-
-   The build takes about 10 minutes. Open `https://<your-hf-username>-askmedi.hf.space`
-   directly: the huggingface.co page frames the app, which the security headers block.
-6. Promote yourself to admin for `/admin`: run `python -m app.admin promote <email>` with
+1. Sign in at https://render.com with GitHub and allow it to read this repository.
+2. *New* → *Blueprint* → pick this repository → **Blueprint path** `deploy/render-free.yaml`.
+3. Render asks for the secret values: copy them from `backend/.env.space` (gitignored).
+   For `CORS_ORIGINS` use `["https://askmedi.onrender.com"]` (or the name Render gives).
+4. *Apply*. The first build takes about 10 minutes. Open `https://askmedi.onrender.com`.
+5. Promote yourself to admin for `/admin`: run `python -m app.admin promote <email>` with
    `DATABASE_URL` from `backend/.env.space`.
-7. Load test, then paste me the output:
+6. Load test, then paste me the output:
 
    ```bash
    cd backend
-   uv run python scripts/loadtest.py --base https://<your-hf-username>-askmedi.hf.space --users 20 --rps 5 --duration 60
+   uv run python scripts/loadtest.py --base https://askmedi.onrender.com --users 20 --rps 5 --duration 60
    ```
 
-Limits: the Space sleeps after 48 h without visitors (first request then waits ~1 min);
+Limits: the free service sleeps after 15 min without visitors (first request then waits ~1 min);
 rate limits and quotas live in memory and reset when it restarts; Gemini free tier is slow
 at peak times (answers fall back to extractive). The paid path is still `render.yaml`.
 

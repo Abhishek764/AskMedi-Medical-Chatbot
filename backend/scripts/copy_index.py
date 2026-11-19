@@ -20,7 +20,8 @@ from qdrant_client import models as m
 from app.core.config import get_settings
 from app.rag.store import VectorStore
 
-BATCH = 256
+BATCH = 64
+RETRIES = 4
 
 
 async def copy(src: AsyncQdrantClient, dst: AsyncQdrantClient, name: str) -> int:
@@ -31,12 +32,17 @@ async def copy(src: AsyncQdrantClient, dst: AsyncQdrantClient, name: str) -> int
             name, limit=BATCH, offset=offset, with_payload=True, with_vectors=True
         )
         if points:
-            await dst.upsert(
-                name,
-                points=[
-                    m.PointStruct(id=p.id, vector=p.vector or {}, payload=p.payload) for p in points
-                ],
-            )
+            batch = [
+                m.PointStruct(id=p.id, vector=p.vector or {}, payload=p.payload) for p in points
+            ]
+            for attempt in range(RETRIES):
+                try:
+                    await dst.upsert(name, points=batch)
+                    break
+                except Exception:
+                    if attempt == RETRIES - 1:
+                        raise
+                    await asyncio.sleep(2**attempt)
             total += len(points)
             print(f"  {name}: {total}", end="\r", flush=True)
         if offset is None:
@@ -52,13 +58,8 @@ async def main() -> None:
     local = (await src.get_collections()).collections
     bases = sorted(c.name for c in local if not c.name.endswith("-parents"))  # corpus, policies
     for base in bases:
-        dst = VectorStore.from_settings(
-            url=s.qdrant_url,
-            path=s.qdrant_path,
-            api_key=s.qdrant_api_key,
-            collection=base,
-            dim=s.embeddings_dim,
-        )
+        client = AsyncQdrantClient(url=s.qdrant_url, api_key=s.qdrant_api_key, timeout=120)
+        dst = VectorStore(client, base, s.embeddings_dim)
         await dst.ensure()
         for name in (dst.collection, dst.parents):
             n = await copy(src, dst.client, name)

@@ -1,0 +1,32 @@
+# Render Blueprint for the free deploy: one free web service (API + website in one container).
+# Postgres is Neon (free), vectors are Qdrant Cloud (free), answers use the Gemini free key.
+# In Render: New -> Blueprint -> this repo -> Blueprint path `deploy/render-free.yaml`.
+# The paid, multi-service setup stays in /render.yaml.
+services:
+  - type: web
+    name: askmedi
+    runtime: docker
+    plan: free                # 512 MB: the local cross-encoder reranker does not fit, so it is off
+    region: virginia          # next to Neon us-east-1
+    branch: v2/backend
+    dockerContext: .
+    dockerfilePath: ./deploy/single/Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: RERANK_PROVIDER
+        value: none
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL     # Neon, postgresql+asyncpg://...?ssl=require (direct host, not -pooler)
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LOGFIRE_TOKEN
+        sync: false
+      - key: CORS_ORIGINS     # ["https://<service>.onrender.com"]
+        sync: false
