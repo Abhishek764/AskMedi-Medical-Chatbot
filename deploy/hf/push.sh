@@ -16,9 +16,9 @@ mkdir -p "$work/backend" "$work/web" "$work/policies"
 cp deploy/hf/Dockerfile deploy/hf/README.md "$work/"
 # Tracked files only: no .env, venv, local databases or node_modules.
 git archive HEAD backend/pyproject.toml backend/uv.lock backend/alembic.ini \
-  backend/app backend/migrations | tar -x -C "$work"
-git archive HEAD web | tar -x -C "$work"
-git archive HEAD data/policies | tar -x -C "$work" && cp -r "$work/data/policies/." "$work/policies/" \
+  backend/app backend/migrations | (cd "$work" && tar -x)
+git archive HEAD web | (cd "$work" && tar -x)
+git archive HEAD data/policies | (cd "$work" && tar -x) && cp -r "$work/data/policies/." "$work/policies/" \
   && rm -rf "$work/data"
 printf 'node_modules\n' > "$work/.dockerignore"
 
