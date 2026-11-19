@@ -34,8 +34,7 @@ async def copy(src: AsyncQdrantClient, dst: AsyncQdrantClient, name: str) -> int
             await dst.upsert(
                 name,
                 points=[
-                    m.PointStruct(id=p.id, vector=p.vector or {}, payload=p.payload)
-                    for p in points
+                    m.PointStruct(id=p.id, vector=p.vector or {}, payload=p.payload) for p in points
                 ],
             )
             total += len(points)
@@ -50,20 +49,23 @@ async def main() -> None:
     if not s.qdrant_url or not s.qdrant_api_key:
         raise SystemExit("Set QDRANT_URL and QDRANT_API_KEY (backend/.env) first.")
     src = AsyncQdrantClient(path=s.qdrant_path)
-    dst = VectorStore.from_settings(
-        url=s.qdrant_url,
-        path=s.qdrant_path,
-        api_key=s.qdrant_api_key,
-        collection=s.qdrant_collection,
-        dim=s.embeddings_dim,
-    )
-    await dst.ensure()
-    for name in (dst.collection, dst.parents):
-        n = await copy(src, dst.client, name)
-        remote = (await dst.client.count(name, exact=True)).count
-        print(f"{name}: copied {n}, remote has {remote}")
+    local = (await src.get_collections()).collections
+    bases = sorted(c.name for c in local if not c.name.endswith("-parents"))  # corpus, policies
+    for base in bases:
+        dst = VectorStore.from_settings(
+            url=s.qdrant_url,
+            path=s.qdrant_path,
+            api_key=s.qdrant_api_key,
+            collection=base,
+            dim=s.embeddings_dim,
+        )
+        await dst.ensure()
+        for name in (dst.collection, dst.parents):
+            n = await copy(src, dst.client, name)
+            remote = (await dst.client.count(name, exact=True)).count
+            print(f"{name}: copied {n}, remote has {remote}")
+        await dst.client.close()
     await src.close()
-    await dst.client.close()
 
 
 if __name__ == "__main__":
