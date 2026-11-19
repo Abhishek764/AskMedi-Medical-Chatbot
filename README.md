@@ -152,7 +152,7 @@ backend/   FastAPI API, answer pipeline, guards, NeMo rails, ingestion, evals, t
 web/       React app
 data/      corpus snapshot (JSONL + manifest) and parsed insurance policies
 evals/     golden sets, CI gate thresholds, results (scorecard, ablation, Ragas)
-deploy/    Prometheus + Grafana stack
+deploy/    single-container image, free Render Blueprint, Prometheus + Grafana stack
 docs/      architecture, security analysis, metrics, observability, corpus plan
 ```
 

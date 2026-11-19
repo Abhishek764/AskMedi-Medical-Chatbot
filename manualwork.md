@@ -15,7 +15,7 @@ exactly what to type or click, and how to know it worked. Commands run in **Git 
 | 7 | Put the real numbers in your email | 10 min | Only quote what the tools measured |
 | 8 | Open and merge the pull request | 10 min | Makes v2 the main version on GitHub |
 | 9 | Clinician review | external | Required before real users get medicine suggestions |
-| 10 | Deploy (Render + Qdrant Cloud) | half a day | Turns "production-grade" into "in production" |
+| 10 | Deploy free (Render free + Neon + Qdrant Cloud) | 20 min | Turns "production-grade" into "in production" |
 | 11 | Turn on Logfire + LangSmith tracing, make yourself admin | 15 min | Lets you open any answer and see every step |
 
 ---
@@ -185,33 +185,32 @@ Send a doctor or pharmacist:
 Ask them to mark anything unsafe or missing. Each change becomes a row in
 `backend/tests/test_triage.py` or `test_guards.py`; send me their notes and I'll implement them.
 
-## 10. Deploy (half a day)
+## 10. Deploy for free (about 20 min)
 
-1. **Qdrant Cloud:** your cluster already exists (sa-east-1). In `backend/.env` the URL is a
-   commented line. Copy the **full** API key from https://cloud.qdrant.io (Data Access
-   Control → API keys; the screenshot cut it off), paste it into `QDRANT_API_KEY=`, and
-   remove the leading `# ` from both `QDRANT_URL` and `QDRANT_API_KEY`. Then do step 4 below
-   to load the data. Until then the app uses the local `qdrant_data/` folder.
-2. **Render:** sign in at https://render.com → *New* → *Blueprint* → pick this repository.
-   Render reads `render.yaml` and creates the API, worker, PostgreSQL and Key Value.
-3. In the Render dashboard set the secret values: `QDRANT_URL`, `QDRANT_API_KEY`, and later
-   `OPENAI_API_KEY`. Set `CORS_ORIGINS` to your website's address.
-4. Load the corpus into Qdrant Cloud once, from your machine, pointing at the cloud cluster:
+Free stack, no card: **Render** free web service (API and website in one container),
+**Neon** Postgres (created: project `askmedi`, us-east-1), **Qdrant Cloud** free cluster
+(index already copied with `scripts/copy_index.py`), Gemini free key, Logfire free tracing.
+Render's free plan has 512 MB of memory, so the local reranker is off (`RERANK_PROVIDER=none`:
+the embedding model plus reranker need about 530 MB). Hugging Face Docker Spaces need PRO now;
+`deploy/single/push.sh` still works there if you subscribe.
 
-   ```bash
-   cd backend
-   QDRANT_URL=https://... QDRANT_API_KEY=... uv run python -m app.ingest load
-   QDRANT_URL=https://... QDRANT_API_KEY=... uv run python -m app.policies build
-   ```
-
-5. Deploy the website (`web/`) to Vercel or Render Static Site with a rewrite from `/v1/*`
-   to the API's URL.
-6. Run the load test against the deployed API and paste me the output:
+1. Sign in at https://render.com with GitHub and allow it to read this repository.
+2. *New* → *Blueprint* → pick this repository → **Blueprint path** `deploy/render-free.yaml`.
+3. Render asks for the secret values: copy them from `backend/.env.space` (gitignored).
+   For `CORS_ORIGINS` use `["https://askmedi.onrender.com"]` (or the name Render gives).
+4. *Apply*. The first build takes about 10 minutes. Open `https://askmedi.onrender.com`.
+5. Promote yourself to admin for `/admin`: run `python -m app.admin promote <email>` with
+   `DATABASE_URL` from `backend/.env.space`.
+6. Load test, then paste me the output:
 
    ```bash
    cd backend
-   uv run python scripts/loadtest.py --base https://YOUR-API --users 20 --rps 5 --duration 60
+   uv run python scripts/loadtest.py --base https://askmedi.onrender.com --users 20 --rps 5 --duration 60
    ```
+
+Limits: the free service sleeps after 15 min without visitors (first request then waits ~1 min);
+rate limits and quotas live in memory and reset when it restarts; Gemini free tier is slow
+at peak times (answers fall back to extractive). The paid path is still `render.yaml`.
 
 Before letting real users in: privacy policy, terms of use and a medical disclaimer page
 (a lawyer should look at these, especially for showing medicine doses in India).

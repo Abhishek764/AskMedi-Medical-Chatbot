@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     # Storage
     database_url: str = "sqlite+aiosqlite:///./askmedi.db"
     redis_url: str | None = None  # None -> in-process KV (dev/test only)
+    # Single-instance free hosting (one process, e.g. a Hugging Face Space): accept the
+    # in-process KV outside dev. Rate limits and quotas then reset on restart.
+    allow_inprocess_kv: bool = False
+    # Built web app (web/dist) to serve at "/" from this process: one origin, no CORS.
+    web_dist_dir: str | None = None
     db_auto_create: bool = True  # create tables at startup (dev/test); False in prod
 
     # Auth
@@ -116,7 +121,7 @@ class Settings(BaseSettings):
                 raise ValueError("JWT_SECRET must be set to a strong value outside dev/test")
             if self.database_url.startswith("sqlite"):
                 raise ValueError("DATABASE_URL must be Postgres outside dev/test")
-            if self.redis_url is None:
+            if self.redis_url is None and not self.allow_inprocess_kv:
                 raise ValueError("REDIS_URL is required outside dev/test")
             if self.db_auto_create:
                 raise ValueError("DB_AUTO_CREATE must be false outside dev/test (use Alembic)")

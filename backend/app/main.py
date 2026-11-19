@@ -7,9 +7,11 @@ import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.v1.router import api_router
 from app.core import tracing
@@ -98,4 +100,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     install_error_handlers(app)
     app.include_router(api_router)
+    if settings.web_dist_dir:
+        _serve_web(app, Path(settings.web_dist_dir), settings.api_prefix)
     return app
+
+
+def _serve_web(app: FastAPI, dist: Path, api_prefix: str) -> None:
+    """Serve the built single-page app. Registered last, so API routes match first."""
+    root = dist.resolve()
+    index = root / "index.html"
+    reserved = (api_prefix.strip("/") + "/", "docs", "openapi.json", "metrics")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    async def web(path: str) -> Response:
+        if path.startswith(reserved) or not index.is_file():
+            return Response(status_code=404)
+        file = (root / path).resolve()
+        if path and file.is_file() and file.is_relative_to(root):
+            headers = {}
+            if path.startswith("assets/"):  # content-hashed names from Vite
+                headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return FileResponse(file, headers=headers)
+        return FileResponse(index)  # client-side routes (/admin, /c/<id>, ...)
