@@ -210,7 +210,7 @@ the embedding model plus reranker need about 530 MB). Hugging Face Docker Spaces
 
 7. Optional, website on Vercel (the API stays on Render): https://vercel.com → *Add New* →
    *Project* → import this repo → **Root Directory** `web` → *Deploy*. `web/vercel.json`
-   proxies `/v1` to `https://askmedi.onrender.com`, so the browser sees one origin and the
+   proxies `/v1` to `https://askmedi-hj7z.onrender.com`, so the browser sees one origin and the
    refresh cookie keeps working. If Render gave the service another name, change the three
    URLs in `web/vercel.json`. Add the Vercel domain to `CORS_ORIGINS` on Render. In Vercel
    *Settings → Git*, set the production branch to the branch you deploy (`v2/backend` or `main`).

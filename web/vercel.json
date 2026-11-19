@@ -5,9 +5,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/v1/:path*", "destination": "https://askmedi.onrender.com/v1/:path*" },
-    { "source": "/healthz", "destination": "https://askmedi.onrender.com/healthz" },
-    { "source": "/readyz", "destination": "https://askmedi.onrender.com/readyz" },
+    { "source": "/v1/:path*", "destination": "https://askmedi-hj7z.onrender.com/v1/:path*" },
+    { "source": "/healthz", "destination": "https://askmedi-hj7z.onrender.com/healthz" },
+    { "source": "/readyz", "destination": "https://askmedi-hj7z.onrender.com/readyz" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
