@@ -241,7 +241,7 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
               <g key={p.key} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
                 <rect x={pad.l + i * slot} y={pad.t} width={slot} height={H - pad.t - pad.b} fill="transparent" />
                 {h > 0 ? (
-                  <path d={roundedTop(x, H - pad.b - h, bw, h, Math.min(4, bw / 2, h))} fill={hover === i ? '#5eead4' : '#2dd4bf'} />
+                  <path d={roundedTop(x, H - pad.b - h, bw, h, Math.min(4, bw / 2, h))} fill={hover === i ? '#86efac' : '#4ade80'} />
                 ) : null}
                 {i % every === 0 ? (
                   <text x={x + bw / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#93a9ae">
@@ -294,7 +294,7 @@ function HBars({ rows, empty }: { rows: Record<string, number>; empty: string })
             <span className="tabular-nums text-fg">{num(v)}</span>
           </div>
           <div className="mt-1 h-1.5 rounded-full bg-white/10">
-            <div className="h-1.5 rounded-full bg-gradient-to-r from-accent to-sky" style={{ width: `${(v / max) * 100}%` }} />
+            <div className="h-1.5 rounded-full bg-gradient-to-r from-accent to-lime" style={{ width: `${(v / max) * 100}%` }} />
           </div>
         </li>
       ))}

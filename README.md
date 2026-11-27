@@ -15,6 +15,8 @@ labels, PubMed Central reviews). Retrieval is hybrid (dense + BM25 + cross-encod
 A verifier removes any sentence it can't trace to a passage. Safety runs before any model is
 called. When the sources are weak, it says so instead of guessing.
 
+![AskMedi landing page: matte black with green silk, liquid-glass answer card](docs/screenshots/landing.png)
+
 ![A cited answer: each sentence links to the passage it came from](docs/screenshots/chat.png)
 
 | | |
@@ -120,6 +122,13 @@ Standard Flood Insurance Policy forms (44 CFR Part 61), parsed with their printe
   migrations check, dependency audit and the eval gate.
 - **Web:** React 19, TypeScript, Vite and Tailwind. Streamed answers with citation links,
   crisis cards with tap-to-call, conversation history.
+- **Design:** matte black with one green accent and 3D "liquid glass" panels: bevelled
+  highlights, a sheen that follows the pointer, film grain, and an SVG lens that bends the
+  background in Chromium. GSAP drives the hero timeline, scroll reveals, 3D card tilt and
+  magnetic buttons, all skipped under `prefers-reduced-motion`. Backgrounds are React Bits
+  Silk (WebGL, lazy-loaded) on the landing and sign-in pages and CSS-only drifting light in
+  the app. Skeleton screens and a top progress bar cover every wait. The `[+]` logo is a
+  medical cross held in citation brackets ([concepts](docs/brand/logo-concepts.png)).
 
 ## Run it locally
 

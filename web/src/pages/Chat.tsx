@@ -19,6 +19,7 @@ import { api } from '../api/client'
 import { ApiError, type Conversation } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { Ambient, DISCLAIMER, Logo, Mark, Skeleton, TopProgress } from '../components/Layout'
+import { gsap, MOTION_OK, useGSAP, useTilt } from '../lib/motion'
 import { Turn, TurnSkeleton, type TurnModel } from '../components/Turn'
 import { applyEvent, pendingAssistant, turnsFromMessages, userTurn } from '../components/turns'
 
@@ -208,7 +209,7 @@ export default function Chat() {
 
         <div className="border-t border-line p-3">
           <div className="flex items-center gap-3 px-2 py-2">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent to-sky font-semibold text-accent-ink">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent to-lime font-semibold text-accent-ink">
               {initial}
             </span>
             <div className="min-w-0">
@@ -248,33 +249,7 @@ export default function Chat() {
             {loadingConv ? (
               <TurnSkeleton />
             ) : turns.length === 0 ? (
-              <div className="animate-rise pt-[8vh] text-center">
-                <span className="glass mx-auto grid size-16 place-items-center rounded-2xl text-accent shadow-[0_0_60px_-10px_rgb(94_234_212/0.5)]">
-                  <Mark className="size-8" />
-                </span>
-                <h1 className="mt-6 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-                  What would you like to know?
-                </h1>
-                <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-                  Ask about a condition, a symptom or a medicine. Every answer cites its sources.
-                </p>
-                <div className="mt-9 grid gap-3 text-left sm:grid-cols-2">
-                  {EXAMPLES.map(({ icon: Icon, kind, q }, i) => (
-                    <button
-                      key={q}
-                      onClick={() => ask(q)}
-                      style={{ animationDelay: `${80 + i * 60}ms` }}
-                      className="glass group animate-rise rounded-2xl px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-accent/40"
-                    >
-                      <span className="eyebrow flex items-center gap-1.5 text-faint group-hover:text-accent">
-                        <Icon className="size-3.5" aria-hidden />
-                        {kind}
-                      </span>
-                      <span className="mt-1.5 block text-sm text-fg">{q}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <EmptyState onAsk={(q) => void ask(q)} />
             ) : (
               turns.map((t, i) => (
                 <Turn
@@ -299,7 +274,7 @@ export default function Chat() {
                 {error}
               </p>
             ) : null}
-            <div className="glass flex items-end gap-2 rounded-2xl p-2 transition focus-within:border-accent/40 focus-within:shadow-[0_0_0_4px_rgb(94_234_212/0.08)]">
+            <div className="glass glass-liquid flex items-end gap-2 rounded-2xl p-2 transition focus-within:border-accent/40 focus-within:shadow-[0_0_0_4px_rgb(74_222_128/0.08)]">
               <textarea
                 ref={box}
                 value={input}
@@ -352,5 +327,60 @@ function SideLink(props: { to: string; icon: typeof SettingsIcon; label: string;
       <Icon className="size-4" aria-hidden />
       {props.label}
     </Link>
+  )
+}
+
+function EmptyState({ onAsk }: { onAsk: (q: string) => void }) {
+  const root = useRef<HTMLDivElement>(null)
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add(MOTION_OK, () => {
+        gsap
+          .timeline({ defaults: { ease: 'power3.out' } })
+          .from('.es-mark', { scale: 0.6, rotationY: -120, transformPerspective: 600, autoAlpha: 0, duration: 1, ease: 'expo.out' })
+          .from('.es-title, .es-copy', { y: 16, autoAlpha: 0, duration: 0.6, stagger: 0.08 }, '-=0.6')
+          .from('.es-card', { y: 30, rotationX: -20, transformPerspective: 800, autoAlpha: 0, duration: 0.8, stagger: 0.07 }, '-=0.4')
+        gsap.to('.es-mark', { y: -6, rotationY: 12, duration: 2.8, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 1.2 })
+      })
+      return () => mm.revert()
+    },
+    { scope: root },
+  )
+  return (
+    <div ref={root} className="pt-[8vh] text-center">
+      <span className="es-mark glass glass-liquid mx-auto grid size-16 place-items-center rounded-2xl text-accent shadow-[0_0_60px_-10px_rgb(74_222_128/0.55)]">
+        <Mark className="size-8" />
+      </span>
+      <h1 className="es-title mt-6 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+        What would you like to know?
+      </h1>
+      <p className="es-copy mx-auto mt-2 max-w-md text-sm text-muted">
+        Ask about a condition, a symptom or a medicine. Every answer cites its sources.
+      </p>
+      <div className="mt-9 grid gap-3 text-left [perspective:1000px] sm:grid-cols-2">
+        {EXAMPLES.map((ex) => (
+          <ExampleCard key={ex.q} {...ex} onAsk={onAsk} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ExampleCard({ icon: Icon, kind, q, onAsk }: (typeof EXAMPLES)[number] & { onAsk: (q: string) => void }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  useTilt(ref, { max: 6 })
+  return (
+    <button
+      ref={ref}
+      onClick={() => onAsk(q)}
+      className="es-card glass group rounded-2xl px-4 py-3.5 text-left will-change-transform hover:border-accent/30"
+    >
+      <span className="eyebrow flex items-center gap-1.5 text-faint transition-colors group-hover:text-accent">
+        <Icon className="size-3.5" aria-hidden />
+        {kind}
+      </span>
+      <span className="mt-1.5 block text-sm text-fg">{q}</span>
+    </button>
   )
 }

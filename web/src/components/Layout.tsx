@@ -1,8 +1,9 @@
-import { lazy, Suspense, type ReactNode } from 'react'
+import { lazy, Suspense, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { gsap, MOTION_OK, useGSAP } from '../lib/motion'
 
 // WebGL background: loaded on its own so the chat screen never pays for it.
-const Aurora = lazy(() => import('./reactbits/Aurora'))
+const Silk = lazy(() => import('./reactbits/Silk'))
 
 export const DISCLAIMER =
   'AskMedi gives general health information from cited sources. It is not medical advice, a diagnosis or a prescription. In an emergency, call your local emergency number.'
@@ -32,22 +33,34 @@ export function Logo({ to = '/' }: { to?: string }) {
   )
 }
 
-/** Animated aurora behind marketing and auth screens; a static glow when WebGL or motion is off. */
-export function Backdrop({ strength = 0.6 }: { strength?: number }) {
+/** Slow matte-green silk behind marketing and auth screens, sunk into black at the edges. */
+export function Backdrop({ strength = 0.75 }: { strength?: number }) {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <Suspense fallback={null}>
-        <Aurora
-          colorStops={['#0f766e', '#0ea5e9', '#2dd4bf']}
-          amplitude={0.9}
-          blend={0.6}
-          speed={0.6}
-          opacity={strength}
-          className="opacity-90"
-        />
+        <div className="absolute inset-0" style={{ opacity: strength }}>
+          <Silk color="#0f2a19" sheenColor="#4ade80" speed={3} scale={1.1} sheen={0.45} glow={0.25} noiseIntensity={1.2} rotation={-0.25} />
+        </div>
       </Suspense>
-      <div className="absolute inset-0 bg-gradient-to-b from-ink/10 via-ink/30 to-ink" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_20%,transparent_10%,var(--color-ink)_80%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/20 to-ink" />
     </div>
+  )
+}
+
+/**
+ * SVG lens used by .glass-liquid (Chromium): low-frequency noise displaces whatever sits behind
+ * the glass, so edges bend like light through a thick pane of liquid glass.
+ */
+export function LiquidFilter() {
+  return (
+    <svg aria-hidden width="0" height="0" className="absolute">
+      <filter id="liquid-refract" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves="2" seed="11" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="soft" />
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="42" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
   )
 }
 
@@ -74,7 +87,7 @@ export function TopProgress({ active }: { active: boolean }) {
         active ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div className="h-full w-full origin-left animate-progress bg-gradient-to-r from-transparent via-accent to-sky shadow-[0_0_12px_var(--color-accent)]" />
+      <div className="h-full w-full origin-left animate-progress bg-gradient-to-r from-transparent via-accent to-lime shadow-[0_0_12px_var(--color-accent)]" />
     </div>
   )
 }
@@ -111,14 +124,29 @@ export function AppSkeleton() {
 
 /** Centered glass card used by sign-in, sign-up and consent screens. */
 export function CardPage({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+  const root = useRef<HTMLDivElement>(null)
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add(MOTION_OK, () => {
+        gsap
+          .timeline({ defaults: { ease: 'power3.out' } })
+          .from('.cp-logo', { y: -16, autoAlpha: 0, duration: 0.6 })
+          .from('.cp-card', { y: 40, rotationX: 14, transformPerspective: 900, autoAlpha: 0, duration: 0.9, ease: 'expo.out' }, '-=0.3')
+          .from('.cp-card label, .cp-card button, .cp-card p', { y: 10, autoAlpha: 0, stagger: 0.04, duration: 0.4 }, '-=0.5')
+      })
+      return () => mm.revert()
+    },
+    { scope: root },
+  )
   return (
     <main className="relative grid min-h-dvh place-items-center px-4 py-10">
-      <Backdrop strength={0.45} />
-      <div className="w-full max-w-md animate-rise">
-        <div className="mb-8 flex justify-center">
+      <Backdrop strength={0.6} />
+      <div ref={root} className="w-full max-w-md">
+        <div className="cp-logo mb-8 flex justify-center">
           <Logo />
         </div>
-        <section className="glass rounded-3xl p-7 sm:p-8">
+        <section className="cp-card glass glass-liquid rounded-3xl p-7 sm:p-8">
           <h1 className="font-display text-xl font-semibold tracking-tight">{title}</h1>
           {subtitle ? <p className="mt-1.5 text-sm text-muted">{subtitle}</p> : null}
           <div className="mt-6">{children}</div>

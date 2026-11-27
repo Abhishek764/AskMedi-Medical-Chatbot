@@ -29,7 +29,7 @@ export function TriageCard(props: {
         </p>
         <div aria-hidden className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-accent to-sky transition-[width] duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-accent to-lime transition-[width] duration-500"
             style={{ width: `${(q.step / q.total) * 100}%` }}
           />
         </div>

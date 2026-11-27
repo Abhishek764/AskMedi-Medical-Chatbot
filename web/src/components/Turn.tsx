@@ -1,5 +1,5 @@
 import { ThumbsDown, ThumbsUp } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { api } from '../api/client'
 import type {
   Citation,
@@ -14,6 +14,7 @@ import { MedicineCards, TriageCard } from './MedicineCheck'
 import { Mark, Skeleton } from './Layout'
 import { CrisisCard, EmergencyCard, SafetyBanner } from './SafetyCards'
 import ShinyText from './reactbits/ShinyText'
+import { useEntrance } from '../lib/motion'
 
 /** One chat turn as the UI shows it, built from saved messages or live stream events. */
 export interface TurnModel {
@@ -44,10 +45,12 @@ export function Turn({
   active?: boolean
   onAnswer?: AnswerHandler
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEntrance(ref, turn.role === 'user' ? { x: 24, y: 0 } : {})
   if (turn.role === 'user') {
     return (
-      <div className="flex animate-rise justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-accent px-4 py-2.5 font-medium text-accent-ink shadow-[0_10px_30px_-14px_rgb(94_234_212/0.6)]">
+      <div ref={ref} className="flex justify-end">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-accent px-4 py-2.5 font-medium text-accent-ink shadow-[0_10px_30px_-14px_rgb(74_222_128/0.6)]">
           {turn.text}
         </p>
       </div>
@@ -55,7 +58,7 @@ export function Turn({
   }
   const refused = turn.status === 'refused' || turn.status === 'error'
   return (
-    <div className="flex animate-rise gap-3">
+    <div ref={ref} className="flex gap-3">
       <span aria-hidden className="glass mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl text-accent">
         <Mark className="size-4" />
       </span>
@@ -101,7 +104,7 @@ function AnswerPending({ stage }: { stage?: string }) {
   return (
     <div aria-live="polite" className="space-y-2.5 py-0.5">
       <p className="font-mono text-xs">
-        <ShinyText text={`${stage ?? 'Thinking'}…`} color="#5f767c" shineColor="#5eead4" speed={1.8} />
+        <ShinyText text={`${stage ?? 'Thinking'}…`} color="#626d65" shineColor="#4ade80" speed={1.8} />
       </p>
       <Skeleton className="h-3 w-[92%]" />
       <Skeleton className="h-3 w-[78%]" />
