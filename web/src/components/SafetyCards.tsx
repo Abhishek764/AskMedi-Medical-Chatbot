@@ -5,7 +5,7 @@ const tel = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`
 /** Shown instead of an answer when someone may be at risk. Copy is fixed server-side. */
 export function CrisisCard({ data }: { data: CrisisPayload }) {
   return (
-    <section role="alert" className="rounded-xl border-2 border-rose-300 bg-rose-50 p-4 text-rose-950">
+    <section role="alert" className="rounded-2xl border border-danger/50 bg-[#2a0d16]/90 p-5 text-rose-50 shadow-[0_0_40px_-12px_rgb(251_113_133/0.5)]">
       <h3 className="font-semibold">You don't have to go through this alone</h3>
       <p className="mt-1 text-sm leading-relaxed">{data.message}</p>
       <ul className="mt-3 space-y-2">
@@ -13,13 +13,13 @@ export function CrisisCard({ data }: { data: CrisisPayload }) {
           <li key={h.phone} className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <a
               href={tel(h.phone)}
-              className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-rose-700"
+              className="btn btn-danger min-h-10 text-sm"
             >
               Call {h.phone}
             </a>
             <span className="text-sm">
               {h.name}
-              {h.note ? <span className="text-rose-800"> · {h.note}</span> : null}
+              {h.note ? <span className="text-rose-200/70"> · {h.note}</span> : null}
             </span>
           </li>
         ))}
@@ -36,12 +36,12 @@ export function CrisisCard({ data }: { data: CrisisPayload }) {
 
 export function EmergencyCard({ data }: { data: EmergencyPayload }) {
   return (
-    <section role="alert" className="rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-amber-950">
+    <section role="alert" className="rounded-2xl border border-warn/60 bg-[#2a1f05]/90 p-5 text-amber-50 shadow-[0_0_40px_-12px_rgb(251_191_36/0.5)]">
       <h3 className="font-semibold">This may be a medical emergency</h3>
       <p className="mt-1 text-sm leading-relaxed">{data.message}</p>
       <a
         href={tel(data.number)}
-        className="mt-3 inline-block rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700"
+        className="btn mt-4 bg-warn text-[#2a1f05] hover:bg-amber-300"
       >
         Call {data.number}
       </a>
@@ -56,7 +56,7 @@ export function SafetyBanner({ kind, phone }: { kind: 'crisis' | 'emergency'; ph
       ? 'If you are struggling, free, confidential help is available'
       : 'If symptoms are sudden or severe, call emergency services'
   return (
-    <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
+    <p className="rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-xs text-muted">
       {text}
       {phone ? (
         <>

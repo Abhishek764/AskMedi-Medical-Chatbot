@@ -1,11 +1,289 @@
 @import 'tailwindcss';
 
+/*
+ * AskMedi "clinical night" design tokens.
+ * Deep blue-green ink base, frosted matte glass, one teal accent, film grain over everything.
+ * Signature: the citation bracket [ ] — in the logo, the citation chips and the hero.
+ */
+@theme {
+  --font-display: 'Unbounded', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  --color-ink: #000000;
+  --color-ink-2: #0b0d0f;
+  --color-fg: #e6f1f2;
+  --color-muted: #9ba7aa;
+  --color-faint: #5f6b6e;
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-accent: #5eead4;
+  --color-accent-strong: #2dd4bf;
+  --color-accent-ink: #032420;
+  --color-sky: #38bdf8;
+  --color-danger: #fb7185;
+  --color-warn: #fbbf24;
+
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-progress: progress 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes shimmer {
+    0% { background-position: 150% 0; }
+    100% { background-position: -50% 0; }
+  }
+  @keyframes progress {
+    0% { transform: translateX(-100%) scaleX(0.3); }
+    50% { transform: translateX(10%) scaleX(0.6); }
+    100% { transform: translateX(110%) scaleX(0.3); }
+  }
+  @keyframes drift-a {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-12vw, 10vh) scale(1.15); }
+  }
+  @keyframes drift-b {
+    0%, 100% { transform: translate(0, 0) scale(1.1); }
+    50% { transform: translate(14vw, -8vh) scale(0.9); }
+  }
+  @keyframes drift-c {
+    0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+    50% { transform: translate(-6vw, -12vh); opacity: 0.9; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
   -webkit-font-smoothing: antialiased;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Background lives on <html> (the root canvas) so the fixed aurora layer at z-index -10 paints above it. */
+html {
+  background-color: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  /* Quiet ambient light so glass always has something to frost, even without the aurora. */
+  background-image:
+    radial-gradient(60rem 40rem at 85% -10%, rgb(45 212 191 / 0.07), transparent 60%),
+    radial-gradient(50rem 35rem at -10% 110%, rgb(56 189 248 / 0.05), transparent 60%);
+  background-attachment: fixed;
 }
 
 body {
   margin: 0;
+}
+
+/* Film grain over the whole app: gives every surface a matte, printed finish. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 220px;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+}
+
+::selection {
+  background: rgb(94 234 212 / 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Frosted matte glass: blur, a top highlight edge, inner grain. */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.065), rgb(255 255 255 / 0.03));
+    border: 1px solid var(--color-line);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 20px 50px -24px rgb(0 0 0 / 0.7);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-image: var(--grain);
+    background-size: 180px;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .glass-strong {
+    background: linear-gradient(180deg, rgb(16 20 22 / 0.82), rgb(6 8 9 / 0.86));
+  }
+
+  /* Animated ambient light for app screens: three slow orbs + a faint dot grid, CSS only. */
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ambient > .orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    will-change: transform;
+  }
+  .ambient > .orb-a {
+    top: -18vh;
+    right: -8vw;
+    width: 55vw;
+    height: 55vw;
+    background: radial-gradient(circle, rgb(45 212 191 / 0.22), transparent 65%);
+    animation: drift-a 28s ease-in-out infinite;
+  }
+  .ambient > .orb-b {
+    bottom: -25vh;
+    left: -12vw;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, rgb(56 189 248 / 0.16), transparent 65%);
+    animation: drift-b 34s ease-in-out infinite;
+  }
+  .ambient > .orb-c {
+    top: 35vh;
+    left: 40vw;
+    width: 30vw;
+    height: 30vw;
+    background: radial-gradient(circle, rgb(129 140 248 / 0.1), transparent 65%);
+    animation: drift-c 40s ease-in-out infinite;
+  }
+  .ambient > .grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 80%);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    border-radius: 0.875rem;
+    padding: 0 1.1rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s, box-shadow 0.15s, transform 0.1s, color 0.15s, border-color 0.15s;
+    cursor: pointer;
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.99);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.45),
+      0 8px 24px -10px rgb(45 212 191 / 0.7);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #7cf0de;
+  }
+  .btn-ghost {
+    color: var(--color-fg);
+    border: 1px solid var(--color-line);
+    background: rgb(255 255 255 / 0.04);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: rgb(255 255 255 / 0.09);
+    border-color: rgb(255 255 255 / 0.16);
+  }
+  .btn-danger {
+    background: #e11d48;
+    color: white;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: #be123c;
+  }
+
+  .input {
+    width: 100%;
+    min-height: 2.75rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-line);
+    background: rgb(2 10 14 / 0.55);
+    padding: 0.6rem 0.85rem;
+    color: var(--color-fg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input::placeholder {
+    color: var(--color-faint);
+  }
+  .input:focus {
+    border-color: rgb(94 234 212 / 0.6);
+    box-shadow: 0 0 0 4px rgb(94 234 212 / 0.12);
+  }
+
+  .link {
+    color: var(--color-accent);
+    text-underline-offset: 3px;
+  }
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  /* Skeleton block: matte bar with a slow light sweep. */
+  .skeleton {
+    border-radius: 0.5rem;
+    background: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0.05) 30%,
+      rgb(255 255 255 / 0.12) 50%,
+      rgb(255 255 255 / 0.05) 70%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+}
+
+input[type='checkbox'] {
+  accent-color: var(--color-accent-strong);
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+select.input option {
+  background: var(--color-ink-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
