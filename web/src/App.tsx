@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './auth/AuthContext'
+import { AppSkeleton, LiquidFilter } from './components/Layout'
 import { Consent, Forgot, Login, Register } from './pages/Auth'
 import Admin from './pages/Admin'
 import Chat from './pages/Chat'
@@ -8,9 +9,7 @@ import Landing from './pages/Landing'
 import Policies from './pages/Policies'
 import Settings from './pages/Settings'
 
-function Loading() {
-  return <div className="grid min-h-dvh place-items-center text-slate-500">Loading…</div>
-}
+const Loading = AppSkeleton
 
 /** Signed-in only; migrated v1 accounts are sent to consent first. */
 function Private({ children }: { children: ReactNode }) {
@@ -45,6 +44,7 @@ function Public({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
+      <LiquidFilter />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Public><Landing /></Public>} />

@@ -218,3 +218,4 @@ docs/diagrams/*.browser-check.json
 docs/diagrams/*.delivery.json
 
 # policy PDFs live in data/raw/policies (gitignored); parsed JSON in data/policies
+!web/src/lib/

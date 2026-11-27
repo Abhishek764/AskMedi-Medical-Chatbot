@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { ApiError, type AdminMetrics, type DailyMetrics } from '../api/types'
-import { Logo } from '../components/Layout'
+import { PageHeader, Skeleton, TopProgress } from '../components/Layout'
 import { fillDays } from './adminData'
 
 const WINDOWS = [7, 30, 90] as const
@@ -51,44 +50,39 @@ export default function Admin() {
   const safetyTotal = data ? Object.values(data.safety_events).reduce((a, b) => a + b, 0) : 0
 
   return (
-    <div className="min-h-dvh bg-slate-50 text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
-        <Logo />
-        <Link to="/chat" className="text-sm text-teal-700 hover:underline">
-          Back to chat
-        </Link>
-      </header>
+    <div className="min-h-dvh text-fg">
+      <PageHeader />
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
         <section className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
+            <p className="mt-1 text-sm text-muted">
               How the assistant behaves with real users. Counts only: no message text is shown.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <div role="group" aria-label="Time range" className="flex rounded-lg ring-1 ring-slate-300">
+            <div role="group" aria-label="Time range" className="flex rounded-lg border border-line">
               {WINDOWS.map((w) => (
                 <button
                   key={w}
                   onClick={() => setDays(w)}
                   aria-pressed={days === w}
                   className={`px-3 py-1.5 first:rounded-l-lg last:rounded-r-lg ${
-                    days === w ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
+                    days === w ? 'bg-accent text-accent-ink font-semibold' : 'text-muted hover:bg-white/10'
                   }`}
                 >
                   {w} days
                 </button>
               ))}
             </div>
-            <label className="flex items-center gap-1.5 text-slate-600">
+            <label className="flex items-center gap-1.5 text-muted">
               <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
               Auto-refresh
             </label>
             <button
               onClick={() => void load()}
-              className="rounded-lg bg-white px-3 py-1.5 text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50"
+              className="btn btn-ghost min-h-9 px-3 text-sm"
             >
               Refresh
             </button>
@@ -96,20 +90,31 @@ export default function Admin() {
         </section>
 
         {error ? (
-          <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800">
+          <p role="alert" className="rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-200">
             {error}
           </p>
         ) : null}
 
         {!data ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <div aria-busy="true" aria-label="Loading dashboard" className="space-y-6">
+            <TopProgress active />
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {Array.from({ length: 8 }, (_, i) => (
+                <Skeleton key={i} className="h-24 rounded-2xl" />
+              ))}
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Skeleton className="h-64 rounded-2xl" />
+              <Skeleton className="h-64 rounded-2xl" />
+            </div>
+          </div>
         ) : (
           <>
             <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Tile label="Answers" value={num(data.usage.answers)} note={`${num(data.usage.active_conversations)} conversations`} />
               <Tile label="Answer rate" value={pct(data.answer_rate)} note="answered, not refused" />
               <Tile label="Latency p50 / p95" value={`${ms(data.latency_ms.p50)} / ${ms(data.latency_ms.p95)}`} note={`max ${ms(data.latency_ms.max)}`} />
-              <Tile label="Helpful rate" value={pct(data.feedback.helpful_rate)} note={`👍 ${data.feedback.up} · 👎 ${data.feedback.down}`} />
+              <Tile label="Helpful rate" value={pct(data.feedback.helpful_rate)} note={`${data.feedback.up} up · ${data.feedback.down} down`} />
               <Tile label="Safety events" value={num(safetyTotal)} note="crisis, emergency, refusals" />
               <Tile label="Users" value={num(data.usage.users_total)} note={`${num(data.usage.new_users)} new`} />
               <Tile label="LLM tokens" value={num(data.tokens.in + data.tokens.out)} note={`${num(data.tokens.in)} in · ${num(data.tokens.out)} out`} />
@@ -147,14 +152,14 @@ export default function Admin() {
                   ))}
                   <Row k="Feedback coverage" v={pct(data.feedback.coverage)} />
                 </dl>
-                <p className="mt-3 text-xs text-slate-500">
+                <p className="mt-3 text-xs text-muted">
                   Live request rates, errors and model latency: Prometheus at <code>/metrics</code>, Grafana dashboard in{' '}
                   <code>deploy/observability</code>.
                 </p>
               </Panel>
             </div>
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted">
               Last {data.window_days} days · updated {updated?.toLocaleTimeString() ?? '—'}
               {auto ? ' · refreshes every 30 s' : ''}
             </p>
@@ -167,17 +172,17 @@ export default function Admin() {
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{value}</p>
-      {note ? <p className="mt-0.5 text-xs text-slate-500">{note}</p> : null}
+    <div className="glass rounded-2xl p-5">
+      <p className="text-xs font-medium text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums text-fg">{value}</p>
+      {note ? <p className="mt-0.5 text-xs text-muted">{note}</p> : null}
     </div>
   )
 }
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <section className="glass rounded-2xl p-5">
       <h2 className="mb-3 font-semibold">{title}</h2>
       {children}
     </section>
@@ -187,8 +192,8 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-slate-500">{k}</dt>
-      <dd className="text-right font-medium text-slate-800">{v}</dd>
+      <dt className="text-muted">{k}</dt>
+      <dd className="text-right font-medium text-fg">{v}</dd>
     </div>
   )
 }
@@ -215,7 +220,7 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
   const every = Math.ceil(n / 7)
   const total = points.reduce((a, p) => a + p.value, 0)
 
-  if (total === 0) return <p className="py-10 text-center text-sm text-slate-500">No {unit} in this window.</p>
+  if (total === 0) return <p className="py-10 text-center text-sm text-muted">No {unit} in this window.</p>
 
   return (
     <div>
@@ -223,8 +228,8 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`${unit} per day, total ${total}`}>
           {ticks.map((t) => (
             <g key={t}>
-              <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="#e2e8f0" strokeWidth={1} />
-              <text x={pad.l - 6} y={y(t) + 4} textAnchor="end" fontSize={11} fill="#64748b">
+              <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+              <text x={pad.l - 6} y={y(t) + 4} textAnchor="end" fontSize={11} fill="#93a9ae">
                 {t}
               </text>
             </g>
@@ -236,10 +241,10 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
               <g key={p.key} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
                 <rect x={pad.l + i * slot} y={pad.t} width={slot} height={H - pad.t - pad.b} fill="transparent" />
                 {h > 0 ? (
-                  <path d={roundedTop(x, H - pad.b - h, bw, h, Math.min(4, bw / 2, h))} fill={hover === i ? '#115e59' : '#0f766e'} />
+                  <path d={roundedTop(x, H - pad.b - h, bw, h, Math.min(4, bw / 2, h))} fill={hover === i ? '#86efac' : '#4ade80'} />
                 ) : null}
                 {i % every === 0 ? (
-                  <text x={x + bw / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#64748b">
+                  <text x={x + bw / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#93a9ae">
                     {p.key.slice(5)}
                   </text>
                 ) : null}
@@ -249,21 +254,21 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
         </svg>
         {hover != null ? (
           <div
-            className="pointer-events-none absolute top-0 rounded-lg bg-slate-900 px-2 py-1 text-xs text-white shadow"
+            className="pointer-events-none absolute top-0 rounded-lg border border-line bg-ink-2 px-2 py-1 text-xs text-fg shadow-lg"
             style={{ left: `${((pad.l + hover * slot + slot / 2) / W) * 100}%`, transform: 'translateX(-50%)' }}
           >
             <span className="font-semibold">{points[hover].key}</span> · {points[hover].detail}
           </div>
         ) : null}
       </div>
-      <details className="mt-2 text-xs text-slate-600">
+      <details className="mt-2 text-xs text-muted">
         <summary className="cursor-pointer">Table</summary>
         <table className="mt-2 w-full">
           <tbody>
             {points
               .filter((p) => p.value > 0)
               .map((p) => (
-                <tr key={p.key} className="border-t border-slate-100">
+                <tr key={p.key} className="border-t border-line">
                   <td className="py-1">{p.key}</td>
                   <td className="py-1 text-right tabular-nums">{p.value}</td>
                 </tr>
@@ -278,18 +283,18 @@ function BarChart({ points, unit }: { points: Point[]; unit: string }) {
 /** Ranked horizontal bars: label and value in text ink, the bar carries magnitude only. */
 function HBars({ rows, empty }: { rows: Record<string, number>; empty: string }) {
   const items = Object.entries(rows).sort((a, b) => b[1] - a[1])
-  if (!items.length) return <p className="py-6 text-center text-sm text-slate-500">{empty}</p>
+  if (!items.length) return <p className="py-6 text-center text-sm text-muted">{empty}</p>
   const max = Math.max(...items.map(([, v]) => v))
   return (
     <ul className="space-y-2">
       {items.map(([k, v]) => (
         <li key={k} title={`${label(k)}: ${v}`}>
           <div className="flex justify-between text-sm">
-            <span className="capitalize text-slate-700">{label(k)}</span>
-            <span className="tabular-nums text-slate-900">{num(v)}</span>
+            <span className="capitalize text-fg/85">{label(k)}</span>
+            <span className="tabular-nums text-fg">{num(v)}</span>
           </div>
-          <div className="mt-1 h-2 rounded bg-slate-100">
-            <div className="h-2 rounded bg-teal-700" style={{ width: `${(v / max) * 100}%` }} />
+          <div className="mt-1 h-1.5 rounded-full bg-white/10">
+            <div className="h-1.5 rounded-full bg-gradient-to-r from-accent to-lime" style={{ width: `${(v / max) * 100}%` }} />
           </div>
         </li>
       ))}

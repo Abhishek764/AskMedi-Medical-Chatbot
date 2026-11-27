@@ -32,7 +32,7 @@ export function Login() {
   }
 
   return (
-    <CardPage title="Sign in">
+    <CardPage title="Welcome back" subtitle="Sign in to continue your conversations.">
       <form onSubmit={submit} className="space-y-4">
         <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
         <Field label="Password" type="password" value={password} onChange={setPassword} autoComplete="current-password" />
@@ -41,11 +41,11 @@ export function Login() {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <div className="mt-4 flex justify-between text-sm">
-        <Link to="/forgot" className="text-teal-700 hover:underline">
+      <div className="mt-5 flex justify-between text-sm">
+        <Link to="/forgot" className="link">
           Forgot password?
         </Link>
-        <Link to="/register" className="text-teal-700 hover:underline">
+        <Link to="/register" className="link">
           Create an account
         </Link>
       </div>
@@ -82,11 +82,12 @@ export function Register() {
   }
 
   return (
-    <CardPage title="Create your account">
+    <CardPage title="Create your account" subtitle="Free. Your conversations stay private to you.">
       <form onSubmit={submit} className="space-y-4">
         <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
         <Field
-          label="Password (at least 10 characters)"
+          label="Password"
+          hint="at least 10 characters"
           type="password"
           value={password}
           onChange={setPassword}
@@ -99,9 +100,9 @@ export function Register() {
           {busy ? 'Creating account…' : 'Create account'}
         </button>
       </form>
-      <p className="mt-4 text-sm">
+      <p className="mt-5 text-sm text-muted">
         Already have an account?{' '}
-        <Link to="/login" className="text-teal-700 hover:underline">
+        <Link to="/login" className="link">
           Sign in
         </Link>
       </p>
@@ -116,13 +117,13 @@ export function ConsentBoxes(props: {
   setAccept: (v: boolean) => void
 }) {
   return (
-    <div className="space-y-2 text-sm text-slate-700">
-      <label className="flex gap-2">
-        <input type="checkbox" checked={props.adult} onChange={(e) => props.setAdult(e.target.checked)} />
+    <div className="space-y-3 rounded-xl border border-line bg-white/[0.03] p-3 text-sm text-muted">
+      <label className="flex cursor-pointer gap-2.5 leading-snug">
+        <input type="checkbox" className="mt-0.5 shrink-0" checked={props.adult} onChange={(e) => props.setAdult(e.target.checked)} />
         I am 18 or older.
       </label>
-      <label className="flex gap-2">
-        <input type="checkbox" checked={props.accept} onChange={(e) => props.setAccept(e.target.checked)} />
+      <label className="flex cursor-pointer gap-2.5 leading-snug">
+        <input type="checkbox" className="mt-0.5 shrink-0" checked={props.accept} onChange={(e) => props.setAccept(e.target.checked)} />
         I understand AskMedi gives general information only, not medical advice, diagnosis or prescriptions.
       </label>
     </div>
@@ -151,7 +152,7 @@ export function Consent() {
   return (
     <CardPage title="Before you continue">
       <form onSubmit={submit} className="space-y-4">
-        <p className="text-sm text-slate-600">AskMedi has been updated. Please confirm the following once.</p>
+        <p className="text-sm text-muted">AskMedi has been updated. Please confirm the following once.</p>
         <ConsentBoxes adult={adult} setAdult={setAdult} accept={accept} setAccept={setAccept} />
         <ErrorText error={error} />
         <button className={primaryButton}>Continue</button>
@@ -176,14 +177,14 @@ export function Forgot() {
   return (
     <CardPage title="Reset your password">
       {done ? (
-        <p className="text-sm text-slate-700">{done}</p>
+        <p className="rounded-xl border border-accent/25 bg-accent/10 px-3 py-2 text-sm text-fg">{done}</p>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
           <button className={primaryButton}>Send reset link</button>
         </form>
       )}
-      <Link to="/login" className="mt-4 block text-sm text-teal-700 hover:underline">
+      <Link to="/login" className="link mt-5 block text-sm">
         Back to sign in
       </Link>
     </CardPage>
